@@ -1,12 +1,183 @@
 import React, { useState, useEffect } from 'react';
 import Papa from 'papaparse';
 
+// --- Text utils & rule engine (added by ChatGPT) ---
+const normalize = (s = "") =>
+  s
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "") // strip diacritics
+    .replace(/\s+/g, " ")
+    .trim();
+
+const withinNWords = (text, a, b, n = 3) => {
+  const rx = new RegExp(`\\b${a}\\b(?:\\W+\\w+){0,${n}}\\W+\\b${b}\\b|\\b${b}\\b(?:\\W+\\w+){0,${n}}\\W+\\b${a}\\b`, "i");
+  return rx.test(text);
+};
+
+const makeRe = (s) => new RegExp(s, "i");
+const w = (s) => new RegExp(`\\b${s}\\b`, "i"); // word boundary
+
+// Category rules with weights and contextual checks
+const CATEGORY_RULES = [
+  {
+    name: "SSMS/ADS Comparison",
+    weight: 4,
+    tests: [
+      w("ssms"),
+      makeRe("\\bsql server management studio\\b"),
+      makeRe("\\bazure data studio\\b"),
+      // Contextual ADS: exact ADS in caps or 'ads' near azure/data/studio
+      (t) => /\bADS\b/.test(t) || (/\bads\b/i.test(t) && withinNWords(t, "ads", "(azure|data|studio)")),
+      w("management studio"),
+      w("notebook"),
+      w("profiler"),
+      makeRe("\\bsql server profiler\\b"),
+      makeRe("\\bactivity monitor\\b"),
+      w("toad"),
+      makeRe("\\bdb(?:-)?visualizer\\b"),
+      makeRe("\\bdbeaver\\b"),
+      // common shortcut often mentioned in comparisons
+      w("f5")
+    ]
+  },
+  {
+    name: "Missing Feature",
+    weight: 3,
+    tests: [
+      w("missing"), makeRe("\\bmissing (feature|features)\\b"),
+      makeRe("\\bwould like\\b"), w("wish"),
+      makeRe("\\badd(ing)?\\b"), w("feature"), makeRe("\\bbring back\\b"),
+      makeRe("\\bgive me back\\b"), w("shortcut"), makeRe("\\bshort ?cut\\b"),
+      // common MSSQL extension features
+      w("export"), w("import"), makeRe("\\bresult(s)? grid\\b"),
+      makeRe("\\bschema compare\\b"), makeRe("\\bschema designer?\\b"),
+      w("table designer"), makeRe("\\bobject explorer\\b")
+    ]
+  },
+  {
+    name: "Connectivity",
+    weight: 3,
+    tests: [
+      w("connection"), w("connect"), w("authenticate"), w("reauthenticate"),
+      makeRe("\\bre-authenticate\\b"), w("credential"), w("login"),
+      w("kinit"), w("kerberos"), w("timeout"), makeRe("\\btoken\\b"), w("keychain")
+    ]
+  },
+  {
+    name: "Quality/Performance",
+    weight: 3,
+    tests: [
+      w("slow"), w("performance"), w("hangs"), w("crashes"), w("freezes"),
+      w("unstable"), w("brittle"), w("reliability"), makeRe("\\btakes a while\\b"),
+      w("forever"), w("timeout"), w("stuck"), w("lag"), w("speed"), w("responsive"),
+      // IntelliSense / autocomplete with common typos
+      w("autocomplete"), w("auto-complete"), makeRe("\\bauto complete\\b"),
+      w("intellisense"), makeRe("\\bintelisnese\\b"), makeRe("\\bintel+isense\\b"),
+      w("loading"), makeRe("\\bload time\\b")
+    ]
+  },
+  {
+    name: "UI/UX",
+    weight: 2,
+    tests: [
+      w("ui"), w("interface"), w("clunky"), makeRe("\\buser experience\\b"),
+      w("workflow"), w("usability"), w("clumsy"), w("intuitive"), w("cumbersome"),
+      w("scrolling"), w("space"), w("layout"), w("design"), w("visual"),
+      w("look"), w("display"), w("screen"), w("result"), w("table"),
+      w("size"), w("view"), w("navigate"), w("navigation"), w("annoying"),
+      makeRe("\\btoo (many|much) clicks?\\b")
+    ]
+  },
+  {
+    name: "AI/Copilot",
+    weight: 2,
+    tests: [ w("copilot"), makeRe("\\bco-pilot\\b"), makeRe("\\bai\\b") ]
+  },
+  {
+    name: "General Feedback",
+    weight: 1,
+    tests: [] // fallback
+  }
+];
+
+// Areas
+const AREA_RULES = [
+  { name: "Connectivity", tests: [w("connection"), w("connect"), w("authenticate"), w("login"), w("credential"), w("kerberos"), w("kinit"), w("token"), w("timeout"), w("keychain")] },
+  { name: "Query Results", tests: [w("result"), makeRe("\\bquery result(s)?\\b"), w("grid"), w("export"), w("copy"), w("display")] },
+  { name: "Query Editor", tests: [w("query"), w("execute"), w("editor"), w("syntax"), w("intellisense"), makeRe("\\b(auto[- ]?)?complete\\b")] },
+  { name: "GitHub Copilot", tests: [w("copilot"), makeRe("\\bco-pilot\\b"), makeRe("\\bai\\b")] },
+  { name: "Other", tests: [] }
+];
+
+// User types
+const USER_TYPE_RULES = [
+  { name: "DBA", tests: [w("ssms"), makeRe("\\bmanagement studio\\b"), w("dba"), makeRe("\\bdatabase admin\\b"), w("jobs"), w("profiler"), makeRe("\\bactivity monitor\\b"), makeRe("\\blinked server\\b"), makeRe("\\bindex( management)?\\b"), w("backup"), makeRe("\\bazure data studio\\b")] },
+  { name: "Developer", tests: [w("development"), w("coding"), w("copilot"), w("github"), makeRe("\\bvs code\\b"), w("extension"), w("workflow"), w("orm"), w("prisma"), w("tedious")] },
+  { name: "Data Analyst", tests: [w("analysis"), w("analytics"), w("report"), makeRe("\\bpower bi\\b"), w("query")] },
+  { name: "General User", tests: [] }
+];
+
+const CONSTRUCTIVE_RULES = {
+  constructive: [
+    makeRe("\\bwould be\\b"), w("suggestion"), w("improve"), w("add"), w("feature"),
+    w("option"), w("ability"), w("support"), makeRe("\\bplease\\b"), makeRe("\\bshould\\b"),
+    makeRe("\\bcould\\b")
+  ],
+  nonConstructive: [
+    makeRe("\\bjust copy\\b"), makeRe("\\blike ssms\\b"), makeRe("\\bbring back\\b"),
+    makeRe("\\bfar from\\b"), makeRe("\\bnot as good\\b")
+  ]
+};
+
+function scoreCategory(text) {
+  const t = normalize(text || "");
+  const hits = [];
+  let best = { name: "General Feedback", score: 0, matches: [] };
+
+  for (const rule of CATEGORY_RULES) {
+    let localMatches = [];
+    for (const test of rule.tests) {
+      const matched = typeof test === "function" ? test(t) : test.test(t);
+      if (matched) localMatches.push(test.toString ? test.toString() : "fn");
+    }
+    const score = (localMatches.length > 0 ? rule.weight : 0) * localMatches.length;
+    if (score > best.score) best = { name: rule.name, score, matches: localMatches };
+    if (localMatches.length) hits.push({ category: rule.name, matches: localMatches });
+  }
+  if (best.score === 0) best = { name: "General Feedback", score: 0, matches: [] };
+  return { category: best.name, explain: hits };
+}
+
+function pickRule(text, rules, fallback = "Other") {
+  const t = normalize(text || "");
+  for (const r of rules) {
+    if (r.tests.length === 0) continue;
+    for (const test of r.tests) {
+      const ok = typeof test === "function" ? test(t) : test.test(t);
+      if (ok) return r.name;
+    }
+  }
+  const last = rules.find(r => r.tests.length === 0)?.name;
+  return last || fallback;
+}
+
+function commentType(comment) {
+  const t = normalize(comment || "");
+  if (!t) return "No Comment";
+  if (t.length < 10) return "Non-constructive";
+  if (CONSTRUCTIVE_RULES.nonConstructive.some(rx => rx.test(t))) return "Non-constructive";
+  if (CONSTRUCTIVE_RULES.constructive.some(rx => rx.test(t))) return "Constructive";
+  return "General";
+}
+// --- End of rule engine additions ---
+
 const NPSAnalysis = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [filters, setFilters] = useState({
     category: 'All',
     area: 'All',
@@ -19,197 +190,58 @@ const NPSAnalysis = () => {
   // Debug: verify component renders
   console.log('NPSAnalysis render - loading:', loading, 'data length:', data.length, 'error:', error);
 
-  const categorizeComment = (comment) => {
-    if (!comment || comment.trim() === '') return 'No Comment';
-    
-    const lowerComment = comment.toLowerCase();
-    
-    // SSMS/ADS references (check first - most specific)
-    if (lowerComment.includes('ssms') || lowerComment.includes('sql server management') || 
-        lowerComment.includes('azure data studio') || lowerComment.includes('ads') ||
-        lowerComment.includes('management studio') || lowerComment.includes('notebook') ||
-        lowerComment.includes('f5') || lowerComment.includes('toad') ||
-        lowerComment.includes('profiler') || lowerComment.includes('activity monitor') ||
-        lowerComment.includes('sql server profiler')) {
-      return 'SSMS/ADS Comparison';
-    }
-    
-    // Missing features (check early - specific pattern)
-    if (lowerComment.includes('missing') || lowerComment.includes('missing features') ||
-        lowerComment.includes('need') || lowerComment.includes('would like') || 
-        lowerComment.includes('wish') || lowerComment.includes('add') || 
-        lowerComment.includes('feature') || lowerComment.includes('bring back') || 
-        lowerComment.includes('give me back') || lowerComment.includes('shortcut') ||
-        lowerComment.includes('short cut')) {
-      return 'Missing Feature';
-    }
-    
-    // Connectivity issues
-    if (lowerComment.includes('reauthenticate') || lowerComment.includes('re-authenticate') ||
-        lowerComment.includes('keychain') || lowerComment.includes('credential') ||
-        lowerComment.includes('connection') || lowerComment.includes('connect') ||
-        lowerComment.includes('authenticate') || lowerComment.includes('login') ||
-        lowerComment.includes('kinit') || lowerComment.includes('kerberos')) {
-      return 'Connectivity';
-    }
-    
-    // Performance/Quality issues (including intellisense/autocomplete issues)
-    if (lowerComment.includes('slow') || lowerComment.includes('performance') || 
-        lowerComment.includes('hangs') || lowerComment.includes('crashes') ||
-        lowerComment.includes('freezes') || lowerComment.includes('unstable') ||
-        lowerComment.includes('brittle') || lowerComment.includes('reliability') ||
-        lowerComment.includes('forever') || lowerComment.includes('takes a while') ||
-        lowerComment.includes('timeout') || lowerComment.includes('stuck') ||
-        lowerComment.includes('autocomplete') || lowerComment.includes('intellisense') ||
-        lowerComment.includes('intelisnese') || lowerComment.includes('struggles') ||
-        lowerComment.includes('loading') || lowerComment.includes('load time') ||
-        lowerComment.includes('lag') || lowerComment.includes('speed') ||
-        lowerComment.includes('fast') || lowerComment.includes('responsive')) {
-      return 'Quality/Performance';
-    }
-    
-    // UI/UX issues - expanded to catch more UI/UX related feedback
-    if (lowerComment.includes('ui') || lowerComment.includes('interface') ||
-        lowerComment.includes('clunky') || lowerComment.includes('user experience') ||
-        lowerComment.includes('workflow') || lowerComment.includes('usability') ||
-        lowerComment.includes('clumsy') || lowerComment.includes('intuitive') ||
-        lowerComment.includes('cumbersome') || lowerComment.includes('scrolling') ||
-        lowerComment.includes('space') || lowerComment.includes('layout') ||
-        lowerComment.includes('design') || lowerComment.includes('visual') ||
-        lowerComment.includes('look') || lowerComment.includes('display') ||
-        lowerComment.includes('screen') || lowerComment.includes('result') ||
-        lowerComment.includes('table') || lowerComment.includes('size') ||
-        lowerComment.includes('view') || lowerComment.includes('navigate') ||
-        lowerComment.includes('navigation') || lowerComment.includes('miss') ||
-        lowerComment.includes('annoying')) {
-      return 'UI/UX';
-    }
-    
-    return 'General Feedback';
-  };
-
   const determineArea = (comment) => {
-    if (!comment || comment.trim() === '') return 'Other';
-    
-    const lowerComment = comment.toLowerCase();
-    
-    if (lowerComment.includes('connection') || lowerComment.includes('connect') ||
-        lowerComment.includes('authenticate') || lowerComment.includes('login') ||
-        lowerComment.includes('credential')) {
-      return 'Connectivity';
-    }
-    
-    if (lowerComment.includes('result') || lowerComment.includes('query result') ||
-        lowerComment.includes('grid') || lowerComment.includes('export') ||
-        lowerComment.includes('copy') || lowerComment.includes('display')) {
-      return 'Query Results';
-    }
-    
-    if (lowerComment.includes('query') || lowerComment.includes('execute') ||
-        lowerComment.includes('intellisense') || lowerComment.includes('autocomplete') ||
-        lowerComment.includes('syntax') || lowerComment.includes('editor')) {
-      return 'Query Editor';
-    }
-    
-    if (lowerComment.includes('copilot') || lowerComment.includes('ai')) {
-      return 'GitHub Copilot';
-    }
-    
-    return 'Other';
+    if (!comment || !comment.trim()) return "Other";
+    return pickRule(comment, AREA_RULES, "Other");
   };
 
   const determineUserType = (comment) => {
-    if (!comment || comment.trim() === '') return 'Unknown';
-    
-    const lowerComment = comment.toLowerCase();
-    
-    // DBA indicators
-    if (lowerComment.includes('ssms') || lowerComment.includes('management studio') ||
-        lowerComment.includes('dba') || lowerComment.includes('database admin') ||
-        lowerComment.includes('jobs') || lowerComment.includes('profiler') ||
-        lowerComment.includes('activity monitor') || lowerComment.includes('linked server') ||
-        lowerComment.includes('index management') || lowerComment.includes('backup') ||
-        lowerComment.includes('azure data studio')) {
-      return 'DBA';
-    }
-    
-    // Developer indicators
-    if (lowerComment.includes('development') || lowerComment.includes('coding') ||
-        lowerComment.includes('copilot') || lowerComment.includes('github') ||
-        lowerComment.includes('vs code') || lowerComment.includes('extension') ||
-        lowerComment.includes('workflow')) {
-      return 'Developer';
-    }
-    
-    // Analyst indicators
-    if (lowerComment.includes('analysis') || lowerComment.includes('data') ||
-        lowerComment.includes('report') || lowerComment.includes('query')) {
-      return 'Data Analyst';
-    }
-    
-    return 'General User';
+    if (!comment || !comment.trim()) return "Unknown";
+    return pickRule(comment, USER_TYPE_RULES, "General User");
   };
 
-  const determineCommentType = (comment) => {
-    if (!comment || comment.trim() === '') return 'No Comment';
-    
-    const lowerComment = comment.toLowerCase();
-    
-    // Non-constructive patterns
-    if (lowerComment.includes('just copy') || lowerComment.includes('like ssms') ||
-        lowerComment.includes('bring back') || lowerComment.includes('far from') ||
-        lowerComment.includes('not as good') || lowerComment === '' ||
-        lowerComment.length < 10) {
-      return 'Non-constructive';
-    }
-    
-    // Constructive feedback patterns
-    if (lowerComment.includes('would be') || lowerComment.includes('suggestion') ||
-        lowerComment.includes('improve') || lowerComment.includes('add') ||
-        lowerComment.includes('feature') || lowerComment.includes('option') ||
-        lowerComment.includes('ability') || lowerComment.includes('support')) {
-      return 'Constructive';
-    }
-    
-    return 'General';
-  };
+  const determineCommentType = (comment) => commentType(comment);
 
   useEffect(() => {
     const processData = async () => {
       try {
         console.log('Loading CSV data...');
-        
+
         // Load CSV from public folder (public/data.csv)
         const response = await fetch('/data.csv');
-        
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const csvData = await response.text();
         console.log('CSV data length:', csvData.length);
-        
+
         const parsed = Papa.parse(csvData, {
           header: true,
           skipEmptyLines: true,
           dynamicTyping: true
         });
-        
+
         console.log('Parsed rows:', parsed.data.length);
-        
+
         // Process all data without version filtering
-        const processedData = parsed.data.map((row, index) => ({
-          ...row,
-          ID: index + 1,
-          Category: categorizeComment(row.Comments),
-          Area: determineArea(row.Comments),
-          UserType: determineUserType(row.Comments),
-          CommentType: determineCommentType(row.Comments)
-        }));
+        const processedData = parsed.data.map((row, index) => {
+          const cat = scoreCategory(row.Comments || "");
+          return {
+            ...row,
+            ID: index + 1,
+            Category: cat.category,
+            CategoryExplain: cat.explain, // optional: useful for tooltips/debug
+            Area: determineArea(row.Comments),
+            UserType: determineUserType(row.Comments),
+            CommentType: determineCommentType(row.Comments)
+          };
+        });
 
         setData(processedData);
         setLoading(false);
-        
+
       } catch (error) {
         console.error('Error in processData:', error);
         setError(error.message);
@@ -220,7 +252,44 @@ const NPSAnalysis = () => {
     processData();
   }, []);
 
-  const filteredData = data.filter(row => {
+  // Sorting function
+  const requestSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedData = () => {
+    if (!sortConfig.key) return data;
+    
+    return [...data].sort((a, b) => {
+      if (a[sortConfig.key] === null) return 1;
+      if (b[sortConfig.key] === null) return -1;
+      
+      let valueA = a[sortConfig.key];
+      let valueB = b[sortConfig.key];
+      
+      // Handle string values
+      if (typeof valueA === 'string') {
+        valueA = valueA.toLowerCase();
+      }
+      if (typeof valueB === 'string') {
+        valueB = valueB.toLowerCase();
+      }
+      
+      if (valueA < valueB) {
+        return sortConfig.direction === 'asc' ? -1 : 1;
+      }
+      if (valueA > valueB) {
+        return sortConfig.direction === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+  };
+  
+  const filteredData = sortedData().filter(row => {
     // Handle NPS feedback type filtering (Promoters, Passives, Detractors)
     const matchesFeedbackType = filters.feedbackType === 'All' || 
       (filters.feedbackType === 'Promoter' && row.NPS >= 9) ||
@@ -287,30 +356,76 @@ const NPSAnalysis = () => {
       
       {/* Summary Stats - only filtered by version, not other filters */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-        <div className="bg-blue-50 p-4 rounded">
+        <button 
+          className={`${filters.feedbackType === 'All' && filters.category === 'All' && filters.area === 'All' && 
+                        filters.userType === 'All' && filters.commentType === 'All' 
+                        ? 'bg-blue-200 border-2 border-blue-400' : 'bg-blue-50'} 
+                        p-4 rounded text-left transition hover:bg-blue-100 hover:shadow-md`}
+          onClick={() => setFilters({
+            ...filters, 
+            feedbackType: 'All',
+            category: 'All',
+            area: 'All',
+            userType: 'All',
+            commentType: 'All'
+          })}
+        >
           <h3 className="font-semibold">Total Responses</h3>
           <p className="text-2xl">
             {data.filter(r => filters.version === 'All' || r.Version === filters.version).length}
           </p>
-        </div>
-        <div className="bg-green-50 p-4 rounded">
+        </button>
+        <button 
+          className={`${filters.feedbackType === 'Promoter' ? 'bg-green-200 border-2 border-green-400' : 'bg-green-50'} 
+                      p-4 rounded text-left transition hover:bg-green-100 hover:shadow-md`}
+          onClick={() => setFilters({
+            ...filters, 
+            feedbackType: 'Promoter', 
+            category: 'All',
+            area: 'All',
+            userType: 'All',
+            commentType: 'All'
+          })}
+        >
           <h3 className="font-semibold">Promoters (9-10)</h3>
           <p className="text-2xl">
             {data.filter(r => (filters.version === 'All' || r.Version === filters.version) && r.NPS >= 9).length}
           </p>
-        </div>
-        <div className="bg-yellow-50 p-4 rounded">
+        </button>
+        <button 
+          className={`${filters.feedbackType === 'Passive' ? 'bg-yellow-200 border-2 border-yellow-400' : 'bg-yellow-50'} 
+                      p-4 rounded text-left transition hover:bg-yellow-100 hover:shadow-md`}
+          onClick={() => setFilters({
+            ...filters, 
+            feedbackType: 'Passive',
+            category: 'All',
+            area: 'All',
+            userType: 'All',
+            commentType: 'All'
+          })}
+        >
           <h3 className="font-semibold">Passives (7-8)</h3>
           <p className="text-2xl">
             {data.filter(r => (filters.version === 'All' || r.Version === filters.version) && r.NPS >= 7 && r.NPS <= 8).length}
           </p>
-        </div>
-        <div className="bg-red-50 p-4 rounded">
+        </button>
+        <button 
+          className={`${filters.feedbackType === 'Detractor' ? 'bg-red-200 border-2 border-red-400' : 'bg-red-50'} 
+                      p-4 rounded text-left transition hover:bg-red-100 hover:shadow-md`}
+          onClick={() => setFilters({
+            ...filters, 
+            feedbackType: 'Detractor',
+            category: 'All',
+            area: 'All',
+            userType: 'All',
+            commentType: 'All'
+          })}
+        >
           <h3 className="font-semibold">Detractors (0-6)</h3>
           <p className="text-2xl">
             {data.filter(r => (filters.version === 'All' || r.Version === filters.version) && r.NPS <= 6).length}
           </p>
-        </div>
+        </button>
         <div className="bg-purple-50 p-4 rounded">
           <h3 className="font-semibold">NPS Score</h3>
           <p className="text-xl">
@@ -351,10 +466,22 @@ const NPSAnalysis = () => {
           return Object.entries(categoryCounts).map(([category, count]) => {
             const percentage = ((count / versionFilteredData.length) * 100).toFixed(1);
             return (
-              <div key={category} className="bg-gray-50 p-3 rounded">
+              <button
+                key={category}
+                className={`${filters.category === category ? 'bg-blue-100 border-2 border-blue-400' : 'bg-gray-50'} 
+                            p-3 rounded text-left transition hover:bg-gray-100 hover:shadow-md`}
+                onClick={() => setFilters({
+                  ...filters, 
+                  category: category,
+                  area: 'All',
+                  userType: 'All',
+                  commentType: 'All',
+                  feedbackType: 'All'
+                })}
+              >
                 <h4 className="font-medium text-sm">{category}</h4>
                 <p className="text-lg">{count} responses <span className="text-sm text-gray-500">({percentage}%)</span></p>
-              </div>
+              </button>
             );
           });
         })()}
@@ -459,13 +586,97 @@ const NPSAnalysis = () => {
         <table className="min-w-full border border-gray-300">
           <thead className="bg-gray-50">
             <tr>
-              <th className="border px-4 py-2 text-left">NPS</th>
-              <th className="border px-4 py-2 text-left">Version</th>
-              <th className="border px-4 py-2 text-left">Category</th>
-              <th className="border px-4 py-2 text-left">Area</th>
-              <th className="border px-4 py-2 text-left">User Type</th>
-              <th className="border px-4 py-2 text-left">Comment Type</th>
-              <th className="border px-4 py-2 text-left">Comments</th>
+              <th className="border px-4 py-2 text-left">
+                <button 
+                  className="flex items-center font-medium"
+                  onClick={() => requestSort('NPS')}
+                >
+                  NPS
+                  {sortConfig.key === 'NPS' && (
+                    <span className="ml-1">
+                      {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                    </span>
+                  )}
+                </button>
+              </th>
+              <th className="border px-4 py-2 text-left">
+                <button 
+                  className="flex items-center font-medium"
+                  onClick={() => requestSort('Version')}
+                >
+                  Version
+                  {sortConfig.key === 'Version' && (
+                    <span className="ml-1">
+                      {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                    </span>
+                  )}
+                </button>
+              </th>
+              <th className="border px-4 py-2 text-left">
+                <button 
+                  className="flex items-center font-medium"
+                  onClick={() => requestSort('Category')}
+                >
+                  Category
+                  {sortConfig.key === 'Category' && (
+                    <span className="ml-1">
+                      {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                    </span>
+                  )}
+                </button>
+              </th>
+              <th className="border px-4 py-2 text-left">
+                <button 
+                  className="flex items-center font-medium"
+                  onClick={() => requestSort('Area')}
+                >
+                  Area
+                  {sortConfig.key === 'Area' && (
+                    <span className="ml-1">
+                      {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                    </span>
+                  )}
+                </button>
+              </th>
+              <th className="border px-4 py-2 text-left">
+                <button 
+                  className="flex items-center font-medium"
+                  onClick={() => requestSort('UserType')}
+                >
+                  User Type
+                  {sortConfig.key === 'UserType' && (
+                    <span className="ml-1">
+                      {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                    </span>
+                  )}
+                </button>
+              </th>
+              <th className="border px-4 py-2 text-left">
+                <button 
+                  className="flex items-center font-medium"
+                  onClick={() => requestSort('CommentType')}
+                >
+                  Comment Type
+                  {sortConfig.key === 'CommentType' && (
+                    <span className="ml-1">
+                      {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                    </span>
+                  )}
+                </button>
+              </th>
+              <th className="border px-4 py-2 text-left">
+                <button 
+                  className="flex items-center font-medium"
+                  onClick={() => requestSort('Comments')}
+                >
+                  Comments
+                  {sortConfig.key === 'Comments' && (
+                    <span className="ml-1">
+                      {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                    </span>
+                  )}
+                </button>
+              </th>
             </tr>
           </thead>
           <tbody>
