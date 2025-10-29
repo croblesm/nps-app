@@ -320,6 +320,7 @@ const NPSAnalysis = () => {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [hideSSMSComparison, setHideSSMSComparison] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [darkMode, setDarkMode] = useState(true);
   const [filters, setFilters] = useState({
     category: 'All',
     area: 'All',
@@ -328,6 +329,15 @@ const NPSAnalysis = () => {
     feedbackType: 'All',
     version: 'All'
   });
+
+  // Apply dark mode class to html element
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [darkMode]);
 
 
 
@@ -486,7 +496,7 @@ const NPSAnalysis = () => {
   };
 
   if (loading) {
-    return <div className="p-8 text-xl">Loading and analyzing feedback data...</div>;
+    return <div className="p-8 text-xl">Loading and analyzing NPS feedback data...</div>;
   }
 
   if (error) {
@@ -498,47 +508,61 @@ const NPSAnalysis = () => {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex justify-between items-end mb-6">
-        <div className="flex flex-col">
-          <h1 className="text-3xl font-bold">MSSQL VS Code - NPS Analysis Tool</h1>
-        </div>
-        <div className="flex items-end gap-4">
-          <div className="w-48">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Version</label>
-            <select
-              className="border rounded p-2 w-full"
-              value={filters.version}
-              onChange={(e) => {
-                setFilters({...filters, version: e.target.value});
-                setCurrentPage(1); // Reset to first page when changing version
-              }}
-            >
-              {['All', ...new Set(data.map(row => row.Version))].sort().map(ver => (
-                <option key={ver} value={ver}>{ver}</option>
-              ))}
-            </select>
+    <div>
+      <div className="bg-white dark:bg-slate-950 text-gray-900 dark:text-gray-100 p-6 max-w-7xl mx-auto">
+        <div className="flex justify-between items-end mb-6">
+          <div className="flex flex-col">
+            <h1 className="text-3xl font-bold">MSSQL VS Code - NPS Analysis Tool</h1>
           </div>
-          <button
-            onClick={() => setHideSSMSComparison(!hideSSMSComparison)}
-            className={`px-4 py-2 rounded font-medium transition ${
-              hideSSMSComparison
-                ? 'bg-blue-500 text-white hover:bg-blue-600'
-                : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-            }`}
-          >
-            {hideSSMSComparison ? 'Show ADS/SSMS Comparison' : 'Hide ADS/SSMS Comparison'}
-          </button>
+          <div className="flex items-end gap-2">
+            <div className="w-48">
+              <label className={`block text-sm font-medium mb-1`}>Version</label>
+              <select
+                className={`border rounded p-2 w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600`}
+                value={filters.version}
+                onChange={(e) => {
+                  setFilters({...filters, version: e.target.value});
+                  setCurrentPage(1);
+                }}
+              >
+                {['All', ...new Set(data.map(row => row.Version))].sort().map(ver => (
+                  <option key={ver} value={ver}>{ver}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                id="ads-toggle"
+                onClick={() => setHideSSMSComparison(!hideSSMSComparison)}
+                className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${
+                  hideSSMSComparison
+                    ? 'bg-blue-500'
+                    : 'bg-gray-300 dark:bg-gray-600'
+                }`}
+                role="switch"
+                aria-checked={hideSSMSComparison}
+                aria-label="Toggle ADS/SSMS Comparison filter"
+              >
+                <span
+                  className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
+                    hideSSMSComparison ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+              <label htmlFor="ads-toggle" className="text-xs font-medium text-gray-600 dark:text-gray-400 cursor-pointer">
+                ADS/SSMS
+              </label>
+            </div>
+          </div>
         </div>
-      </div>
-      
       {/* Summary Stats - only filtered by version, not other filters */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
         <button 
           className={`${filters.feedbackType === 'All' && filters.category === 'All' && filters.area === 'All' && 
                         filters.userType === 'All' && filters.commentType === 'All' 
-                        ? 'bg-blue-200 border-2 border-blue-400' : 'bg-blue-50'} 
-                        p-4 rounded text-left transition hover:bg-blue-100 hover:shadow-md`}
+                        ? 'bg-blue-200 dark:bg-blue-900 border-2 border-blue-400 dark:border-blue-500'
+                        : 'bg-blue-50 dark:bg-blue-950'} 
+                        p-4 rounded text-left transition hover:shadow-md hover:bg-blue-100 dark:hover:bg-blue-900`}
           onClick={() => setFilters({
             ...filters, 
             feedbackType: 'All',
@@ -561,8 +585,8 @@ const NPSAnalysis = () => {
           </p>
         </button>
         <button 
-          className={`${filters.feedbackType === 'Promoter' ? 'bg-green-200 border-2 border-green-400' : 'bg-green-50'} 
-                      p-4 rounded text-left transition hover:bg-green-100 hover:shadow-md`}
+          className={`${filters.feedbackType === 'Promoter' ? 'bg-green-200 dark:bg-green-900 border-2 border-green-400 dark:border-green-500' : 'bg-green-50 dark:bg-green-950'} 
+                      p-4 rounded text-left transition hover:shadow-md hover:bg-green-100 dark:hover:bg-green-900`}
           onClick={() => setFilters({
             ...filters, 
             feedbackType: 'Promoter', 
@@ -582,8 +606,8 @@ const NPSAnalysis = () => {
           </p>
         </button>
         <button 
-          className={`${filters.feedbackType === 'Passive' ? 'bg-yellow-200 border-2 border-yellow-400' : 'bg-yellow-50'} 
-                      p-4 rounded text-left transition hover:bg-yellow-100 hover:shadow-md`}
+          className={`${filters.feedbackType === 'Passive' ? 'bg-yellow-200 dark:bg-yellow-900 border-2 border-yellow-400 dark:border-yellow-500' : 'bg-yellow-50 dark:bg-yellow-950'} 
+                      p-4 rounded text-left transition hover:shadow-md hover:bg-yellow-100 dark:hover:bg-yellow-900`}
           onClick={() => setFilters({
             ...filters, 
             feedbackType: 'Passive',
@@ -603,8 +627,8 @@ const NPSAnalysis = () => {
           </p>
         </button>
         <button 
-          className={`${filters.feedbackType === 'Detractor' ? 'bg-red-200 border-2 border-red-400' : 'bg-red-50'} 
-                      p-4 rounded text-left transition hover:bg-red-100 hover:shadow-md`}
+          className={`${filters.feedbackType === 'Detractor' ? 'bg-red-200 dark:bg-red-900 border-2 border-red-400 dark:border-red-500' : 'bg-red-50 dark:bg-red-950'} 
+                      p-4 rounded text-left transition hover:shadow-md hover:bg-red-100 dark:hover:bg-red-900`}
           onClick={() => setFilters({
             ...filters, 
             feedbackType: 'Detractor',
@@ -623,7 +647,7 @@ const NPSAnalysis = () => {
             }).length}
           </p>
         </button>
-        <div className="bg-purple-50 p-4 rounded">
+        <div className={`bg-purple-50 dark:bg-purple-950 p-4 rounded`}>
           <h3 className="font-semibold">NPS Score</h3>
           <p className="text-xl">
             {(() => {
@@ -688,8 +712,8 @@ const NPSAnalysis = () => {
             return (
               <button
                 key={category}
-                className={`${filters.category === category ? 'bg-blue-100 border-2 border-blue-400' : isNoComment ? 'bg-gray-100' : 'bg-gray-50'} 
-                            p-3 rounded text-left transition hover:bg-gray-100 hover:shadow-md`}
+                className={`${filters.category === category ? 'bg-blue-100 dark:bg-blue-900 border-2 border-blue-400 dark:border-blue-500' : isNoComment ? 'bg-gray-100 dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'} 
+                            p-3 rounded text-left transition hover:bg-gray-100 dark:hover:bg-gray-800 hover:shadow-md`}
                 onClick={() => setFilters({
                   ...filters, 
                   category: category,
@@ -699,8 +723,8 @@ const NPSAnalysis = () => {
                   feedbackType: 'All'
                 })}
               >
-                <h4 className="font-medium text-sm">{category}</h4>
-                <p className="text-lg">{count} responses <span className="text-sm text-gray-500">({percentage}%)</span></p>
+                <h4 className="font-medium text-sm">{ category}</h4>
+                <p className="text-lg">{count} responses <span className="text-sm text-gray-500 dark:text-gray-400">({percentage}%)</span></p>
               </button>
             );
           });
@@ -709,7 +733,7 @@ const NPSAnalysis = () => {
 
       {/* Search Bar */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Search Comments</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Search Comments</label>
         <input
           type="text"
           placeholder="Search in comments... (e.g., edit, feature, slow)"
@@ -718,16 +742,16 @@ const NPSAnalysis = () => {
             setSearchQuery(e.target.value);
             setCurrentPage(1); // Reset to first page when searching
           }}
-          className="w-full border rounded p-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border rounded p-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
         />
       </div>
 
       {/* Filters */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Feedback Type</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Feedback Type</label>
           <select
-            className="border rounded p-2 w-full"
+            className="border rounded p-2 w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
             value={filters.feedbackType}
             onChange={(e) => setFilters({...filters, feedbackType: e.target.value})}
           >
@@ -738,9 +762,9 @@ const NPSAnalysis = () => {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
           <select
-            className="border rounded p-2 w-full"
+            className="border rounded p-2 w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
             value={filters.category}
             onChange={(e) => setFilters({...filters, category: e.target.value})}
           >
@@ -751,9 +775,9 @@ const NPSAnalysis = () => {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Area</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Area</label>
           <select
-            className="border rounded p-2 w-full"
+            className="border rounded p-2 w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
             value={filters.area}
             onChange={(e) => setFilters({...filters, area: e.target.value})}
           >
@@ -763,9 +787,9 @@ const NPSAnalysis = () => {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">User Type</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">User Type</label>
           <select
-            className="border rounded p-2 w-full"
+            className="border rounded p-2 w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
             value={filters.userType}
             onChange={(e) => setFilters({...filters, userType: e.target.value})}
           >
@@ -775,9 +799,9 @@ const NPSAnalysis = () => {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Comment Type</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Comment Type</label>
           <select
-            className="border rounded p-2 w-full"
+            className="border rounded p-2 w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
             value={filters.commentType}
             onChange={(e) => setFilters({...filters, commentType: e.target.value})}
           >
@@ -790,13 +814,13 @@ const NPSAnalysis = () => {
 
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-4">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             Showing {Math.min(filteredData.length, (currentPage - 1) * rowsPerPage + 1)} to {Math.min(currentPage * rowsPerPage, filteredData.length)} of {filteredData.length}
           </p>
           <div className="flex items-center">
-            <label className="text-sm text-gray-600 mr-2">Rows per page:</label>
+            <label className="text-sm text-gray-600 dark:text-gray-400 mr-2">Rows per page:</label>
             <select
-              className="border rounded p-1 text-sm"
+              className="border rounded p-1 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
               value={rowsPerPage}
               onChange={(e) => {
                 setRowsPerPage(Number(e.target.value));
@@ -811,7 +835,7 @@ const NPSAnalysis = () => {
         </div>
         <button
           onClick={downloadCSV}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          className="px-4 py-2 rounded text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
         >
           Download Filtered CSV
         </button>
@@ -819,10 +843,10 @@ const NPSAnalysis = () => {
 
       {/* Data Table */}
       <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300">
-          <thead className="bg-gray-50">
+        <table className="min-w-full border border-gray-300 dark:border-gray-700">
+          <thead className="bg-gray-50 dark:bg-gray-800">
             <tr>
-              <th className="border px-4 py-2 text-left">
+              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left">
                 <button 
                   className="flex items-center font-medium"
                   onClick={() => requestSort('NPS')}
@@ -835,7 +859,7 @@ const NPSAnalysis = () => {
                   )}
                 </button>
               </th>
-              <th className="border px-4 py-2 text-left">
+              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left">
                 <button 
                   className="flex items-center font-medium"
                   onClick={() => requestSort('Version')}
@@ -848,7 +872,7 @@ const NPSAnalysis = () => {
                   )}
                 </button>
               </th>
-              <th className="border px-4 py-2 text-left">
+              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left">
                 <button 
                   className="flex items-center font-medium"
                   onClick={() => requestSort('Category')}
@@ -861,7 +885,7 @@ const NPSAnalysis = () => {
                   )}
                 </button>
               </th>
-              <th className="border px-4 py-2 text-left">
+              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left">
                 <button 
                   className="flex items-center font-medium"
                   onClick={() => requestSort('Area')}
@@ -874,7 +898,7 @@ const NPSAnalysis = () => {
                   )}
                 </button>
               </th>
-              <th className="border px-4 py-2 text-left">
+              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left">
                 <button 
                   className="flex items-center font-medium"
                   onClick={() => requestSort('UserType')}
@@ -887,7 +911,7 @@ const NPSAnalysis = () => {
                   )}
                 </button>
               </th>
-              <th className="border px-4 py-2 text-left">
+              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left">
                 <button 
                   className="flex items-center font-medium"
                   onClick={() => requestSort('CommentType')}
@@ -900,7 +924,7 @@ const NPSAnalysis = () => {
                   )}
                 </button>
               </th>
-              <th className="border px-4 py-2 text-left">
+              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left">
                 <button 
                   className="flex items-center font-medium"
                   onClick={() => requestSort('Comments')}
@@ -919,30 +943,30 @@ const NPSAnalysis = () => {
             {filteredData
               .slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)
               .map((row) => (
-                <tr key={row.ID} className="hover:bg-gray-50">
-                  <td className="border px-4 py-2">
+                <tr key={row.ID} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">
                     <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                      row.NPS >= 9 ? 'bg-green-100 text-green-800' :
-                      row.NPS >= 7 ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
+                      row.NPS >= 9 ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' :
+                      row.NPS >= 7 ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200' :
+                      'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
                     }`}>
                       {row.NPS}
                     </span>
                   </td>
-                  <td className="border px-4 py-2 text-sm">{row.Version}</td>
-                  <td className="border px-4 py-2 text-sm">{row.Category}</td>
-                  <td className="border px-4 py-2 text-sm">{row.Area}</td>
-                  <td className="border px-4 py-2 text-sm">{row.UserType}</td>
-                  <td className="border px-4 py-2 text-sm">
+                  <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm">{row.Version}</td>
+                  <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm">{row.Category}</td>
+                  <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm">{row.Area}</td>
+                  <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm">{row.UserType}</td>
+                  <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm">
                     {row.CommentType && (
                       <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                        row.CommentType === 'Non-actionable' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'
+                        row.CommentType === 'Non-actionable' ? 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
                       }`}>
                         {row.CommentType}
                       </span>
                     )}
                   </td>
-                  <td className="border px-4 py-2 text-sm max-w-md">
+                  <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm max-w-md">
                     <div className="truncate" title={row.Comments}>
                       {row.Comments || 'No comment'}
                     </div>
@@ -961,39 +985,49 @@ const NPSAnalysis = () => {
             <button
               onClick={() => setCurrentPage(1)}
               disabled={currentPage === 1}
-              className={`px-3 py-1 rounded ${currentPage === 1 ? 'bg-gray-200 text-gray-500' : 'bg-gray-300 hover:bg-gray-400 text-gray-700'}`}
+              className="px-3 py-1 rounded disabled:bg-gray-200 disabled:text-gray-500 disabled:dark:bg-gray-700 disabled:dark:text-gray-600 enabled:bg-gray-300 enabled:hover:bg-gray-400 enabled:text-gray-700 enabled:dark:bg-gray-700 enabled:dark:hover:bg-gray-600 enabled:dark:text-white"
             >
               First
             </button>
             <button
               onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
               disabled={currentPage === 1}
-              className={`px-3 py-1 rounded ${currentPage === 1 ? 'bg-gray-200 text-gray-500' : 'bg-gray-300 hover:bg-gray-400 text-gray-700'}`}
+              className="px-3 py-1 rounded disabled:bg-gray-200 disabled:text-gray-500 disabled:dark:bg-gray-700 disabled:dark:text-gray-600 enabled:bg-gray-300 enabled:hover:bg-gray-400 enabled:text-gray-700 enabled:dark:bg-gray-700 enabled:dark:hover:bg-gray-600 enabled:dark:text-white"
             >
               Previous
             </button>
             
-            <div className="flex items-center px-2">
+            <div className="flex items-center px-2 text-gray-700 dark:text-gray-300">
               Page {currentPage} of {Math.ceil(filteredData.length / rowsPerPage) || 1}
             </div>
             
             <button
               onClick={() => setCurrentPage(prev => Math.min(Math.ceil(filteredData.length / rowsPerPage) || 1, prev + 1))}
               disabled={currentPage >= Math.ceil(filteredData.length / rowsPerPage)}
-              className={`px-3 py-1 rounded ${currentPage >= Math.ceil(filteredData.length / rowsPerPage) ? 'bg-gray-200 text-gray-500' : 'bg-gray-300 hover:bg-gray-400 text-gray-700'}`}
+              className="px-3 py-1 rounded disabled:bg-gray-200 disabled:text-gray-500 disabled:dark:bg-gray-700 disabled:dark:text-gray-600 enabled:bg-gray-300 enabled:hover:bg-gray-400 enabled:text-gray-700 enabled:dark:bg-gray-700 enabled:dark:hover:bg-gray-600 enabled:dark:text-white"
             >
               Next
             </button>
             <button
               onClick={() => setCurrentPage(Math.ceil(filteredData.length / rowsPerPage) || 1)}
               disabled={currentPage >= Math.ceil(filteredData.length / rowsPerPage)}
-              className={`px-3 py-1 rounded ${currentPage >= Math.ceil(filteredData.length / rowsPerPage) ? 'bg-gray-200 text-gray-500' : 'bg-gray-300 hover:bg-gray-400 text-gray-700'}`}
+              className="px-3 py-1 rounded disabled:bg-gray-200 disabled:text-gray-500 disabled:dark:bg-gray-700 disabled:dark:text-gray-600 enabled:bg-gray-300 enabled:hover:bg-gray-400 enabled:text-gray-700 enabled:dark:bg-gray-700 enabled:dark:hover:bg-gray-600 enabled:dark:text-white"
             >
               Last
             </button>
           </div>
         </div>
       )}
+      </div>
+      
+      {/* Dark Mode Toggle Button */}
+      <button
+        onClick={() => setDarkMode(!darkMode)}
+        className="fixed bottom-8 right-8 p-3 rounded-full transition text-2xl bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 shadow-lg hover:shadow-xl z-50"
+        title={darkMode ? 'Light Mode' : 'Dark Mode'}
+      >
+        {darkMode ? '☀️' : '🌙'}
+      </button>
     </div>
   );
 };
