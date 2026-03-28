@@ -1,0 +1,31 @@
+schema: spec-driven
+
+context: |
+  Project: NPS Insight Engine — a generic, AI-powered NPS analysis platform for product managers
+  Tech stack: Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS 4
+  Database: SQL Server 2025 (local via Docker container)
+  ORM: TypeORM with SQL Server 2025 (native vector type support via tedious driver)
+  AI: Vercel AI SDK — multi-provider (Anthropic, OpenAI, Azure OpenAI, Ollama)
+  Auth: Deferred (NextAuth.js v5 planned for later)
+  CSV parsing: PapaParse
+  Validation: Zod schemas
+  Domain: NPS (Net Promoter Score) survey analysis for product managers
+  Conventions:
+    - App Router file-based routing with server components by default
+    - "use client" only when interactivity is required
+    - Zod for all validation (CSV, API inputs, LLM structured output)
+    - TypeORM for all database access
+    - Vercel AI SDK for all LLM interactions
+  Target audience: Product managers analyzing NPS survey data from any tool
+  Key feature: AI agents replace hardcoded regex rules for comment classification
+
+rules:
+  proposal:
+    - Always include a "Non-goals" section
+    - Reference the ADR for tech stack decisions
+    - Include user-facing flow descriptions
+  tasks:
+    - Break tasks into chunks of max 4 hours
+    - Each task should be independently testable
+    - Include verification steps in each task
+    - Commit changes after completing each task group (## heading) for rollback capability
