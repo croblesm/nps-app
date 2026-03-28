@@ -336,14 +336,24 @@ npm run test:watch    # Run tests in watch mode
 
 ## Environment Variables
 
+All variables are defined in `.env.local` (gitignored). Copy from `.env.example` to get started:
+
+```bash
+cp .env.example .env.local
+# Then edit .env.local with your values
+```
+
+Next.js auto-loads `.env.local` for `npm run dev` and `npm run build`. The `npm run db:init` script loads it via `dotenv`.
+
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `DATABASE_HOST` | No | `localhost` | SQL Server host |
+| `DATABASE_HOST` | No | `localhost` | SQL Server host. Use `sqlserver` in Dev Containers |
 | `DATABASE_PORT` | No | `1433` | SQL Server port |
 | `DATABASE_USER` | No | `sa` | SQL Server username |
-| `DATABASE_PASSWORD` | No | `NpsEngine@2025` | SQL Server password |
-| `DATABASE_NAME` | No | `nps_insight_engine` | Database name |
-| `ENCRYPTION_KEY` | Yes | (dev default) | 64-char hex string for AES-256-GCM API key encryption |
+| `DATABASE_PASSWORD` | **Yes** | (none) | Must match `MSSQL_SA_PASSWORD` in docker-compose.yml |
+| `DATABASE_NAME` | No | `nps_insight_engine` | Database name (alphanumeric, underscores, hyphens only) |
+| `ENCRYPTION_KEY` | **Yes** | (none) | 64-char hex string for AES-256-GCM. Generate: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
+| `NODE_ENV` | No | `development` | Set to `production` to disable TypeORM synchronize and verbose logging |
 
 ## Deferred Features (SaaS Phase)
 

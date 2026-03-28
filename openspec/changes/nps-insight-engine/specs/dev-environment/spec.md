@@ -72,6 +72,24 @@ The project SHALL include a `.env.example` file documenting all required environ
 - **WHEN** a developer sets values in `.env.local`
 - **THEN** `.env.local` is excluded from git via `.gitignore`, while `.env.example` remains tracked
 
+### Requirement: Environment variables load consistently across all scripts
+The `.env.local` file SHALL be loaded by all project scripts — Next.js auto-loads it for `dev`/`build`/`start`, and standalone scripts (like `db:init`) SHALL load it via `dotenv`.
+
+#### Scenario: Running db:init loads env vars
+- **WHEN** a developer runs `npm run db:init`
+- **THEN** the script loads `DATABASE_PASSWORD` and other variables from `.env.local` via dotenv
+
+#### Scenario: Running next dev loads env vars
+- **WHEN** a developer runs `npm run dev`
+- **THEN** Next.js auto-loads `.env.local` and all API routes can access environment variables
+
+### Requirement: Environment files are consistent across environments
+All environment files (`.env.example`, `.env.local`, `.devcontainer/.env.local`) SHALL define the same set of variables: `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_USER`, `DATABASE_PASSWORD`, `DATABASE_NAME`, `ENCRYPTION_KEY`, `NODE_ENV`.
+
+#### Scenario: Dev Container env matches local env
+- **WHEN** a developer compares `.devcontainer/.env.local` with `.env.example`
+- **THEN** both files define the same variables, differing only in `DATABASE_HOST` (`sqlserver` vs `localhost`)
+
 ### Requirement: Security headers
 The application SHALL set security headers on all responses to mitigate common web vulnerabilities.
 

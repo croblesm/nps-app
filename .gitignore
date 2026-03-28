@@ -13,12 +13,13 @@
 # testing
 /coverage
 
-# environment variables (keep .env.example)
+# environment variables (keep .env.example and .devcontainer/.env.local)
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+!.devcontainer/.env.local
 
 # misc
 .DS_Store
