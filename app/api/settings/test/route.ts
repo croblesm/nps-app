@@ -1,12 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { generateText } from "ai";
-import { createModel, type LlmProviderConfig } from "@/lib/ai/providers";
+import { createModel } from "@/lib/ai/providers";
 import { getDb } from "@/lib/db";
 import { decrypt } from "@/lib/ai/encryption";
+import { parseBody, testLlmSchema } from "@/lib/api/schemas";
 
-export async function POST(request: NextRequest) {
-  const body = await request.json();
-  const { provider, apiKey, endpointUrl, modelName } = body;
+export async function POST(request: Request) {
+  const parsed = await parseBody(request, testLlmSchema);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
+  }
+
+  const { provider, apiKey, endpointUrl, modelName } = parsed.data;
 
   let resolvedApiKey = apiKey;
 
@@ -27,14 +32,12 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const providerConfig: LlmProviderConfig = {
+    const model = createModel({
       provider,
       apiKey: resolvedApiKey,
       endpointUrl,
       modelName,
-    };
-
-    const model = createModel(providerConfig);
+    });
 
     const { text } = await generateText({
       model,
@@ -42,16 +45,9 @@ export async function POST(request: NextRequest) {
       maxOutputTokens: 10,
     });
 
-    return NextResponse.json({
-      success: true,
-      response: text.trim(),
-    });
+    return NextResponse.json({ success: true, response: text.trim() });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json(
-      { success: false, error: message },
-      { status: 400 }
-    );
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({ success: false, error: message }, { status: 400 });
   }
 }

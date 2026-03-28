@@ -1,3 +1,19 @@
+/** NPS score thresholds — single source of truth */
+export const NPS_THRESHOLDS = {
+  PROMOTER_MIN: 9,
+  PASSIVE_MIN: 7,
+  PASSIVE_MAX: 8,
+  DETRACTOR_MAX: 6,
+} as const;
+
+export const NPS_LABELS = {
+  EXCELLENT: { min: 50, label: "Excellent" },
+  VERY_GOOD: { min: 30, label: "Very Good" },
+  GOOD: { min: 0, label: "Good" },
+  NEEDS_WORK: { min: -30, label: "Needs Work" },
+  CRITICAL: { min: -Infinity, label: "Critical" },
+} as const;
+
 export interface NpsStats {
   total: number;
   promoters: number;
@@ -7,6 +23,18 @@ export interface NpsStats {
   promoterPct: number;
   passivePct: number;
   detractorPct: number;
+}
+
+export function isPromoter(score: number): boolean {
+  return score >= NPS_THRESHOLDS.PROMOTER_MIN;
+}
+
+export function isPassive(score: number): boolean {
+  return score >= NPS_THRESHOLDS.PASSIVE_MIN && score <= NPS_THRESHOLDS.PASSIVE_MAX;
+}
+
+export function isDetractor(score: number): boolean {
+  return score <= NPS_THRESHOLDS.DETRACTOR_MAX;
 }
 
 export function calculateNps(scores: (number | null)[]): NpsStats {
@@ -26,9 +54,9 @@ export function calculateNps(scores: (number | null)[]): NpsStats {
     };
   }
 
-  const promoters = valid.filter((s) => s >= 9).length;
-  const passives = valid.filter((s) => s >= 7 && s <= 8).length;
-  const detractors = valid.filter((s) => s <= 6).length;
+  const promoters = valid.filter(isPromoter).length;
+  const passives = valid.filter(isPassive).length;
+  const detractors = valid.filter(isDetractor).length;
   const npsScore = Math.round(((promoters - detractors) / total) * 100);
 
   return {
@@ -43,10 +71,10 @@ export function calculateNps(scores: (number | null)[]): NpsStats {
   };
 }
 
-export function npsEmoji(score: number): string {
-  if (score >= 50) return "Excellent";
-  if (score >= 30) return "Very Good";
-  if (score >= 0) return "Good";
-  if (score >= -30) return "Needs Work";
-  return "Critical";
+export function npsLabel(score: number): string {
+  if (score >= NPS_LABELS.EXCELLENT.min) return NPS_LABELS.EXCELLENT.label;
+  if (score >= NPS_LABELS.VERY_GOOD.min) return NPS_LABELS.VERY_GOOD.label;
+  if (score >= NPS_LABELS.GOOD.min) return NPS_LABELS.GOOD.label;
+  if (score >= NPS_LABELS.NEEDS_WORK.min) return NPS_LABELS.NEEDS_WORK.label;
+  return NPS_LABELS.CRITICAL.label;
 }

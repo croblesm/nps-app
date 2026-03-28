@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
+import { parseBody, saveCategoriesSchema, updateCategorySchema } from "@/lib/api/schemas";
 
 export async function GET(
   _request: NextRequest,
@@ -22,22 +23,11 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const body = await request.json();
-  const { categories } = body as {
-    categories: {
-      name: string;
-      description: string;
-      sampleComments?: unknown;
-      isFallback?: boolean;
-    }[];
-  };
-
-  if (!categories || categories.length === 0) {
-    return NextResponse.json(
-      { error: "At least one category is required" },
-      { status: 400 }
-    );
+  const parsed = await parseBody(request, saveCategoriesSchema);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
+  const { categories } = parsed.data;
 
   const db = await getDb();
   const { Category } = await import("@/lib/db/entities/Category");
@@ -72,15 +62,11 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const body = await request.json();
-  const { categoryId, name, description, isActive } = body;
-
-  if (!categoryId) {
-    return NextResponse.json(
-      { error: "categoryId is required" },
-      { status: 400 }
-    );
+  const parsed = await parseBody(request, updateCategorySchema);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
+  const { categoryId, name, description, isActive } = parsed.data;
 
   const db = await getDb();
   const { Category } = await import("@/lib/db/entities/Category");

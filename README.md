@@ -295,6 +295,25 @@ nps-app/
 | Classifier | Batch-classifies comments into categories | Fast/cheap (Claude Haiku, GPT-4o-mini) |
 | Summary Generator | Produces markdown insight report | Best available |
 
+## Testing
+
+Tests use [Vitest](https://vitest.dev/) with Node.js environment.
+
+```bash
+npm test              # Run all tests once
+npm run test:watch    # Run tests in watch mode
+```
+
+**Test suites (57 tests):**
+
+| Suite | File | What it covers |
+|-------|------|---------------|
+| NPS Calculator | `__tests__/lib/calculator.test.ts` | Threshold constants, isPromoter/isPassive/isDetractor, NPS computation, percentages, null handling, reference dataset (NPS=18), score labels |
+| CSV Validator | `__tests__/lib/validator.test.ts` | Column type detection (numeric, text), null percentage calculation, structure validation (requires numeric + text columns), sample values |
+| Stratified Sampler | `__tests__/lib/sampler.test.ts` | Target size limits, empty text filtering, NPS bucket representation, null score handling |
+| API Schemas | `__tests__/lib/schemas.test.ts` | Zod validation for all API inputs: project creation, LLM config, noise filters, categories, structure, UUID format |
+| Encryption | `__tests__/lib/encryption.test.ts` | AES-256-GCM round-trip, random IV uniqueness, unicode support, tamper detection |
+
 ## Scripts
 
 | Command | Description |
@@ -303,6 +322,8 @@ nps-app/
 | `npm run build` | Production build |
 | `npm start` | Start production server |
 | `npm run lint` | Run Next.js linter |
+| `npm test` | Run all Vitest tests |
+| `npm run test:watch` | Run tests in watch mode |
 | `npm run db:init` | Create database and tables |
 | `docker compose up -d` | Start SQL Server 2025 container |
 | `docker compose down` | Stop SQL Server container |

@@ -168,6 +168,13 @@ A Dev Container configuration (`.devcontainer/`) provides a one-click setup with
 - **Footer attribution**: Consistent "croblesm.com" branding on all pages via root layout
 - **Responsive design**: Grid layouts adapt from mobile to desktop
 - **Progressive disclosure**: 6-step sidebar navigation guides users through the workflow
+- **Component decomposition**: Dashboard split into 5 reusable components (ScoreCards, CategoryBreakdown, SearchBar, FilterPanel, DataTable)
+
+### Code Quality
+- **Zod API validation**: All 11 API routes validate request bodies via `parseBody()` with typed Zod schemas, returning consistent `{ error }` responses on failure
+- **Shared constants**: NPS thresholds (`NPS_THRESHOLDS`) and score labels (`NPS_LABELS`) defined once in `lib/nps/calculator.ts`, used everywhere
+- **Unit tests**: 57 tests across 5 suites (NPS calculator, CSV validator, stratified sampler, API schemas, encryption) via Vitest
+- **Test command**: `npm test` (Vitest in Node.js environment with `@/` path aliases)
 
 ## Risks / Trade-offs
 

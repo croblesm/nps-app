@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { encrypt } from "@/lib/ai/encryption";
+import { parseBody, saveLlmConfigSchema } from "@/lib/api/schemas";
 
 export async function GET() {
   const db = await getDb();
@@ -17,16 +18,13 @@ export async function GET() {
   return NextResponse.json(masked);
 }
 
-export async function POST(request: NextRequest) {
-  const body = await request.json();
-  const { provider, apiKey, endpointUrl, modelName, isDefault } = body;
-
-  if (!provider || !modelName) {
-    return NextResponse.json(
-      { error: "Provider and model name are required" },
-      { status: 400 }
-    );
+export async function POST(request: Request) {
+  const parsed = await parseBody(request, saveLlmConfigSchema);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
+
+  const { provider, apiKey, endpointUrl, modelName, isDefault } = parsed.data;
 
   const db = await getDb();
   const { LlmConfig } = await import("@/lib/db/entities/LlmConfig");

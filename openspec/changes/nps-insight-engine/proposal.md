@@ -58,6 +58,7 @@ Product managers need a flexible, AI-powered tool to analyze NPS survey data fro
 - `llm-configuration`: Multi-provider LLM settings with API key management
 - `data-export`: Filtered CSV download and project metadata export/import
 - `dev-environment`: Dev Container setup, .env management, security headers, TypeORM guards, footer attribution, error boundary, server-side aggregation, connection pooling, input sanitization
+- `code-quality`: Component decomposition, shared NPS constants, Zod API validation, consistent error format, unit tests (57 tests), Vitest configuration
 
 ### Modified Capabilities
 <!-- No existing specs to modify — this is a greenfield rewrite -->

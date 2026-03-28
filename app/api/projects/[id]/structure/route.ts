@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
+import { parseBody, saveStructureSchema } from "@/lib/api/schemas";
 
 export async function GET(
   _request: NextRequest,
@@ -20,8 +21,11 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const body = await request.json();
-  const { includedColumns, excludedColumns } = body;
+  const parsed = await parseBody(request, saveStructureSchema);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
+  }
+  const { includedColumns, excludedColumns } = parsed.data;
 
   const db = await getDb();
   const { ReportStructure } = await import("@/lib/db/entities/ReportStructure");

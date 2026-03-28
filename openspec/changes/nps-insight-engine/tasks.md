@@ -139,3 +139,18 @@
 - [x] 13.15 Add footer attribution (croblesm.com) to root layout
 - [x] 13.16 Add input validation on POST /api/projects (name length, type checks)
 - [x] 13.17 Create dev-environment spec with all best practice requirements and scenarios
+
+## 14. Code Quality and Testing
+
+- [x] 14.1 Extract shared NPS threshold constants (NPS_THRESHOLDS, NPS_LABELS) and helper functions (isPromoter, isPassive, isDetractor)
+- [x] 14.2 Decompose dashboard into reusable components: ScoreCards, CategoryBreakdown, SearchBar, FilterPanel, DataTable
+- [x] 14.3 Create Zod validation schemas for all API route inputs (lib/api/schemas.ts)
+- [x] 14.4 Add parseBody() utility for consistent request body parsing with Zod
+- [x] 14.5 Update all 11 API routes to use Zod validation via parseBody()
+- [x] 14.6 Install and configure Vitest with Node.js environment and path aliases
+- [x] 14.7 Write NPS calculator tests: thresholds, classification, NPS computation, labels, reference dataset (NPS=18)
+- [x] 14.8 Write CSV validator tests: column type detection, null percentages, structure validation
+- [x] 14.9 Write stratified sampler tests: size limits, empty text filtering, NPS bucket coverage, null score handling
+- [x] 14.10 Write Zod schema tests: valid/invalid inputs for all schemas, edge cases
+- [x] 14.11 Write encryption tests: round-trip, random IV, unicode, tamper detection
+- [x] 14.12 Create code-quality spec with all requirements and scenarios

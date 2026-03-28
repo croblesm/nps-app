@@ -1,22 +1,19 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { generateObject } from "ai";
 import { getDb } from "@/lib/db";
 import { getActiveModel } from "@/lib/ai/get-model";
+import { parseBody, projectIdBodySchema } from "@/lib/api/schemas";
 import {
   dataValidatorSchema,
   buildDataValidatorPrompt,
 } from "@/lib/ai/prompts";
 
-export async function POST(request: NextRequest) {
-  const body = await request.json();
-  const { projectId } = body;
-
-  if (!projectId) {
-    return NextResponse.json(
-      { error: "projectId is required" },
-      { status: 400 }
-    );
+export async function POST(request: Request) {
+  const parsed = await parseBody(request, projectIdBodySchema);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
+  const { projectId } = parsed.data;
 
   const db = await getDb();
   const { DataSource } = await import("@/lib/db/entities/DataSource");

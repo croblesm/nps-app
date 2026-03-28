@@ -1,17 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { generateText } from "ai";
 import { getDb } from "@/lib/db";
 import { getActiveModel } from "@/lib/ai/get-model";
+import { parseBody, projectIdBodySchema } from "@/lib/api/schemas";
 import { buildSummaryPrompt } from "@/lib/ai/prompts";
 import { calculateNps } from "@/lib/nps/calculator";
 
-export async function POST(request: NextRequest) {
-  const body = await request.json();
-  const { projectId } = body;
-
-  if (!projectId) {
-    return NextResponse.json({ error: "projectId required" }, { status: 400 });
+export async function POST(request: Request) {
+  const parsed = await parseBody(request, projectIdBodySchema);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
+  const { projectId } = parsed.data;
 
   const db = await getDb();
 

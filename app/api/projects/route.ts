@@ -1,16 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
+import { parseBody, createProjectSchema } from "@/lib/api/schemas";
 
 export async function GET() {
   const db = await getDb();
   const { Project } = await import("@/lib/db/entities/Project");
+  const { Comment } = await import("@/lib/db/entities/Comment");
 
   const projects = await db
     .getRepository(Project)
     .find({ order: { createdAt: "DESC" } });
 
-  // Single aggregation query instead of N+1
-  const { Comment } = await import("@/lib/db/entities/Comment");
   const stats = await db
     .getRepository(Comment)
     .createQueryBuilder("c")
@@ -54,29 +54,13 @@ export async function GET() {
   return NextResponse.json(summaries);
 }
 
-export async function POST(request: NextRequest) {
-  let body;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+export async function POST(request: Request) {
+  const parsed = await parseBody(request, createProjectSchema);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
 
-  const { name, description } = body;
-
-  if (!name?.trim()) {
-    return NextResponse.json(
-      { error: "Project name is required" },
-      { status: 400 }
-    );
-  }
-
-  if (typeof name !== "string" || name.length > 255) {
-    return NextResponse.json(
-      { error: "Project name must be a string under 255 characters" },
-      { status: 400 }
-    );
-  }
+  const { name, description } = parsed.data;
 
   const db = await getDb();
   const { Project } = await import("@/lib/db/entities/Project");
@@ -84,10 +68,9 @@ export async function POST(request: NextRequest) {
 
   const project = repo.create({
     name: name.trim(),
-    description: typeof description === "string" ? description.slice(0, 2000) : null,
+    description: description || null,
   });
 
   await repo.save(project);
-
   return NextResponse.json(project, { status: 201 });
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
+import { parseBody, updateProjectSchema } from "@/lib/api/schemas";
 
 export async function GET(
   _request: NextRequest,
@@ -23,7 +24,11 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const body = await request.json();
+  const parsed = await parseBody(request, updateProjectSchema);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
+  }
+
   const db = await getDb();
   const { Project } = await import("@/lib/db/entities/Project");
   const repo = db.getRepository(Project);
@@ -33,11 +38,10 @@ export async function PATCH(
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
 
-  if (body.name !== undefined) project.name = body.name;
-  if (body.description !== undefined) project.description = body.description;
+  if (parsed.data.name !== undefined) project.name = parsed.data.name;
+  if (parsed.data.description !== undefined) project.description = parsed.data.description;
 
   await repo.save(project);
-
   return NextResponse.json(project);
 }
 

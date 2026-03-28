@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
+import { parseBody, createNoiseFilterSchema } from "@/lib/api/schemas";
 
 export async function GET(
   _request: NextRequest,
@@ -19,15 +20,11 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const body = await request.json();
-  const { name, description, filterKeywords, excludeFromNps } = body;
-
-  if (!name || !filterKeywords?.length) {
-    return NextResponse.json(
-      { error: "Name and keywords are required" },
-      { status: 400 }
-    );
+  const parsed = await parseBody(request, createNoiseFilterSchema);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
+  const { name, description, filterKeywords, excludeFromNps } = parsed.data;
 
   const db = await getDb();
   const { NoiseFilter } = await import("@/lib/db/entities/NoiseFilter");

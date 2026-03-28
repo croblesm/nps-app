@@ -11,6 +11,8 @@ NPS Insight Engine — a generic, AI-powered NPS (Net Promoter Score) analysis p
 - **Dev server:** `npm run dev` (Next.js on localhost:3000)
 - **Build:** `npm run build`
 - **Start prod:** `npm start`
+- **Test:** `npm test` (Vitest, 57 tests across 5 suites)
+- **Test watch:** `npm run test:watch`
 - **DB init:** `npm run db:init` (creates database + tables via TypeORM)
 - **Docker SQL Server:** `docker compose up -d` (starts SQL Server 2025 on port 1433)
 
