@@ -21,12 +21,12 @@
 
 ## 3. Project Management
 
-- [ ] 3.1 Build home page (app/page.tsx) listing all saved projects with name, creation date, and NPS score preview
-- [ ] 3.2 Create new project page (app/new-project/page.tsx) with form: tool name, description
-- [ ] 3.3 Create API routes for project CRUD (app/api/projects/route.ts, app/api/projects/[id]/route.ts)
-- [ ] 3.4 Add project deletion with confirmation modal
-- [ ] 3.5 Create project layout shell (app/project/[id]/layout.tsx) with navigation sidebar showing project steps
-- [ ] 3.6 Verify: create a project, see it listed on home page, open it, delete it
+- [x] 3.1 Build home page (app/page.tsx) listing all saved projects with name, creation date, and NPS score preview
+- [x] 3.2 Create new project page (app/new-project/page.tsx) with form: tool name, description
+- [x] 3.3 Create API routes for project CRUD (app/api/projects/route.ts, app/api/projects/[id]/route.ts)
+- [x] 3.4 Add project deletion with confirmation modal
+- [x] 3.5 Create project layout shell (app/project/[id]/layout.tsx) with navigation sidebar showing project steps
+- [x] 3.6 Verify: create a project, see it listed on home page, open it, delete it
 
 ## 4. CSV Upload and Validation
 
