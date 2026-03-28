@@ -63,12 +63,12 @@ All API routes SHALL use a consistent error response format with `{ error: strin
 - **WHEN** any API route encounters a validation error, not-found, or server error
 - **THEN** the response body contains an `error` field with a human-readable message
 
-### Requirement: Unit tests cover core business logic
-The project SHALL include unit tests for NPS calculator, CSV validator, stratified sampler, API validation schemas, and encryption utilities.
+### Requirement: Unit tests cover core business logic and error handling
+The project SHALL include unit tests for NPS calculator, CSV validator, stratified sampler, API validation schemas, encryption utilities, and API error handling (invalid JSON, empty body, missing fields, wrong types).
 
 #### Scenario: Tests pass
 - **WHEN** `npm test` is run
-- **THEN** all tests pass (57 tests across 5 test files)
+- **THEN** all tests pass (67 tests across 6 test files)
 
 #### Scenario: NPS calculator tests
 - **WHEN** NPS calculator tests run
@@ -81,6 +81,10 @@ The project SHALL include unit tests for NPS calculator, CSV validator, stratifi
 #### Scenario: Encryption round-trip tests
 - **WHEN** encryption tests run
 - **THEN** they verify: encrypt/decrypt round-trip, different ciphertext per call (random IV), unicode handling, tampered ciphertext detection
+
+#### Scenario: API error handling tests
+- **WHEN** API error handling tests run
+- **THEN** they verify: invalid JSON body returns error, empty body returns error, missing required fields return descriptive error, wrong types rejected, valid input passes through, UUID format validated, null body handled gracefully
 
 ### Requirement: Test framework configuration
 The project SHALL use Vitest as the test runner with Node.js environment and path alias support.

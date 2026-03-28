@@ -38,7 +38,7 @@ The Dev Container SHALL auto-install VS Code extensions for the project's tech s
 
 #### Scenario: Extensions are present after container build
 - **WHEN** the Dev Container finishes building
-- **THEN** the following extensions are installed: MSSQL (ms-mssql.mssql), SQL Database Projects, ESLint, Prettier, Tailwind CSS IntelliSense, Docker, TypeScript Nightly, GitHub Copilot, GitHub Copilot Chat
+- **THEN** the following extensions are installed: MSSQL (ms-mssql.mssql), SQL Database Projects, ESLint, Prettier, Tailwind CSS IntelliSense, Docker, TypeScript Nightly, GitHub Copilot, GitHub Copilot Chat, Claude Code, OpenAI Codex
 
 ### Requirement: Pre-configured SQL Server connection
 The Dev Container SHALL include a pre-configured MSSQL connection profile so developers can browse the database without manual setup.

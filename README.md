@@ -63,6 +63,7 @@ The fastest way to get started. Requires [VS Code](https://code.visualstudio.com
 - ESLint, Prettier, Tailwind CSS IntelliSense
 - Docker, TypeScript Nightly
 - GitHub Copilot + Copilot Chat
+- Claude Code, OpenAI Codex
 
 **Pre-configured SQL Server connection:** The MSSQL extension comes with a saved connection profile — just click it in the SQL Server sidebar to connect (no manual setup needed).
 
@@ -309,7 +310,7 @@ npm test              # Run all tests once
 npm run test:watch    # Run tests in watch mode
 ```
 
-**Test suites (57 tests):**
+**Test suites (67 tests):**
 
 | Suite | File | What it covers |
 |-------|------|---------------|
@@ -318,6 +319,7 @@ npm run test:watch    # Run tests in watch mode
 | Stratified Sampler | `__tests__/lib/sampler.test.ts` | Target size limits, empty text filtering, NPS bucket representation, null score handling |
 | API Schemas | `__tests__/lib/schemas.test.ts` | Zod validation for all API inputs: project creation, LLM config, noise filters, categories, structure, UUID format |
 | Encryption | `__tests__/lib/encryption.test.ts` | AES-256-GCM round-trip, random IV uniqueness, unicode support, tamper detection |
+| API Error Handling | `__tests__/lib/api-error-handling.test.ts` | Invalid JSON, empty body, missing fields, wrong types, valid input pass-through, UUID validation, null body |
 
 ## Scripts
 

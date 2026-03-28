@@ -17,11 +17,12 @@
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "bradlc.vscode-tailwindcss",
-        "Prisma.prisma",
         "ms-azuretools.vscode-docker",
+        "ms-vscode.vscode-typescript-next",
         "GitHub.copilot",
         "GitHub.copilot-chat",
-        "ms-vscode.vscode-typescript-next"
+        "anthropic.claude-code",
+        "openai.openai-codex"
       ],
       "settings": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",
