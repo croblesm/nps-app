@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  devIndicators: false,
   serverExternalPackages: ["tedious", "typeorm", "reflect-metadata", "mssql"],
   headers: async () => [
     {

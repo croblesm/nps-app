@@ -67,13 +67,16 @@ export default function HomePage() {
       {loading ? (
         <div className="text-center py-16 text-gray-400">Loading...</div>
       ) : projects.length === 0 ? (
-        <div className="text-center py-16 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg">
-          <p className="text-gray-500 dark:text-gray-400 text-lg mb-4">
+        <div className="text-center py-16">
+          <p className="text-gray-400 text-lg mb-2">
             No projects yet
+          </p>
+          <p className="text-gray-500 dark:text-gray-500 text-sm mb-6">
+            Create a project to start analyzing NPS survey data
           </p>
           <Link
             href="/new-project"
-            className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm font-medium"
+            className="px-5 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm font-medium"
           >
             Create your first project
           </Link>
