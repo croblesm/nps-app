@@ -73,16 +73,16 @@
 
 ## 8. NPS Dashboard
 
-- [ ] 8.1 Extract NPS calculation logic into lib/nps/calculator.ts: promoter/passive/detractor counts, NPS score, emoji indicators
-- [ ] 8.2 Build score cards component (components/nps/ScoreCards.tsx): Total Responses, Promoters, Passives, Detractors, NPS Score — clickable to filter
-- [ ] 8.3 Build category breakdown component (components/nps/CategoryBreakdown.tsx): dynamic grid of cards with count/percentage, clickable, sorted by percentage
-- [ ] 8.4 Build search bar component (components/nps/SearchBar.tsx): full-text search across comment text
-- [ ] 8.5 Build filter panel component (components/nps/FilterPanel.tsx): dynamic dropdowns generated from report structure columns + Category + Actionable
-- [ ] 8.6 Build sortable data table component (components/nps/DataTable.tsx): dynamic columns, sortable headers, pagination (10/25/50/100 rows per page)
-- [ ] 8.7 Create dashboard page (app/project/[id]/dashboard/page.tsx): compose all components, wire up filter/search/sort state with AND logic
-- [ ] 8.8 Create API route to fetch filtered/paginated comments (app/api/projects/[id]/comments/route.ts)
-- [ ] 8.9 Implement dark mode toggle in root layout, ensure all components respect dark mode
-- [ ] 8.10 Verify: dashboard shows NPS score of 18 for data.csv, filters work, search works, table sorts correctly
+- [x] 8.1 Extract NPS calculation logic into lib/nps/calculator.ts: promoter/passive/detractor counts, NPS score, emoji indicators
+- [x] 8.2 Build score cards component (components/nps/ScoreCards.tsx): Total Responses, Promoters, Passives, Detractors, NPS Score — clickable to filter
+- [x] 8.3 Build category breakdown component (components/nps/CategoryBreakdown.tsx): dynamic grid of cards with count/percentage, clickable, sorted by percentage
+- [x] 8.4 Build search bar component (components/nps/SearchBar.tsx): full-text search across comment text
+- [x] 8.5 Build filter panel component (components/nps/FilterPanel.tsx): dynamic dropdowns generated from report structure columns + Category + Actionable
+- [x] 8.6 Build sortable data table component (components/nps/DataTable.tsx): dynamic columns, sortable headers, pagination (10/25/50/100 rows per page)
+- [x] 8.7 Create dashboard page (app/project/[id]/dashboard/page.tsx): compose all components, wire up filter/search/sort state with AND logic
+- [x] 8.8 Create API route to fetch filtered/paginated comments (app/api/projects/[id]/comments/route.ts)
+- [x] 8.9 Implement dark mode toggle in root layout, ensure all components respect dark mode
+- [x] 8.10 Verify: dashboard shows NPS score of 18 for data.csv, filters work, search works, table sorts correctly
 
 ## 9. Noise/Pollution Console
 
