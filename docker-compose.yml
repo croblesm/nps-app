@@ -1,6 +1,7 @@
 services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2025-latest
+    platform: linux/amd64
     container_name: nps-sqlserver
     environment:
       ACCEPT_EULA: "Y"
