@@ -1,5 +1,16 @@
 ## ADDED Requirements
 
+### Requirement: README includes quick-start badges
+The README SHALL include clickable badges for opening the project in GitHub Codespaces and VS Code Dev Containers.
+
+#### Scenario: Codespaces badge
+- **WHEN** a user visits the repository on GitHub
+- **THEN** they see an "Open in GitHub Codespaces" badge that links to `codespaces.new/croblesm/nps-app`
+
+#### Scenario: Dev Containers badge
+- **WHEN** a user visits the repository on GitHub
+- **THEN** they see an "Open in Dev Containers" badge that triggers VS Code to clone and open in a container
+
 ### Requirement: Dev Container provides one-click setup
 The system SHALL include a `.devcontainer/` configuration that provides a fully working development environment when opened in VS Code with the Dev Containers extension.
 

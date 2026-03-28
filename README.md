@@ -1,5 +1,8 @@
 # NPS Insight Engine
 
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/croblesm/nps-app?quickstart=1)
+[![Open in Dev Containers](https://img.shields.io/static/v1?style=for-the-badge&label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/croblesm/nps-app)
+
 An AI-powered NPS (Net Promoter Score) analysis platform for product managers. Upload CSV survey data, let AI discover themes and classify comments, then explore insights through an interactive dashboard with noise filtering and summary reports.
 
 ## Features
