@@ -116,6 +116,6 @@
 
 - [ ] 12.1 End-to-end test: create project → upload data.csv → validate → confirm structure → discover categories → classify → dashboard → noise filter → summary → export
 - [ ] 12.2 Remove CRA artifacts: src/App.js, src/App-simple.js, src/App_bk.js, react-scripts dependency, CRA config files
-- [ ] 12.3 Update CLAUDE.md with new project structure, commands, and architecture
+- [x] 12.3 Update CLAUDE.md with new project structure, commands, and architecture
 - [ ] 12.4 Update README.md with setup instructions: Docker, environment variables, getting started
 - [ ] 12.5 Verify: clean clone → docker compose up → npm install → npm run dev → full workflow completes successfully

@@ -4,37 +4,64 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-NPS (Net Promoter Score) analysis dashboard for a VS Code extension (MSSQL). A single-page React app that loads survey data from a CSV file (`public/data.csv`), classifies comments using a regex-based rule engine, and displays interactive charts and a filterable data table.
+NPS Insight Engine — a generic, AI-powered NPS (Net Promoter Score) analysis platform for product managers. Users upload CSV survey data, AI agents discover themes and classify comments, and the dashboard provides interactive analysis with noise filtering and summary reports.
 
 ## Commands
 
-- **Dev server:** `npm run dev` or `npm start` (runs on localhost:3000)
+- **Dev server:** `npm run dev` (Next.js on localhost:3000)
 - **Build:** `npm run build`
-- **Test:** `npm test` (Jest + React Testing Library, watch mode)
-- **Single test:** `npm test -- --testPathPattern=<pattern>`
+- **Start prod:** `npm start`
+- **DB init:** `npm run db:init` (creates database + tables via TypeORM)
+- **Docker SQL Server:** `docker compose up -d` (starts SQL Server 2025 on port 1433)
+
+## Prerequisites
+
+- Node.js 18+
+- Docker Desktop (for SQL Server 2025)
+- An LLM API key (Anthropic, OpenAI, Azure OpenAI, or local Ollama)
 
 ## Architecture
 
-The entire app lives in a single component: `src/App.js` (~700+ lines). There is no routing, no backend, and no API calls beyond fetching the local CSV.
+### Stack
+- **Framework:** Next.js 15 (App Router), React 19, TypeScript
+- **Styling:** Tailwind CSS 4 with dark mode (class strategy, dark by default)
+- **Database:** SQL Server 2025 (Docker), TypeORM
+- **AI:** Vercel AI SDK (`ai` package) — multi-provider (Anthropic, OpenAI, Azure OpenAI, Ollama)
+- **CSV:** PapaParse
+- **Validation:** Zod (for AI structured output schemas)
 
-### Key sections of App.js
+### Directory Structure
+```
+app/                          # Next.js App Router pages
+  api/                        # API routes
+    ai/{validate,categorize,classify,summarize}/
+    projects/[id]/{categories,comments,export,noise,structure}/
+    settings/
+    upload/
+  project/[id]/               # Project pages with sidebar layout
+    {upload,structure,categories,dashboard,noise,summary}/
+  settings/                   # LLM provider configuration
+  new-project/                # Project creation
+components/ui/                # Shared UI components (Header)
+lib/
+  ai/                         # LLM providers, prompts, encryption
+  csv/                        # CSV validator, sampler
+  db/                         # TypeORM entities, data source, connection
+  nps/                        # NPS calculation logic
+openspec/                     # Spec-driven development artifacts
+```
 
-1. **Rule engine (top of file):** Regex-based classification system that categorizes NPS comments into:
-   - **Categories** (`CATEGORY_RULES`): ADS/SSMS Comparison, Missing Feature, Connectivity, Quality/Performance, UI/UX, AI/GitHub Copilot, No comment, General Feedback — scored by weight × match count
-   - **Areas** (`AREA_RULES`): Connectivity, Edit data, Query Results, Query Editor, Object Explorer, Database Management, GitHub Copilot, MCP, Other — first-match wins
-   - **User types** (`USER_TYPE_RULES`): DBA, Developer, Data Analyst, General User — first-match wins
-   - **Comment types** (`CONSTRUCTIVE_RULES`): constructive vs non-actionable
+### Data Flow
+1. Create project → Upload CSV → Validate structure (AI Agent 1)
+2. User confirms report structure → AI discovers themes (Agent 2a)
+3. User reviews/edits categories → AI classifies all comments (Agent 2b)
+4. Dashboard: NPS cards, category breakdown, filters, sortable table
+5. Noise Console: keyword filters that exclude from NPS score
+6. AI Summary: markdown insight report (Agent 3)
+7. Export: filtered CSV or project metadata JSON
 
-2. **NPSAnalysis component:** Loads `public/data.csv` via fetch + PapaParse, applies rule engine to each row, renders summary cards, charts, and a paginated/sortable/filterable table.
-
-### Data flow
-
-CSV (`public/data.csv`) → PapaParse → rule engine classification → React state → filtered/sorted display
-
-### Styling
-
-Tailwind CSS 3 with dark mode (`class` strategy). Dark mode is on by default. Styles are inline via Tailwind utility classes — `App.css` is the default CRA boilerplate and mostly unused.
-
-### Alternate files
-
-- `src/App-simple.js` and `src/App_bk.js` are earlier/backup versions — not imported anywhere.
+### Key Conventions
+- Server components by default, `"use client"` only for interactivity
+- TypeORM entities in `lib/db/entities/` — import dynamically in API routes to avoid circular deps
+- All AI calls use Vercel AI SDK with Zod-validated structured output
+- API routes use `getDb()` for lazy-initialized database connection
