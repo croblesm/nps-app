@@ -49,15 +49,15 @@
 
 ## 6. AI Theme Discovery and Category Management
 
-- [ ] 6.1 Create stratified sampling utility (lib/csv/sampler.ts): select 50-100 comments balanced across NPS score ranges
-- [ ] 6.2 Create AI theme discovery prompt template: analyze sample comments for product, propose 5-10 categories with descriptions and sample indices
-- [ ] 6.3 Define Zod output schema for theme discovery: { categories: { name, description, sampleIndices[] }[] }
-- [ ] 6.4 Create AI categorize API route — discovery phase (app/api/ai/categorize/route.ts)
-- [ ] 6.5 Build category review page (app/project/[id]/categories/page.tsx): list proposed categories with name, description, sample comments, edit/merge/delete/add controls
-- [ ] 6.6 Implement category editing: rename inline, merge two categories modal, delete with reassignment to General Feedback, add custom category form
-- [ ] 6.7 Enforce "General Feedback" as mandatory fallback (cannot be deleted, always present)
-- [ ] 6.8 Create API route to save confirmed categories (app/api/projects/[id]/categories/route.ts) to Category table
-- [ ] 6.9 Verify: AI proposes meaningful categories from data.csv, user can edit them, General Feedback cannot be deleted
+- [x] 6.1 Create stratified sampling utility (lib/csv/sampler.ts): select 50-100 comments balanced across NPS score ranges
+- [x] 6.2 Create AI theme discovery prompt template: analyze sample comments for product, propose 5-10 categories with descriptions and sample indices
+- [x] 6.3 Define Zod output schema for theme discovery: { categories: { name, description, sampleIndices[] }[] }
+- [x] 6.4 Create AI categorize API route — discovery phase (app/api/ai/categorize/route.ts)
+- [x] 6.5 Build category review page (app/project/[id]/categories/page.tsx): list proposed categories with name, description, sample comments, edit/merge/delete/add controls
+- [x] 6.6 Implement category editing: rename inline, merge two categories modal, delete with reassignment to General Feedback, add custom category form
+- [x] 6.7 Enforce "General Feedback" as mandatory fallback (cannot be deleted, always present)
+- [x] 6.8 Create API route to save confirmed categories (app/api/projects/[id]/categories/route.ts) to Category table
+- [x] 6.9 Verify: AI proposes meaningful categories from data.csv, user can edit them, General Feedback cannot be deleted
 
 ## 7. AI Bulk Classification
 
