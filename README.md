@@ -122,13 +122,56 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ### 6. Configure your LLM provider
 
-Go to [http://localhost:3000/settings](http://localhost:3000/settings) and configure your LLM provider:
+Go to [http://localhost:3000/settings](http://localhost:3000/settings) and configure your LLM provider.
 
-1. Select a provider (Anthropic recommended)
-2. Enter your API key
-3. Select a model (e.g., `claude-sonnet-4-6`)
-4. Click "Test Connection" to verify
-5. Click "Save Configuration"
+#### Option A: Cloud provider (API key required)
+
+| Provider | API Key | Recommended Model |
+|----------|---------|------------------|
+| **Anthropic** | [console.anthropic.com](https://console.anthropic.com/) | `claude-sonnet-4-6` (best quality) or `claude-haiku-4-5-20251001` (fastest/cheapest) |
+| **OpenAI** | [platform.openai.com](https://platform.openai.com/) | `gpt-4o` (best quality) or `gpt-4o-mini` (fastest/cheapest) |
+| **Azure OpenAI** | Azure portal | Your deployment name (requires endpoint URL + API key) |
+
+1. Select provider, enter API key, select model
+2. Click "Test Connection" to verify
+3. Click "Save Configuration"
+
+#### Option B: Local model with Ollama (no API key, free, private)
+
+Run AI models entirely on your machine — no data leaves your computer.
+
+1. **Install Ollama**: [ollama.com/download](https://ollama.com/download)
+
+2. **Pull a model** (choose based on your hardware):
+
+   | Model | RAM Needed | Best For |
+   |-------|-----------|----------|
+   | `llama3.1:8b` | 8GB | Faster, good for classification |
+   | `llama3.1:70b` | 48GB | Higher quality, better theme discovery |
+   | `mistral` | 8GB | Fast, good general performance |
+   | `qwen2.5:14b` | 16GB | Good balance of speed and quality |
+
+   ```bash
+   ollama pull llama3.1:8b
+   ```
+
+3. **Start Ollama** (if not already running):
+   ```bash
+   ollama serve
+   ```
+
+4. **Configure in the app**:
+   - Provider: **Ollama (Local)**
+   - Server URL: `http://localhost:11434/v1` (default, usually no change needed)
+   - Model: the model name you pulled (e.g., `llama3.1:8b`)
+   - No API key needed
+   - Click "Test Connection" then "Save Configuration"
+
+> **Note**: For Dev Container users, Ollama must run on your **host machine** (not inside the container). Use `http://host.docker.internal:11434/v1` as the server URL instead of `localhost`.
+
+#### Switching providers
+
+You can change your LLM provider at any time from the Settings page. The active provider is shown in the app header. Cloud and local providers can coexist — configure multiple and switch the "active" toggle.
 
 ## Usage Workflow
 
