@@ -14,9 +14,21 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
+      <body className="min-h-screen flex flex-col bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
         <Header />
-        {children}
+        <div className="flex-1">{children}</div>
+        <footer className="border-t border-gray-200 dark:border-gray-800 py-4 text-center text-xs text-gray-400">
+          &copy; {new Date().getFullYear()}{" "}
+          <a
+            href="https://croblesm.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-blue-400 transition-colors"
+          >
+            croblesm
+          </a>
+          . All rights reserved.
+        </footer>
       </body>
     </html>
   );
