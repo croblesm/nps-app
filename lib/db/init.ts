@@ -1,5 +1,8 @@
 import "reflect-metadata";
+import { config as loadEnv } from "dotenv";
 import { Connection, Request } from "tedious";
+
+loadEnv({ path: ".env.local" });
 
 const config = {
   server: process.env.DATABASE_HOST || "localhost",
