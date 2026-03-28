@@ -40,12 +40,12 @@
 
 ## 5. AI Data Validation Agent
 
-- [ ] 5.1 Create AI validation prompt template (lib/ai/prompts.ts): analyze column headers, types, and 20 sample rows
-- [ ] 5.2 Define Zod output schema for validator agent: { npsColumn, commentColumn, issues[], columnRecommendations[] }
-- [ ] 5.3 Create AI validate API route (app/api/ai/validate/route.ts) using Vercel AI SDK with structured output
-- [ ] 5.4 Build report structure review page (app/project/[id]/structure/page.tsx): display columns with AI recommendations, toggle include/exclude, show reasoning
-- [ ] 5.5 Create API route to save confirmed structure (app/api/projects/[id]/structure/route.ts) to ReportStructure table
-- [ ] 5.6 Verify: after CSV upload, AI correctly identifies NPS and Comments columns, recommends excluding low-value columns
+- [x] 5.1 Create AI validation prompt template (lib/ai/prompts.ts): analyze column headers, types, and 20 sample rows
+- [x] 5.2 Define Zod output schema for validator agent: { npsColumn, commentColumn, issues[], columnRecommendations[] }
+- [x] 5.3 Create AI validate API route (app/api/ai/validate/route.ts) using Vercel AI SDK with structured output
+- [x] 5.4 Build report structure review page (app/project/[id]/structure/page.tsx): display columns with AI recommendations, toggle include/exclude, show reasoning
+- [x] 5.5 Create API route to save confirmed structure (app/api/projects/[id]/structure/route.ts) to ReportStructure table
+- [x] 5.6 Verify: after CSV upload, AI correctly identifies NPS and Comments columns, recommends excluding low-value columns
 
 ## 6. AI Theme Discovery and Category Management
 
