@@ -32,6 +32,8 @@ export default function SettingsPage() {
     message: string;
   } | null>(null);
   const [saveMessage, setSaveMessage] = useState("");
+  const [ollamaModels, setOllamaModels] = useState<string[]>([]);
+  const [loadingOllamaModels, setLoadingOllamaModels] = useState(false);
 
   useEffect(() => {
     fetchConfigs();
@@ -51,6 +53,28 @@ export default function SettingsPage() {
     setApiKey("");
     setTestResult(null);
     setSaveMessage("");
+    setOllamaModels([]);
+    if (p === "ollama") {
+      fetchOllamaModels("http://localhost:11434");
+    }
+  }
+
+  async function fetchOllamaModels(url: string) {
+    setLoadingOllamaModels(true);
+    try {
+      const res = await fetch(`/api/settings/ollama-models?url=${encodeURIComponent(url)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setOllamaModels(data.models || []);
+        if (data.models?.length > 0 && !modelName) {
+          setModelName(data.models[0]);
+        }
+      }
+    } catch {
+      setOllamaModels([]);
+    } finally {
+      setLoadingOllamaModels(false);
+    }
   }
 
   async function handleSave() {
@@ -206,7 +230,13 @@ export default function SettingsPage() {
               <input
                 type="text"
                 value={endpointUrl}
-                onChange={(e) => setEndpointUrl(e.target.value)}
+                onChange={(e) => {
+                  setEndpointUrl(e.target.value);
+                  if (provider === "ollama" && e.target.value) {
+                    const baseUrl = e.target.value.replace(/\/v1\/?$/, "");
+                    fetchOllamaModels(baseUrl);
+                  }
+                }}
                 placeholder={
                   provider === "azure-openai"
                     ? "https://your-resource.openai.azure.com/openai/deployments/your-deployment"
@@ -221,7 +251,37 @@ export default function SettingsPage() {
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Model
             </label>
-            {models.length > 0 ? (
+            {provider === "ollama" && ollamaModels.length > 0 ? (
+              <select
+                value={modelName}
+                onChange={(e) => setModelName(e.target.value)}
+                className="w-full p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+              >
+                <option value="">Select a model...</option>
+                {ollamaModels.map((m) => (
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
+                ))}
+              </select>
+            ) : provider === "ollama" && loadingOllamaModels ? (
+              <div className="text-sm text-gray-400 p-2">
+                Detecting installed models...
+              </div>
+            ) : provider === "ollama" ? (
+              <div>
+                <input
+                  type="text"
+                  value={modelName}
+                  onChange={(e) => setModelName(e.target.value)}
+                  placeholder="e.g., llama3, mistral"
+                  className="w-full p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                  No models detected. Make sure Ollama is running, or type the model name manually.
+                </p>
+              </div>
+            ) : models.length > 0 ? (
               <select
                 value={modelName}
                 onChange={(e) => setModelName(e.target.value)}
@@ -238,11 +298,7 @@ export default function SettingsPage() {
                 type="text"
                 value={modelName}
                 onChange={(e) => setModelName(e.target.value)}
-                placeholder={
-                  provider === "ollama"
-                    ? "e.g., llama3, mistral"
-                    : "Deployment name"
-                }
+                placeholder="Deployment name"
                 className="w-full p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               />
             )}

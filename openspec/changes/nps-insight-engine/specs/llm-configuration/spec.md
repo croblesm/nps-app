@@ -96,6 +96,27 @@ THEN the system SHALL persist the configuration with the custom server URL and t
 
 ---
 
+### Requirement: Ollama model auto-detection
+
+When the user selects Ollama as the provider, the system SHALL auto-detect installed models from the Ollama server and display them as a dropdown selector instead of a free-text input.
+
+#### Scenario: Ollama models detected
+
+WHEN the user selects Ollama as the provider and Ollama is running locally
+THEN the system SHALL query the Ollama API (`/api/tags`) and display installed models in a dropdown selector.
+
+#### Scenario: Ollama not running
+
+WHEN the user selects Ollama but the Ollama server is not reachable
+THEN the system SHALL fall back to a text input with a message "No models detected. Make sure Ollama is running, or type the model name manually."
+
+#### Scenario: Custom Ollama URL triggers re-detection
+
+WHEN the user modifies the Ollama Server URL field
+THEN the system SHALL re-query for available models at the new URL and update the dropdown.
+
+---
+
 ### Requirement: Select a model from the provider's available models
 
 The system SHALL allow the user to select a specific model from the chosen provider's available models. The model selection MUST be required before saving the configuration.
