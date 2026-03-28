@@ -5,8 +5,6 @@ import {
   ManyToOne,
   JoinColumn,
 } from "typeorm";
-import { Project } from "./Project";
-import { Category } from "./Category";
 
 @Entity("comments")
 export class Comment {
@@ -16,15 +14,15 @@ export class Comment {
   @Column({ type: "uniqueidentifier" })
   projectId!: string;
 
-  @ManyToOne(() => Project, (p) => p.comments, { onDelete: "CASCADE" })
+  @ManyToOne("Project", "comments", { onDelete: "CASCADE" })
   @JoinColumn({ name: "projectId" })
-  project!: Project;
+  project!: unknown;
 
   @Column({ type: "int" })
   rowIndex!: number;
 
   @Column({ type: "nvarchar", length: "MAX", nullable: true })
-  rawData!: string | null; // JSON string — full original CSV row
+  rawData!: string | null;
 
   @Column({ type: "int", nullable: true })
   npsScore!: number | null;
@@ -35,9 +33,9 @@ export class Comment {
   @Column({ type: "uniqueidentifier", nullable: true })
   categoryId!: string | null;
 
-  @ManyToOne(() => Category, (c) => c.comments, { nullable: true })
+  @ManyToOne("Category", "comments", { nullable: true })
   @JoinColumn({ name: "categoryId" })
-  category!: Category | null;
+  category!: { name: string } | null;
 
   @Column({ type: "bit", default: true })
   isActionable!: boolean;
@@ -55,5 +53,5 @@ export class Comment {
   aiReasoning!: string | null;
 
   @Column({ type: "nvarchar", length: "MAX", nullable: true })
-  metadata!: string | null; // JSON string — dynamic columns
+  metadata!: string | null;
 }

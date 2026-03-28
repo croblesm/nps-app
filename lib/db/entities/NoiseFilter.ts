@@ -5,7 +5,6 @@ import {
   ManyToOne,
   JoinColumn,
 } from "typeorm";
-import { Project } from "./Project";
 
 @Entity("noise_filters")
 export class NoiseFilter {
@@ -15,9 +14,9 @@ export class NoiseFilter {
   @Column({ type: "uniqueidentifier" })
   projectId!: string;
 
-  @ManyToOne(() => Project, (p) => p.noiseFilters, { onDelete: "CASCADE" })
+  @ManyToOne("Project", "noiseFilters", { onDelete: "CASCADE" })
   @JoinColumn({ name: "projectId" })
-  project!: Project;
+  project!: unknown;
 
   @Column({ type: "nvarchar", length: 255 })
   name!: string;
@@ -26,7 +25,7 @@ export class NoiseFilter {
   description!: string | null;
 
   @Column({ type: "nvarchar", length: "MAX", nullable: true })
-  filterKeywords!: string | null; // JSON string
+  filterKeywords!: string | null;
 
   @Column({ type: "bit", default: false })
   excludeFromNps!: boolean;

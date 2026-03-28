@@ -6,7 +6,6 @@ import {
   ManyToOne,
   JoinColumn,
 } from "typeorm";
-import { Project } from "./Project";
 
 @Entity("summaries")
 export class Summary {
@@ -16,9 +15,9 @@ export class Summary {
   @Column({ type: "uniqueidentifier" })
   projectId!: string;
 
-  @ManyToOne(() => Project, (p) => p.summaries, { onDelete: "CASCADE" })
+  @ManyToOne("Project", "summaries", { onDelete: "CASCADE" })
   @JoinColumn({ name: "projectId" })
-  project!: Project;
+  project!: unknown;
 
   @Column({ type: "nvarchar", length: "MAX", nullable: true })
   markdownContent!: string | null;

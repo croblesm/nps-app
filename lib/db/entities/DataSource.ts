@@ -6,7 +6,6 @@ import {
   ManyToOne,
   JoinColumn,
 } from "typeorm";
-import { Project } from "./Project";
 
 @Entity("data_sources")
 export class DataSource {
@@ -16,9 +15,9 @@ export class DataSource {
   @Column({ type: "uniqueidentifier" })
   projectId!: string;
 
-  @ManyToOne(() => Project, (p) => p.dataSources, { onDelete: "CASCADE" })
+  @ManyToOne("Project", "dataSources", { onDelete: "CASCADE" })
   @JoinColumn({ name: "projectId" })
-  project!: Project;
+  project!: unknown;
 
   @Column({ type: "nvarchar", length: 500 })
   filename!: string;
@@ -27,7 +26,7 @@ export class DataSource {
   rowCount!: number | null;
 
   @Column({ type: "nvarchar", length: "MAX", nullable: true })
-  columns!: string | null; // JSON string
+  columns!: string | null;
 
   @Column({ type: "nvarchar", length: 20, default: "pending" })
   validationStatus!: string;

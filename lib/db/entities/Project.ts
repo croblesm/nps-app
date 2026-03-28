@@ -6,11 +6,6 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from "typeorm";
-import { DataSource as DataSourceEntity } from "./DataSource";
-import { Category } from "./Category";
-import { NoiseFilter } from "./NoiseFilter";
-import { Comment } from "./Comment";
-import { Summary } from "./Summary";
 
 @Entity("projects")
 export class Project {
@@ -35,18 +30,18 @@ export class Project {
   @UpdateDateColumn({ type: "datetime2" })
   updatedAt!: Date;
 
-  @OneToMany(() => DataSourceEntity, (ds) => ds.project)
-  dataSources!: DataSourceEntity[];
+  @OneToMany("DataSource", "project")
+  dataSources!: unknown[];
 
-  @OneToMany(() => Category, (c) => c.project)
-  categories!: Category[];
+  @OneToMany("Category", "project")
+  categories!: unknown[];
 
-  @OneToMany(() => NoiseFilter, (nf) => nf.project)
-  noiseFilters!: NoiseFilter[];
+  @OneToMany("NoiseFilter", "project")
+  noiseFilters!: unknown[];
 
-  @OneToMany(() => Comment, (c) => c.project)
-  comments!: Comment[];
+  @OneToMany("Comment", "project")
+  comments!: unknown[];
 
-  @OneToMany(() => Summary, (s) => s.project)
-  summaries!: Summary[];
+  @OneToMany("Summary", "project")
+  summaries!: unknown[];
 }

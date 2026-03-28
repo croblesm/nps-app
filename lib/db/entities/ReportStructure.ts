@@ -5,7 +5,6 @@ import {
   ManyToOne,
   JoinColumn,
 } from "typeorm";
-import { Project } from "./Project";
 
 @Entity("report_structures")
 export class ReportStructure {
@@ -15,15 +14,15 @@ export class ReportStructure {
   @Column({ type: "uniqueidentifier" })
   projectId!: string;
 
-  @ManyToOne(() => Project, { onDelete: "CASCADE" })
+  @ManyToOne("Project", { onDelete: "CASCADE" })
   @JoinColumn({ name: "projectId" })
-  project!: Project;
+  project!: unknown;
 
   @Column({ type: "nvarchar", length: "MAX", nullable: true })
-  includedColumns!: string | null; // JSON string
+  includedColumns!: string | null;
 
   @Column({ type: "nvarchar", length: "MAX", nullable: true })
-  excludedColumns!: string | null; // JSON string
+  excludedColumns!: string | null;
 
   @Column({ type: "datetime2", nullable: true })
   confirmedAt!: Date | null;

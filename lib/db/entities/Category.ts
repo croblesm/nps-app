@@ -6,8 +6,6 @@ import {
   JoinColumn,
   OneToMany,
 } from "typeorm";
-import { Project } from "./Project";
-import { Comment } from "./Comment";
 
 @Entity("categories")
 export class Category {
@@ -17,9 +15,9 @@ export class Category {
   @Column({ type: "uniqueidentifier" })
   projectId!: string;
 
-  @ManyToOne(() => Project, (p) => p.categories, { onDelete: "CASCADE" })
+  @ManyToOne("Project", "categories", { onDelete: "CASCADE" })
   @JoinColumn({ name: "projectId" })
-  project!: Project;
+  project!: unknown;
 
   @Column({ type: "nvarchar", length: 255 })
   name!: string;
@@ -28,7 +26,7 @@ export class Category {
   description!: string | null;
 
   @Column({ type: "nvarchar", length: "MAX", nullable: true })
-  sampleComments!: string | null; // JSON string
+  sampleComments!: string | null;
 
   @Column({ type: "bit", default: false })
   isFallback!: boolean;
@@ -42,6 +40,6 @@ export class Category {
   @Column({ type: "nvarchar", length: 10, default: "ai" })
   createdBy!: string;
 
-  @OneToMany(() => Comment, (c) => c.category)
-  comments!: Comment[];
+  @OneToMany("Comment", "category")
+  comments!: unknown[];
 }
