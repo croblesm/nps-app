@@ -41,9 +41,13 @@ export default function SettingsPage() {
   }, []);
 
   async function fetchConfigs() {
-    const res = await fetch("/api/settings");
-    if (res.ok) {
-      setConfigs(await res.json());
+    try {
+      const res = await fetch("/api/settings");
+      if (res.ok) {
+        setConfigs(await res.json());
+      }
+    } catch {
+      // DB may not be ready yet
     }
   }
 
@@ -98,9 +102,15 @@ export default function SettingsPage() {
         setApiKey("");
         await fetchConfigs();
       } else {
-        const err = await res.json();
-        setSaveMessage(`Error: ${err.error}`);
+        try {
+          const err = await res.json();
+          setSaveMessage(`Error: ${err.error}`);
+        } catch {
+          setSaveMessage(`Error: Server returned ${res.status}`);
+        }
       }
+    } catch {
+      setSaveMessage("Error: Could not connect to the server. Is the database running?");
     } finally {
       setSaving(false);
     }
@@ -120,7 +130,13 @@ export default function SettingsPage() {
           modelName,
         }),
       });
-      const data = await res.json();
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        setTestResult({ success: false, message: `Server returned ${res.status} — is the database running?` });
+        return;
+      }
       setTestResult({
         success: data.success,
         message: data.success
