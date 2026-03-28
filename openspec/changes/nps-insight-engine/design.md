@@ -138,6 +138,37 @@ A Dev Container configuration (`.devcontainer/`) provides a one-click setup with
 [User] → Generate Summary → AI Agent 3 → [DB: Summary] → Render/Download
 ```
 
+## Best Practices Applied
+
+### Security
+- **Input sanitization**: Database name validated against `[a-zA-Z0-9_-]` pattern to prevent SQL injection in init scripts
+- **No hardcoded secrets**: All passwords and keys come from `.env.local` (gitignored); `.env.example` documents required variables without values
+- **API key encryption**: AES-256-GCM encryption for LLM API keys stored in the database, using a server-side key from environment
+- **Security headers**: X-Frame-Options (DENY), X-Content-Type-Options (nosniff), Referrer-Policy, Permissions-Policy configured in `next.config.ts`
+- **TypeORM synchronize guard**: Auto-schema sync disabled when `NODE_ENV=production` to prevent accidental schema mutations
+
+### Performance
+- **Server-side aggregation**: Dedicated `/api/projects/[id]/stats` endpoint computes NPS scores and category breakdowns via SQL `GROUP BY` instead of loading all rows to the client
+- **N+1 elimination**: Project list computes comment counts and NPS scores in a single aggregation query instead of one query per project
+- **Connection pooling**: TypeORM configured with `pool.max: 10, min: 2, idleTimeoutMillis: 30000`
+- **Batch AI classification**: Comments processed in batches of 25 to balance throughput and API cost
+
+### Reliability
+- **Error boundary**: Global React error boundary (`app/error.tsx`) catches runtime errors with recovery UI
+- **Database retry**: `getDb()` clears cached promise on initialization failure so subsequent calls retry instead of returning a stale rejected promise
+- **CSV validation**: Multi-layer validation — client-side preview, server-side parse check, column type detection, then AI structure analysis
+
+### Developer Experience
+- **Dev Container**: One-click setup with Node.js 22, SQL Server 2025, and pre-configured VS Code extensions (MSSQL, ESLint, Prettier, Tailwind CSS, Docker, GitHub Copilot)
+- **`.env.example`**: Documented template with generation instructions for the encryption key
+- **Client/server separation**: Client-safe constants (`lib/ai/models.ts`) separated from server-only provider imports (`lib/ai/providers.ts`) to prevent webpack bundling issues
+
+### UI/UX
+- **Dark mode by default**: Class-based Tailwind dark mode on all pages
+- **Footer attribution**: Consistent "croblesm.com" branding on all pages via root layout
+- **Responsive design**: Grid layouts adapt from mobile to desktop
+- **Progressive disclosure**: 6-step sidebar navigation guides users through the workflow
+
 ## Risks / Trade-offs
 
 **[LLM classification inconsistency]** → Different runs may categorize the same comment differently. Mitigation: Use structured output with Zod validation, include confidence scores, cache results in DB, allow user override per comment.

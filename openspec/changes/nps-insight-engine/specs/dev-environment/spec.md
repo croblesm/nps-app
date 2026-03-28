@@ -1,0 +1,108 @@
+## ADDED Requirements
+
+### Requirement: Dev Container provides one-click setup
+The system SHALL include a `.devcontainer/` configuration that provides a fully working development environment when opened in VS Code with the Dev Containers extension.
+
+#### Scenario: Opening project in Dev Container
+- **WHEN** a developer opens the project in VS Code and selects "Reopen in Container"
+- **THEN** the container builds with Node.js 22, SQL Server 2025 starts as a sidecar service, and all required VS Code extensions are installed automatically
+
+#### Scenario: SQL Server is accessible from the app container
+- **WHEN** the Dev Container is running
+- **THEN** the app can connect to SQL Server using hostname `sqlserver` on port 1433
+
+### Requirement: Dev Container includes required VS Code extensions
+The Dev Container SHALL auto-install VS Code extensions for the project's tech stack.
+
+#### Scenario: Extensions are present after container build
+- **WHEN** the Dev Container finishes building
+- **THEN** the following extensions are installed: MSSQL (ms-mssql.mssql), SQL Database Projects, ESLint, Prettier, Tailwind CSS IntelliSense, Docker, TypeScript Nightly, GitHub Copilot, GitHub Copilot Chat
+
+### Requirement: Pre-configured SQL Server connection
+The Dev Container SHALL include a pre-configured MSSQL connection profile so developers can browse the database without manual setup.
+
+#### Scenario: Connecting to SQL Server from MSSQL extension
+- **WHEN** a developer opens the MSSQL sidebar in VS Code
+- **THEN** a saved connection profile "NPS Insight Engine (Dev)" is available and connects without additional configuration
+
+### Requirement: Database creation is managed by the application
+The Dev Container SHALL NOT use post-start or post-create hooks to create the database or schema. Database and table creation MUST be handled by the application (TypeORM synchronize or `npm run db:init`).
+
+#### Scenario: Fresh container start
+- **WHEN** the Dev Container starts for the first time
+- **THEN** SQL Server is running but the `nps_insight_engine` database does not exist until the developer runs `npm run db:init` or `npm run dev`
+
+### Requirement: Environment file for Dev Container
+The project SHALL include a `.devcontainer/.env.local` file with correct connection settings for the containerized environment.
+
+#### Scenario: Copying env file
+- **WHEN** a developer copies `.devcontainer/.env.local` to `.env.local`
+- **THEN** the app connects to SQL Server via the Docker service name `sqlserver` instead of `localhost`
+
+### Requirement: Environment example file
+The project SHALL include a `.env.example` file documenting all required environment variables without exposing actual secrets.
+
+#### Scenario: New developer setup
+- **WHEN** a developer clones the repository
+- **THEN** `.env.example` exists with all variable names, descriptions, and generation instructions for the encryption key
+
+#### Scenario: Secrets are not committed
+- **WHEN** a developer sets values in `.env.local`
+- **THEN** `.env.local` is excluded from git via `.gitignore`, while `.env.example` remains tracked
+
+### Requirement: Security headers
+The application SHALL set security headers on all responses to mitigate common web vulnerabilities.
+
+#### Scenario: Response headers are present
+- **WHEN** any page or API route responds
+- **THEN** the response includes X-Frame-Options: DENY, X-Content-Type-Options: nosniff, Referrer-Policy: strict-origin-when-cross-origin, and Permissions-Policy restricting camera/microphone/geolocation
+
+### Requirement: TypeORM synchronize is development-only
+The TypeORM DataSource SHALL only use `synchronize: true` in non-production environments to prevent accidental schema mutations.
+
+#### Scenario: Production environment
+- **WHEN** `NODE_ENV` is set to `production`
+- **THEN** TypeORM `synchronize` is `false` and schema changes require explicit migrations
+
+#### Scenario: Development environment
+- **WHEN** `NODE_ENV` is `development` or unset
+- **THEN** TypeORM `synchronize` is `true` and tables are auto-created on startup
+
+### Requirement: Footer attribution on all pages
+The application SHALL display a footer with copyright and attribution on every page.
+
+#### Scenario: Viewing any page
+- **WHEN** a user scrolls to the bottom of any page
+- **THEN** a footer is visible showing the current year, "croblesm" linked to croblesm.com, and "All rights reserved"
+
+### Requirement: Error boundary for graceful failure
+The application SHALL include a global React error boundary that catches runtime errors and displays a recovery UI.
+
+#### Scenario: Component throws an error
+- **WHEN** a React component throws an unhandled runtime error
+- **THEN** the error boundary displays an error message and a "Try again" button instead of a blank page
+
+### Requirement: Server-side NPS aggregation
+NPS statistics and category breakdowns SHALL be computed server-side via SQL aggregation queries, not by fetching all comments to the client.
+
+#### Scenario: Dashboard loads NPS stats
+- **WHEN** the dashboard page loads
+- **THEN** NPS score, promoter/passive/detractor counts, and category breakdown are fetched from `/api/projects/[id]/stats` which computes them via SQL GROUP BY
+
+### Requirement: Connection pooling
+The database connection SHALL use connection pooling to manage concurrent requests efficiently.
+
+#### Scenario: Multiple concurrent API requests
+- **WHEN** multiple API requests arrive simultaneously
+- **THEN** the connection pool serves them using up to 10 concurrent connections with a minimum of 2 idle connections
+
+### Requirement: Input sanitization on database name
+The database initialization script SHALL validate the database name to prevent SQL injection.
+
+#### Scenario: Valid database name
+- **WHEN** `DATABASE_NAME` contains only alphanumeric characters, underscores, and hyphens
+- **THEN** the database is created successfully
+
+#### Scenario: Invalid database name
+- **WHEN** `DATABASE_NAME` contains special characters like quotes or semicolons
+- **THEN** the initialization script throws an error and does not execute the SQL statement

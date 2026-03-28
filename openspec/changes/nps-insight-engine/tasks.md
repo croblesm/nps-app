@@ -119,3 +119,23 @@
 - [x] 12.3 Update CLAUDE.md with new project structure, commands, and architecture
 - [x] 12.4 Update README.md with setup instructions: Docker, environment variables, getting started
 - [ ] 12.5 Verify: clean clone → docker compose up → npm install → npm run dev → full workflow completes successfully
+
+## 13. Dev Environment and Best Practices
+
+- [x] 13.1 Create Dev Container config (.devcontainer/) with Node.js 22, SQL Server 2025 sidecar, and VS Code extensions
+- [x] 13.2 Add pre-configured MSSQL connection profile in devcontainer.json
+- [x] 13.3 Create .env.example with documented variables and key generation instructions
+- [x] 13.4 Update .gitignore to exclude .env files while keeping .env.example
+- [x] 13.5 Remove hardcoded password fallbacks from source code (data-source.ts, init.ts)
+- [x] 13.6 Add SQL injection protection: validate database name in init.ts
+- [x] 13.7 Add security headers in next.config.ts (X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy)
+- [x] 13.8 Guard TypeORM synchronize to development-only via NODE_ENV check
+- [x] 13.9 Add connection pooling to TypeORM DataSource (max: 10, min: 2)
+- [x] 13.10 Replace N+1 project list query with single SQL aggregation
+- [x] 13.11 Add server-side /api/projects/[id]/stats endpoint for NPS aggregation
+- [x] 13.12 Separate client-safe model constants (lib/ai/models.ts) from server-only providers
+- [x] 13.13 Add React error boundary (app/error.tsx) with recovery UI
+- [x] 13.14 Fix getDb() to retry on initialization failure
+- [x] 13.15 Add footer attribution (croblesm.com) to root layout
+- [x] 13.16 Add input validation on POST /api/projects (name length, type checks)
+- [x] 13.17 Create dev-environment spec with all best practice requirements and scenarios

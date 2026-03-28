@@ -16,6 +16,11 @@ Product managers need a flexible, AI-powered tool to analyze NPS survey data fro
 - **New**: Project persistence — SQL Server 2025 database stores projects, categories, noise filters, and classified comments
 - **New**: Multi-provider LLM configuration — users bring their own API key for Anthropic, OpenAI, Azure OpenAI, or Ollama
 - **New**: Project metadata export/import — save and reuse project configuration across analyses
+- **New**: Dev Container support — one-click setup with Node.js 22, SQL Server 2025, and VS Code extensions (MSSQL, ESLint, Prettier, Tailwind, Copilot)
+- **New**: Footer attribution — "croblesm.com" branding on all pages
+- **New**: Security hardening — input sanitization, security headers, encrypted API key storage, environment-guarded TypeORM synchronize
+- **New**: Performance optimizations — server-side NPS aggregation, connection pooling, N+1 query elimination
+- **New**: Error boundary — graceful error handling with recovery UI
 - **BREAKING**: Complete rewrite from CRA single-file app to Next.js 15 App Router with TypeScript
 - **Removed**: Hardcoded regex-based rule engine (CATEGORY_RULES, AREA_RULES, USER_TYPE_RULES, CONSTRUCTIVE_RULES)
 - **Removed**: Hardcoded ADS/SSMS toggle (replaced by configurable noise filters)
@@ -52,6 +57,7 @@ Product managers need a flexible, AI-powered tool to analyze NPS survey data fro
 - `ai-summary`: On-demand AI-generated markdown insight report
 - `llm-configuration`: Multi-provider LLM settings with API key management
 - `data-export`: Filtered CSV download and project metadata export/import
+- `dev-environment`: Dev Container setup, .env management, security headers, TypeORM guards, footer attribution, error boundary, server-side aggregation, connection pooling, input sanitization
 
 ### Modified Capabilities
 <!-- No existing specs to modify — this is a greenfield rewrite -->
