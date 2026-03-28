@@ -7,7 +7,7 @@ const config = {
     type: "default" as const,
     options: {
       userName: process.env.DATABASE_USER || "sa",
-      password: process.env.DATABASE_PASSWORD || "NpsEngine@2025",
+      password: process.env.DATABASE_PASSWORD || "",
     },
   },
   options: {
@@ -41,6 +41,12 @@ async function init() {
   console.log("Connected to SQL Server");
 
   const dbName = process.env.DATABASE_NAME || "nps_insight_engine";
+
+  // Validate database name — alphanumeric, underscores, hyphens only
+  if (!/^[a-zA-Z0-9_-]+$/.test(dbName)) {
+    throw new Error(`Invalid database name: "${dbName}". Use only alphanumeric characters, underscores, and hyphens.`);
+  }
+
   await runSql(
     connection,
     `IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = '${dbName}') CREATE DATABASE [${dbName}]`

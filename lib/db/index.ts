@@ -10,6 +10,11 @@ export async function getDb() {
       }
       return AppDataSource;
     })();
+
+    // If initialization fails, clear the cached promise so next call retries
+    dataSourcePromise.catch(() => {
+      dataSourcePromise = null;
+    });
   }
   return dataSourcePromise;
 }

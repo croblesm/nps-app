@@ -101,19 +101,16 @@ This creates the `nps_insight_engine` database and all tables via TypeORM.
 
 ### 4. Configure environment
 
-The default `.env.local` is created during setup with:
+Copy the example env file and fill in your values:
 
-```env
-# SQL Server connection
-DATABASE_HOST=localhost
-DATABASE_PORT=1433
-DATABASE_USER=sa
-DATABASE_PASSWORD=NpsEngine@2025
-DATABASE_NAME=nps_insight_engine
-
-# Encryption key for API keys (change this in production!)
-ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+```bash
+cp .env.example .env.local
 ```
+
+Edit `.env.local`:
+- Set `DATABASE_PASSWORD` to match your Docker Compose `MSSQL_SA_PASSWORD`
+- Generate a secure encryption key: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
+- Set `ENCRYPTION_KEY` to the generated value
 
 ### 5. Start the development server
 

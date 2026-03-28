@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
-import { calculateNps, npsEmoji } from "@/lib/nps/calculator";
+import { npsEmoji } from "@/lib/nps/calculator";
 
 interface CommentRow {
   id: string;
@@ -32,12 +32,24 @@ interface CategoryBreakdown {
   percentage: number;
 }
 
+interface NpsStats {
+  total: number;
+  promoters: number;
+  passives: number;
+  detractors: number;
+  npsScore: number;
+  promoterPct: number;
+  passivePct: number;
+  detractorPct: number;
+  categoryBreakdown: CategoryBreakdown[];
+}
+
 export default function DashboardPage() {
   const params = useParams();
   const projectId = params.id as string;
 
   const [data, setData] = useState<CommentsResponse | null>(null);
-  const [allScores, setAllScores] = useState<(number | null)[]>([]);
+  const [nps, setNps] = useState<NpsStats | null>(null);
   const [categoryBreakdown, setCategoryBreakdown] = useState<CategoryBreakdown[]>([]);
   const [loading, setLoading] = useState(true);
   const [needsClassification, setNeedsClassification] = useState(false);
@@ -78,28 +90,13 @@ export default function DashboardPage() {
     setLoading(false);
   }, [projectId, page, limit, search, feedbackType, categoryFilter, actionableFilter, sortBy, sortDir]);
 
-  // Fetch all scores for NPS calculation (separate from paginated)
+  // Server-side aggregation for NPS stats and category breakdown
   const fetchStats = useCallback(async () => {
-    const res = await fetch(`/api/projects/${projectId}/comments?limit=10000`);
+    const res = await fetch(`/api/projects/${projectId}/stats`);
     if (res.ok) {
-      const result: CommentsResponse = await res.json();
-      setAllScores(result.comments.map((c) => c.npsScore));
-
-      // Category breakdown
-      const counts: Record<string, number> = {};
-      result.comments.forEach((c) => {
-        const name = c.categoryName || "Uncategorized";
-        counts[name] = (counts[name] || 0) + 1;
-      });
-      const total = result.comments.length;
-      const breakdown = Object.entries(counts)
-        .map(([name, count]) => ({
-          name,
-          count,
-          percentage: Math.round((count / total) * 100),
-        }))
-        .sort((a, b) => b.count - a.count);
-      setCategoryBreakdown(breakdown);
+      const stats: NpsStats = await res.json();
+      setNps(stats);
+      setCategoryBreakdown(stats.categoryBreakdown);
     }
   }, [projectId]);
 
@@ -122,8 +119,8 @@ export default function DashboardPage() {
     if (res.ok) {
       setClassifyResult(`Classified ${result.classified} comments`);
       setNeedsClassification(false);
-      fetchComments();
-      fetchStats();
+      await fetchComments();
+      await fetchStats();
     } else {
       setClassifyResult(result.error || "Classification failed");
     }
@@ -140,10 +137,9 @@ export default function DashboardPage() {
     setPage(1);
   }
 
-  const nps = calculateNps(allScores);
-  const npsLabel = npsEmoji(nps.npsScore);
+  const npsLabel = nps ? npsEmoji(nps.npsScore) : "";
 
-  if (loading) {
+  if (loading || !nps) {
     return <div className="text-gray-400 p-8">Loading dashboard...</div>;
   }
 

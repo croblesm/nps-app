@@ -3,10 +3,11 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
+  PROVIDERS,
   PROVIDER_MODELS,
   DEFAULT_MODELS,
   type LlmProvider,
-} from "@/lib/ai/providers";
+} from "@/lib/ai/models";
 
 interface LlmConfigResponse {
   id: string;
@@ -16,13 +17,6 @@ interface LlmConfigResponse {
   isDefault: boolean;
   hasApiKey: boolean;
 }
-
-const PROVIDERS: { value: LlmProvider; label: string }[] = [
-  { value: "anthropic", label: "Anthropic" },
-  { value: "openai", label: "OpenAI" },
-  { value: "azure-openai", label: "Azure OpenAI" },
-  { value: "ollama", label: "Ollama (Local)" },
-];
 
 export default function SettingsPage() {
   const [configs, setConfigs] = useState<LlmConfigResponse[]>([]);
