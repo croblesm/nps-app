@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Papa from "papaparse";
+import { Spinner } from "@/components/ui/Spinner";
 
 interface ColumnInfo {
   name: string;
@@ -173,12 +174,17 @@ export default function UploadPage() {
             </table>
           </div>
 
+          {uploading && (
+            <div className="mt-4 p-3 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+              <Spinner size="sm" label="Uploading and validating your CSV data..." />
+            </div>
+          )}
           <button
             onClick={handleUpload}
             disabled={uploading}
             className="mt-4 px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 font-medium"
           >
-            {uploading ? "Uploading & Validating..." : "Upload & Validate"}
+            {uploading ? <Spinner size="sm" label="Uploading & Validating..." /> : "Upload & Validate"}
           </button>
         </div>
       )}

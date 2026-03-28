@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { npsLabel } from "@/lib/nps/calculator";
+import { Spinner } from "@/components/ui/Spinner";
 import { ScoreCards } from "@/components/nps/ScoreCards";
 import { CategoryBreakdown } from "@/components/nps/CategoryBreakdown";
 import { SearchBar } from "@/components/nps/SearchBar";
@@ -174,23 +175,18 @@ export default function DashboardPage() {
         <p className="text-gray-500 dark:text-gray-400 mb-4">
           Comments need to be classified before viewing the dashboard.
         </p>
+        {classifying && (
+          <div className="mb-4 p-3 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+            <Spinner size="sm" label="Classifying comments in batches of 25..." />
+          </div>
+        )}
         <button
           onClick={handleClassify}
           disabled={classifying}
           className="px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 font-medium"
         >
-          {classifying ? "Classifying..." : "Classify All Comments"}
+          {classifying ? <Spinner size="sm" label="Classifying..." /> : "Classify All Comments"}
         </button>
-        {classifying && (
-          <div className="mt-4 p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-              <span className="text-sm text-blue-700 dark:text-blue-300">
-                Processing comments in batches of 25...
-              </span>
-            </div>
-          </div>
-        )}
         {classifyResult && (
           <p className="mt-3 text-sm text-gray-400">{classifyResult}</p>
         )}

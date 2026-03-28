@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Spinner } from "@/components/ui/Spinner";
 
 export default function NewProjectPage() {
   const router = useRouter();
@@ -105,12 +106,17 @@ export default function NewProjectPage() {
           </div>
         )}
 
+        {saving && (
+          <div className="p-3 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+            <Spinner size="sm" label="Creating your new project..." />
+          </div>
+        )}
         <button
           type="submit"
           disabled={saving || !name.trim()}
           className="w-full py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 font-medium"
         >
-          {saving ? "Creating..." : "Create Project & Upload Data"}
+          {saving ? <Spinner size="sm" label="Creating..." /> : "Create Project & Upload Data"}
         </button>
       </form>
     </main>

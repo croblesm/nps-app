@@ -1,5 +1,20 @@
 ## ADDED Requirements
 
+### Requirement: Consistent loading indicators across all pages
+Every async operation in the UI SHALL display a visible spinner with a descriptive label so users know something is happening. The application SHALL use a shared Spinner component (`components/ui/Spinner.tsx`) for all loading states.
+
+#### Scenario: Async button shows spinner
+- **WHEN** a user clicks a button that triggers an async operation (test connection, save, upload, classify, generate)
+- **THEN** the button shows an inline spinner with a short label AND a separate descriptive spinner block appears above/below the button
+
+#### Scenario: Spinner is consistent across pages
+- **WHEN** any page performs an async operation
+- **THEN** it uses the same `Spinner` component with the same visual style (blue spinner, gray label text, blue-tinted background block)
+
+#### Scenario: Pages with spinners
+- **WHEN** the following pages perform async operations
+- **THEN** they all show loading indicators: Settings (test/save), New Project (create), Upload (upload/validate), Structure (AI analyze/save), Categories (discover/save), Dashboard (classify), Noise (create filter), Summary (generate report)
+
 ### Requirement: Dashboard is composed of reusable components
 The NPS dashboard SHALL be composed of individual, reusable components rather than a monolithic page component.
 

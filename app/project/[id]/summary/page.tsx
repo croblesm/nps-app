@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import ReactMarkdown from "react-markdown";
+import { Spinner } from "@/components/ui/Spinner";
 
 interface SummaryData {
   id: string;
@@ -82,7 +83,7 @@ export default function SummaryPage() {
             className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 text-sm font-medium"
           >
             {generating
-              ? "Generating..."
+              ? <Spinner size="sm" label="Generating..." />
               : summary
               ? "Regenerate"
               : "Generate Summary"}
@@ -97,9 +98,8 @@ export default function SummaryPage() {
       )}
 
       {generating && (
-        <div className="p-8 text-center">
-          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-400">Generating summary report...</p>
+        <div className="p-3 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 mb-4">
+          <Spinner size="sm" label="Generating AI-powered insight report..." />
         </div>
       )}
 

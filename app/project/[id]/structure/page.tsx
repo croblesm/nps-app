@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { Spinner } from "@/components/ui/Spinner";
 
 interface ColumnRecommendation {
   column: string;
@@ -112,13 +113,20 @@ export default function StructurePage() {
       </p>
 
       {!analyzed && (
-        <button
-          onClick={handleAnalyze}
-          disabled={analyzing}
-          className="px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 font-medium"
-        >
-          {analyzing ? "Analyzing with AI..." : "Analyze Data Structure"}
-        </button>
+        <>
+          {analyzing && (
+            <div className="mb-4 p-3 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+              <Spinner size="sm" label="Analyzing data structure with AI..." />
+            </div>
+          )}
+          <button
+            onClick={handleAnalyze}
+            disabled={analyzing}
+            className="px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 font-medium"
+          >
+            {analyzing ? <Spinner size="sm" label="Analyzing with AI..." /> : "Analyze Data Structure"}
+          </button>
+        </>
       )}
 
       {error && (
@@ -185,12 +193,17 @@ export default function StructurePage() {
             </div>
           ))}
 
+          {saving && (
+            <div className="mt-4 p-3 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+              <Spinner size="sm" label="Saving column structure..." />
+            </div>
+          )}
           <button
             onClick={handleConfirm}
             disabled={saving}
             className="mt-4 px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 font-medium"
           >
-            {saving ? "Saving..." : "Confirm Structure & Continue"}
+            {saving ? <Spinner size="sm" label="Saving..." /> : "Confirm Structure & Continue"}
           </button>
         </div>
       )}

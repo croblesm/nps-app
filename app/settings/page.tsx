@@ -8,6 +8,7 @@ import {
   DEFAULT_MODELS,
   type LlmProvider,
 } from "@/lib/ai/models";
+import { Spinner } from "@/components/ui/Spinner";
 
 interface LlmConfigResponse {
   id: string;
@@ -49,7 +50,7 @@ export default function SettingsPage() {
   function handleProviderChange(p: LlmProvider) {
     setProvider(p);
     setModelName(DEFAULT_MODELS[p]);
-    setEndpointUrl("");
+    setEndpointUrl(p === "ollama" ? "http://localhost:11434/v1" : "");
     setApiKey("");
     setTestResult(null);
     setSaveMessage("");
@@ -320,8 +321,21 @@ export default function SettingsPage() {
             </label>
           </div>
 
+          {/* Loading indicator during test/save */}
+          {testing && (
+            <div className="p-3 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+              <Spinner size="sm" label="Testing connection... This may take a few seconds with local models." />
+            </div>
+          )}
+
+          {saving && (
+            <div className="p-3 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+              <Spinner size="sm" label="Saving configuration..." />
+            </div>
+          )}
+
           {/* Test result */}
-          {testResult && (
+          {testResult && !testing && (
             <div
               className={`p-3 rounded text-sm ${
                 testResult.success
@@ -333,7 +347,7 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {saveMessage && (
+          {saveMessage && !saving && (
             <div className="p-3 rounded text-sm bg-blue-50 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
               {saveMessage}
             </div>
@@ -342,17 +356,17 @@ export default function SettingsPage() {
           <div className="flex gap-3">
             <button
               onClick={handleTest}
-              disabled={testing || (!apiKey && needsApiKey)}
+              disabled={testing || saving || (!apiKey && needsApiKey)}
               className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 text-sm"
             >
-              {testing ? "Testing..." : "Test Connection"}
+              {testing ? <Spinner size="sm" label="Testing..." /> : "Test Connection"}
             </button>
             <button
               onClick={handleSave}
-              disabled={saving || !modelName}
+              disabled={saving || testing || !modelName}
               className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 text-sm"
             >
-              {saving ? "Saving..." : "Save Configuration"}
+              {saving ? <Spinner size="sm" label="Saving..." /> : "Save Configuration"}
             </button>
           </div>
         </div>

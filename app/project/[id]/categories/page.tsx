@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { Spinner } from "@/components/ui/Spinner";
 
 interface SampleComment {
   index: number;
@@ -159,15 +160,22 @@ export default function CategoriesPage() {
       </p>
 
       {!discovered && (
-        <button
-          onClick={handleDiscover}
-          disabled={discovering}
-          className="px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 font-medium"
-        >
-          {discovering
-            ? "Discovering themes with AI..."
-            : "Discover Categories"}
-        </button>
+        <>
+          {discovering && (
+            <div className="mb-4 p-3 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+              <Spinner size="sm" label="Discovering thematic categories from your comments with AI..." />
+            </div>
+          )}
+          <button
+            onClick={handleDiscover}
+            disabled={discovering}
+            className="px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 font-medium"
+          >
+            {discovering
+              ? <Spinner size="sm" label="Discovering themes with AI..." />
+              : "Discover Categories"}
+          </button>
+        </>
       )}
 
       {error && (
@@ -280,13 +288,18 @@ export default function CategoriesPage() {
             </button>
           </div>
 
+          {saving && (
+            <div className="mt-4 p-3 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+              <Spinner size="sm" label="Saving categories configuration..." />
+            </div>
+          )}
           <button
             onClick={handleConfirm}
             disabled={saving || activeCount < 2}
             className="mt-4 px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 font-medium"
           >
             {saving
-              ? "Saving..."
+              ? <Spinner size="sm" label="Saving..." />
               : `Confirm ${activeCount} Categories & Continue`}
           </button>
         </div>

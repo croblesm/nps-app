@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import { Spinner } from "@/components/ui/Spinner";
 
 interface NoiseFilterData {
   id: string;
@@ -180,12 +181,17 @@ export default function NoisePage() {
           Exclude matching comments from NPS score calculation
         </label>
 
+        {saving && (
+          <div className="p-3 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+            <Spinner size="sm" label="Creating noise filter..." />
+          </div>
+        )}
         <button
           onClick={handleCreate}
           disabled={saving || !name.trim() || !keywords.trim()}
           className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 text-sm font-medium"
         >
-          {saving ? "Creating..." : "Create Filter"}
+          {saving ? <Spinner size="sm" label="Creating..." /> : "Create Filter"}
         </button>
       </div>
     </div>
