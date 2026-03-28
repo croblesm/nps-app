@@ -37,7 +37,7 @@ An AI-powered NPS (Net Promoter Score) analysis platform for product managers. U
 ## Prerequisites
 
 - **Node.js** 18 or later
-- **Docker Desktop** (for SQL Server 2025)
+- **Docker Desktop** (for SQL Server 2025) — Apple Silicon users: enable "Use Rosetta for x86_64/amd64 emulation" in Docker Desktop → Settings → General
 - **LLM API key** — one of:
   - [Anthropic API key](https://console.anthropic.com/) (recommended)
   - [OpenAI API key](https://platform.openai.com/)
@@ -83,6 +83,8 @@ npm install
 ```bash
 docker compose up -d
 ```
+
+> **Apple Silicon (M1/M2/M3/M4) users:** The SQL Server image runs under x86 emulation via Rosetta. Make sure **"Use Rosetta for x86_64/amd64 emulation on Apple Silicon"** is enabled in Docker Desktop → Settings → General.
 
 This starts SQL Server 2025 on port 1433 with:
 - Username: `sa`

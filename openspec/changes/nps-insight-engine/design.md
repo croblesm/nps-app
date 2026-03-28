@@ -184,7 +184,7 @@ A Dev Container configuration (`.devcontainer/`) provides a one-click setup with
 
 **[LLM latency during classification]** → Classifying 500 comments in batches of 25 = 20 API calls, potentially 30-60 seconds. Mitigation: Show progress bar, process in background with SSE updates, allow user to navigate away and return.
 
-**[SQL Server Docker overhead]** → Requires Docker Desktop running, uses ~2GB RAM. Mitigation: Document clearly in README, provide docker-compose with health checks. Consider SQLite fallback for users without Docker (future enhancement).
+**[SQL Server Docker overhead]** → Requires Docker Desktop running, uses ~2GB RAM. On Apple Silicon Macs, runs under Rosetta x86 emulation (`platform: linux/amd64` in docker-compose). Mitigation: Document clearly in README including Rosetta prerequisite, provide docker-compose with health checks. Consider SQLite fallback for users without Docker (future enhancement).
 
 **[TypeORM decorator complexity]** → TypeORM uses decorators which add boilerplate. Mitigation: Entity definitions are straightforward for this schema; the trade-off is worth it for native vector type support and mature SQL Server migrations.
 

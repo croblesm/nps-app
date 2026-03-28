@@ -11,6 +11,17 @@ The README SHALL include clickable badges for opening the project in GitHub Code
 - **WHEN** a user visits the repository on GitHub
 - **THEN** they see an "Open in Dev Containers" badge that triggers VS Code to clone and open in a container
 
+### Requirement: SQL Server runs on Apple Silicon via Rosetta
+The Docker Compose configuration SHALL specify `platform: linux/amd64` for the SQL Server service so it runs under Rosetta emulation on Apple Silicon Macs.
+
+#### Scenario: Running on Apple Silicon
+- **WHEN** a developer on an M1/M2/M3/M4 Mac runs `docker compose up -d`
+- **THEN** the SQL Server container starts successfully under x86 emulation via Rosetta
+
+#### Scenario: Rosetta not enabled
+- **WHEN** a developer has not enabled "Use Rosetta for x86_64/amd64 emulation" in Docker Desktop
+- **THEN** the README documents this prerequisite clearly
+
 ### Requirement: Dev Container provides one-click setup
 The system SHALL include a `.devcontainer/` configuration that provides a fully working development environment when opened in VS Code with the Dev Containers extension.
 
