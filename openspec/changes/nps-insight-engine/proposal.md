@@ -61,5 +61,6 @@ Product managers need a flexible, AI-powered tool to analyze NPS survey data fro
 - **Code**: Complete rewrite — CRA (`src/App.js`) replaced by Next.js App Router (`app/` directory) with TypeScript
 - **Dependencies**: Replace `react-scripts` with `next`; add `typeorm`, `tedious`, `ai`, `@ai-sdk/anthropic`, `@ai-sdk/openai`, `zod`
 - **Infrastructure**: New SQL Server 2025 Docker container required for local development
+- **Dev Container**: `.devcontainer/` provides one-click setup with Node.js 22, SQL Server 2025, and pre-configured VS Code extensions (MSSQL, ESLint, Prettier, Tailwind, Copilot)
 - **Data**: CSV files no longer stored in `public/`; uploaded via the app and processed server-side
 - **Build**: CRA scripts replaced by Next.js build system

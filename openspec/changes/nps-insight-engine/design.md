@@ -106,6 +106,14 @@ Client-side PapaParse is still used for the upload preview (first 5 rows) before
 
 LLM API keys are stored in the database encrypted using AES-256-GCM with a server-side encryption key (from environment variable). This is acceptable for a local-first tool. For SaaS deployment, this would move to a proper secrets manager.
 
+### 8. Dev Container for reproducible development
+
+A Dev Container configuration (`.devcontainer/`) provides a one-click setup with Docker Compose orchestrating two services: an Ubuntu-based app container (with Node.js 22) and SQL Server 2025. VS Code extensions (MSSQL, ESLint, Prettier, Tailwind CSS, Docker, GitHub Copilot) are auto-installed, and a pre-configured SQL Server connection profile is included. Database and schema creation are handled by the app (TypeORM `synchronize: true`), not by container lifecycle hooks.
+
+**Alternatives considered:**
+- **Manual local setup**: Requires Docker, Node.js, and manual env configuration — error-prone for new contributors
+- **Dockerfile only (no Compose)**: Would lose the SQL Server sidecar; users would need to manage it separately
+
 ## Data Flow
 
 ```

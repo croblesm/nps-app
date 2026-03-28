@@ -1,0 +1,55 @@
+{
+  "name": "NPS Insight Engine",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-mssql.mssql",
+        "ms-mssql.sql-database-projects-vscode",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "Prisma.prisma",
+        "ms-azuretools.vscode-docker",
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "ms-vscode.vscode-typescript-next"
+      ],
+      "settings": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.tabSize": 2,
+        "typescript.preferences.importModuleSpecifier": "non-relative",
+        "mssql.connections": [
+          {
+            "server": "sqlserver",
+            "database": "nps_insight_engine",
+            "authenticationType": "SqlLogin",
+            "user": "sa",
+            "password": "NpsEngine@2025",
+            "savePassword": true,
+            "profileName": "NPS Insight Engine (Dev)"
+          }
+        ]
+      }
+    }
+  },
+  "forwardPorts": [3000, 1433],
+  "portsAttributes": {
+    "3000": {
+      "label": "Next.js Dev Server",
+      "onAutoForward": "openBrowser"
+    },
+    "1433": {
+      "label": "SQL Server 2025"
+    }
+  }
+}

@@ -41,7 +41,31 @@ An AI-powered NPS (Net Promoter Score) analysis platform for product managers. U
   - Azure OpenAI endpoint + key
   - [Ollama](https://ollama.com/) running locally (no key needed)
 
-## Quick Start
+## Quick Start (Dev Container — Recommended)
+
+The fastest way to get started. Requires [VS Code](https://code.visualstudio.com/) with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) and Docker Desktop.
+
+1. Clone the repo and open in VS Code
+2. When prompted, click **"Reopen in Container"** (or run `Dev Containers: Reopen in Container` from the command palette)
+3. Wait for the container to build — this installs Node.js 22, SQL Server 2025, and all VS Code extensions automatically
+4. Copy the devcontainer env file: `cp .devcontainer/.env.local .env.local`
+5. Install dependencies: `npm install`
+6. Initialize the database: `npm run db:init`
+7. Start the dev server: `npm run dev`
+8. Open [http://localhost:3000](http://localhost:3000) and configure your LLM at `/settings`
+
+**Included VS Code extensions:**
+- MSSQL extension (connect to SQL Server, run queries, browse objects)
+- SQL Database Projects
+- ESLint, Prettier, Tailwind CSS IntelliSense
+- Docker, TypeScript Nightly
+- GitHub Copilot + Copilot Chat
+
+**Pre-configured SQL Server connection:** The MSSQL extension comes with a saved connection profile — just click it in the SQL Server sidebar to connect (no manual setup needed).
+
+---
+
+## Quick Start (Local — Without Dev Container)
 
 ### 1. Clone and install
 
@@ -171,6 +195,10 @@ Use the export API endpoints:
 
 ```
 nps-app/
+  .devcontainer/                    # Dev Container configuration
+    devcontainer.json               #   Container settings, extensions, ports
+    docker-compose.yml              #   App + SQL Server services
+    .env.local                      #   Environment vars for devcontainer
   app/                              # Next.js App Router
     api/                            # API routes
       ai/                           # AI agent endpoints
