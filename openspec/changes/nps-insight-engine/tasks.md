@@ -86,31 +86,31 @@
 
 ## 9. Noise/Pollution Console
 
-- [ ] 9.1 Build noise filter management page (app/project/[id]/noise/page.tsx): create/edit/delete noise filters
-- [ ] 9.2 Create noise filter form: name, description, comma-separated keywords, "Exclude from NPS" toggle
-- [ ] 9.3 Implement match preview: show count and sample of comments matching the filter keywords before activation
-- [ ] 9.4 Create API routes for noise filter CRUD (app/api/projects/[id]/noise/route.ts)
-- [ ] 9.5 Integrate noise filters with dashboard: recalculate NPS score excluding noise-filtered comments when exclusion is active
-- [ ] 9.6 Mark noise-matched comments in Comment table (is_noise flag) for display in dashboard table
-- [ ] 9.7 Verify: create "ADS/SSMS" noise filter with keywords, preview shows ~99 matches, NPS score changes when exclusion is toggled
+- [x] 9.1 Build noise filter management page (app/project/[id]/noise/page.tsx): create/edit/delete noise filters
+- [x] 9.2 Create noise filter form: name, description, comma-separated keywords, "Exclude from NPS" toggle
+- [x] 9.3 Implement match preview: show count and sample of comments matching the filter keywords before activation
+- [x] 9.4 Create API routes for noise filter CRUD (app/api/projects/[id]/noise/route.ts)
+- [x] 9.5 Integrate noise filters with dashboard: recalculate NPS score excluding noise-filtered comments when exclusion is active
+- [x] 9.6 Mark noise-matched comments in Comment table (is_noise flag) for display in dashboard table
+- [x] 9.7 Verify: create "ADS/SSMS" noise filter with keywords, preview shows ~99 matches, NPS score changes when exclusion is toggled
 
 ## 10. AI Summary Report
 
-- [ ] 10.1 Create AI summary prompt template: receive project metadata, NPS stats, category breakdown, top comments, noise impact
-- [ ] 10.2 Create AI summarize API route (app/api/ai/summarize/route.ts) with streaming response
-- [ ] 10.3 Build summary page (app/project/[id]/summary/page.tsx): trigger generation button, render markdown in-app, download as .md
-- [ ] 10.4 Install and configure react-markdown for in-app markdown rendering
-- [ ] 10.5 Persist summary in Summary table with timestamp and model info
-- [ ] 10.6 Support regeneration: create new summary version, keep previous versions accessible
-- [ ] 10.7 Verify: generate summary from data.csv analysis, rendered markdown looks correct, download works
+- [x] 10.1 Create AI summary prompt template: receive project metadata, NPS stats, category breakdown, top comments, noise impact
+- [x] 10.2 Create AI summarize API route (app/api/ai/summarize/route.ts) with streaming response
+- [x] 10.3 Build summary page (app/project/[id]/summary/page.tsx): trigger generation button, render markdown in-app, download as .md
+- [x] 10.4 Install and configure react-markdown for in-app markdown rendering
+- [x] 10.5 Persist summary in Summary table with timestamp and model info
+- [x] 10.6 Support regeneration: create new summary version, keep previous versions accessible
+- [x] 10.7 Verify: generate summary from data.csv analysis, rendered markdown looks correct, download works
 
 ## 11. Data Export
 
-- [ ] 11.1 Implement filtered CSV download: export currently filtered/visible data including Category and Actionable columns
-- [ ] 11.2 Implement project metadata export: JSON file with project config, report structure, category definitions, noise filters (no raw data)
-- [ ] 11.3 Implement metadata import on new project creation: upload JSON, pre-configure categories and noise filters
-- [ ] 11.4 Add export filename convention: {project-name}_{date}.csv / {project-name}_metadata_{date}.json
-- [ ] 11.5 Verify: export filtered CSV, re-import metadata into new project, categories and noise filters are pre-populated
+- [x] 11.1 Implement filtered CSV download: export currently filtered/visible data including Category and Actionable columns
+- [x] 11.2 Implement project metadata export: JSON file with project config, report structure, category definitions, noise filters (no raw data)
+- [x] 11.3 Implement metadata import on new project creation: upload JSON, pre-configure categories and noise filters
+- [x] 11.4 Add export filename convention: {project-name}_{date}.csv / {project-name}_metadata_{date}.json
+- [x] 11.5 Verify: export filtered CSV, re-import metadata into new project, categories and noise filters are pre-populated
 
 ## 12. Integration Testing and Cleanup
 
