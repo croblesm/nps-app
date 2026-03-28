@@ -31,7 +31,11 @@ export async function POST(request: Request) {
   const repo = db.getRepository(LlmConfig);
 
   if (isDefault) {
-    await repo.update({}, { isDefault: false });
+    await repo
+      .createQueryBuilder()
+      .update()
+      .set({ isDefault: false })
+      .execute();
   }
 
   let config = await repo.findOneBy({ provider });
