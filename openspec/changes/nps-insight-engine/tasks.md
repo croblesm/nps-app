@@ -30,13 +30,13 @@
 
 ## 4. CSV Upload and Validation
 
-- [ ] 4.1 Build CSV upload page (app/project/[id]/upload/page.tsx) with drag-and-drop zone and file picker
-- [ ] 4.2 Implement client-side CSV preview using PapaParse: show first 5 rows in a table after file selection
-- [ ] 4.3 Create upload API route (app/api/upload/route.ts): receive file, validate size (max 10MB), parse with PapaParse, detect column types and null percentages
-- [ ] 4.4 Create Zod schemas for CSV validation (lib/csv/validator.ts): require at least one numeric column and one text column
-- [ ] 4.5 Store validation results in DataSource table (columns, row_count, validation_status, validation_notes)
-- [ ] 4.6 Show validation results to user: pass/fail indicators per check, column summary with types and null %
-- [ ] 4.7 Verify: upload public/data.csv, see 5-row preview, see validation pass with column details
+- [x] 4.1 Build CSV upload page (app/project/[id]/upload/page.tsx) with drag-and-drop zone and file picker
+- [x] 4.2 Implement client-side CSV preview using PapaParse: show first 5 rows in a table after file selection
+- [x] 4.3 Create upload API route (app/api/upload/route.ts): receive file, validate size (max 10MB), parse with PapaParse, detect column types and null percentages
+- [x] 4.4 Create Zod schemas for CSV validation (lib/csv/validator.ts): require at least one numeric column and one text column
+- [x] 4.5 Store validation results in DataSource table (columns, row_count, validation_status, validation_notes)
+- [x] 4.6 Show validation results to user: pass/fail indicators per check, column summary with types and null %
+- [x] 4.7 Verify: upload public/data.csv, see 5-row preview, see validation pass with column details
 
 ## 5. AI Data Validation Agent
 
