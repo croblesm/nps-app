@@ -1,70 +1,268 @@
-# Getting Started with Create React App
+# NPS Insight Engine
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+An AI-powered NPS (Net Promoter Score) analysis platform for product managers. Upload CSV survey data, let AI discover themes and classify comments, then explore insights through an interactive dashboard with noise filtering and summary reports.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- **Project-based analysis** — Create projects for different products, persist and revisit analyses
+- **CSV upload with validation** — Drag-and-drop upload, automatic column type detection, data quality checks
+- **AI-powered structure analysis** — AI agent recommends which columns to include/exclude from your report
+- **AI theme discovery** — AI proposes 5-10 thematic categories from a stratified sample of your comments
+- **Category management** — Rename, remove, or add custom categories; "General Feedback" as mandatory fallback
+- **AI bulk classification** — Classifies all comments into confirmed categories with confidence scores
+- **Non-actionable detection** — AI flags nonsensical, single-word, redacted, or purely emotional feedback
+- **Interactive dashboard** — Clickable NPS score cards, category breakdown grid, full-text search, sortable paginated table
+- **Noise filters** — Keyword-based filters that can exclude comments from NPS score calculation
+- **AI summary report** — On-demand markdown report with executive summary, theme analysis, key quotes, and recommendations
+- **Data export** — Download filtered CSV or project metadata JSON (categories, noise filters, structure)
+- **Multi-provider LLM** — Bring your own API key: Anthropic (priority), OpenAI, Azure OpenAI, or Ollama (local)
+- **Dark mode** — Enabled by default, full dark theme throughout
 
-### `npm start`
+## Tech Stack
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 15 (App Router) |
+| Language | TypeScript |
+| UI | React 19 + Tailwind CSS 4 |
+| Database | SQL Server 2025 (Docker) |
+| ORM | TypeORM (native SQL Server VECTOR type support) |
+| AI | Vercel AI SDK — multi-provider |
+| CSV Parsing | PapaParse |
+| Validation | Zod (AI structured output) |
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Prerequisites
 
-### `npm test`
+- **Node.js** 18 or later
+- **Docker Desktop** (for SQL Server 2025)
+- **LLM API key** — one of:
+  - [Anthropic API key](https://console.anthropic.com/) (recommended)
+  - [OpenAI API key](https://platform.openai.com/)
+  - Azure OpenAI endpoint + key
+  - [Ollama](https://ollama.com/) running locally (no key needed)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Quick Start
 
-### `npm run build`
+### 1. Clone and install
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+git clone <repo-url>
+cd nps-app
+npm install
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 2. Start SQL Server
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+docker compose up -d
+```
 
-### `npm run eject`
+This starts SQL Server 2025 on port 1433 with:
+- Username: `sa`
+- Password: `NpsEngine@2025`
+- Database: `nps_insight_engine` (created automatically)
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Wait ~30 seconds for the container to be healthy:
+```bash
+docker compose ps   # Should show "healthy"
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### 3. Initialize the database
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```bash
+npm run db:init
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+This creates the `nps_insight_engine` database and all tables via TypeORM.
 
-## Learn More
+### 4. Configure environment
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+The default `.env.local` is created during setup with:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```env
+# SQL Server connection
+DATABASE_HOST=localhost
+DATABASE_PORT=1433
+DATABASE_USER=sa
+DATABASE_PASSWORD=NpsEngine@2025
+DATABASE_NAME=nps_insight_engine
 
-### Code Splitting
+# Encryption key for API keys (change this in production!)
+ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### 5. Start the development server
 
-### Analyzing the Bundle Size
+```bash
+npm run dev
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+Open [http://localhost:3000](http://localhost:3000).
 
-### Making a Progressive Web App
+### 6. Configure your LLM provider
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Go to [http://localhost:3000/settings](http://localhost:3000/settings) and configure your LLM provider:
 
-### Advanced Configuration
+1. Select a provider (Anthropic recommended)
+2. Enter your API key
+3. Select a model (e.g., `claude-sonnet-4-6`)
+4. Click "Test Connection" to verify
+5. Click "Save Configuration"
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## Usage Workflow
 
-### Deployment
+### Step 1: Create a Project
+Click "New Project", enter the product name and description (e.g., "MSSQL VS Code Extension").
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### Step 2: Upload CSV Data
+Drag and drop your NPS survey CSV file. The system shows a 5-row preview, then validates the file:
+- Checks for corruption and file size (max 10MB)
+- Detects column types (numeric, text, date)
+- Reports null percentages per column
 
-### `npm run build` fails to minify
+### Step 3: Review Report Structure
+Click "Analyze Data Structure" — the AI agent examines your columns and recommends:
+- Which column is the NPS score (0-10)
+- Which column contains free-text comments
+- Which columns to include or exclude from the analysis
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Toggle columns on/off and click "Confirm Structure".
+
+### Step 4: Discover Categories
+Click "Discover Categories" — the AI agent samples 75 comments (stratified across promoters/passives/detractors) and proposes 5-10 thematic categories with:
+- Category name and description
+- 3-5 sample comments showing why the category was proposed
+
+You can rename, remove, or add custom categories. "General Feedback" is always present as a fallback. Click "Confirm Categories".
+
+### Step 5: Classify Comments
+On the Dashboard page, click "Classify All Comments". The AI processes comments in batches of 25, assigning each a category, confidence score, and actionability flag. Empty comments are flagged deterministically as "No Comment".
+
+### Step 6: Explore the Dashboard
+- **Score cards**: Total Responses, Promoters (9-10), Passives (7-8), Detractors (0-6), NPS Score — click to filter
+- **Category breakdown**: Click any category card to filter the table
+- **Search**: Full-text search across all comments
+- **Filters**: Actionable/Non-actionable, rows per page
+- **Table**: Sortable by NPS, Category, Comment, or Confidence
+
+### Step 7: Configure Noise Filters (Optional)
+Go to the Noise Filters page to create keyword-based filters:
+- Example: "ADS/SSMS Comparisons" with keywords `ADS, SSMS, Azure Data Studio`
+- Toggle "Exclude from NPS score" to remove noisy comments from the NPS calculation
+- Preview how many comments match before activating
+
+### Step 8: Generate AI Summary (Optional)
+Go to the AI Summary page and click "Generate Summary" for a markdown report including:
+- Executive summary
+- NPS score analysis
+- Top themes with impact assessment
+- Key quotes per theme
+- Prioritized recommendations
+- Noise filter impact statement
+
+Download as `.md` file or view in-app.
+
+### Step 9: Export Data
+Use the export API endpoints:
+- **Filtered CSV**: `GET /api/projects/{id}/export?format=csv`
+- **Project metadata**: `GET /api/projects/{id}/export?format=metadata`
+
+## Project Structure
+
+```
+nps-app/
+  app/                              # Next.js App Router
+    api/                            # API routes
+      ai/                           # AI agent endpoints
+        validate/                   #   Data structure validation
+        categorize/                 #   Theme discovery
+        classify/                   #   Bulk classification
+        summarize/                  #   Summary generation
+      projects/[id]/                # Project CRUD + sub-resources
+        categories/                 #   Category management
+        comments/                   #   Paginated comment queries
+        export/                     #   CSV and metadata export
+        noise/                      #   Noise filter CRUD
+        structure/                  #   Report structure
+      settings/                     # LLM provider configuration
+      upload/                       # CSV upload + validation
+    project/[id]/                   # Project pages
+      upload/                       #   CSV upload UI
+      structure/                    #   Report structure review
+      categories/                   #   Category review + editing
+      dashboard/                    #   NPS dashboard
+      noise/                        #   Noise filter console
+      summary/                      #   AI summary report
+    settings/                       # LLM settings page
+    new-project/                    # Project creation form
+  components/ui/                    # Shared UI components
+  lib/
+    ai/                             # LLM providers, prompts, encryption
+    csv/                            # CSV validator, sampler
+    db/                             # TypeORM entities, data source, connection
+    nps/                            # NPS calculation logic
+  openspec/                         # Spec-driven development artifacts
+  docker-compose.yml                # SQL Server 2025 container
+```
+
+## Database Schema
+
+| Table | Purpose |
+|-------|---------|
+| `projects` | Project metadata (name, description, LLM config) |
+| `data_sources` | Uploaded CSV file info and validation results |
+| `report_structures` | User-confirmed column selections |
+| `categories` | AI-proposed or custom categories per project |
+| `noise_filters` | Keyword-based noise filters with NPS exclusion |
+| `comments` | Individual survey responses with AI classifications |
+| `summaries` | AI-generated markdown reports |
+| `llm_configs` | LLM provider settings with encrypted API keys |
+
+## AI Agents
+
+| Agent | Purpose | Model Recommendation |
+|-------|---------|---------------------|
+| Data Validator | Analyzes CSV structure, identifies NPS/comment columns | Best available (Claude Sonnet, GPT-4o) |
+| Theme Discoverer | Proposes categories from stratified comment sample | Best available |
+| Classifier | Batch-classifies comments into categories | Fast/cheap (Claude Haiku, GPT-4o-mini) |
+| Summary Generator | Produces markdown insight report | Best available |
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start Next.js dev server (localhost:3000) |
+| `npm run build` | Production build |
+| `npm start` | Start production server |
+| `npm run lint` | Run Next.js linter |
+| `npm run db:init` | Create database and tables |
+| `docker compose up -d` | Start SQL Server 2025 container |
+| `docker compose down` | Stop SQL Server container |
+| `docker compose down -v` | Stop and delete all data |
+
+## Environment Variables
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `DATABASE_HOST` | No | `localhost` | SQL Server host |
+| `DATABASE_PORT` | No | `1433` | SQL Server port |
+| `DATABASE_USER` | No | `sa` | SQL Server username |
+| `DATABASE_PASSWORD` | No | `NpsEngine@2025` | SQL Server password |
+| `DATABASE_NAME` | No | `nps_insight_engine` | Database name |
+| `ENCRYPTION_KEY` | Yes | (dev default) | 64-char hex string for AES-256-GCM API key encryption |
+
+## Deferred Features (SaaS Phase)
+
+- **Authentication** — NextAuth.js v5 with GitHub, Google, email/password
+- **Cloud deployment** — Azure App Service or Vercel, migrate to Azure SQL
+- **Vector/RAG** — Semantic search using SQL Server 2025 native VECTOR type
+- **Multi-tenancy** — User/org-scoped data isolation
+- **Metadata import** — Upload previously exported JSON to pre-configure new projects
+
+## OpenSpec
+
+This project uses [OpenSpec](https://github.com/Fission-AI/openspec) for spec-driven development. See `openspec/OPENSPEC-WORKFLOW.md` for the full workflow guide, and `openspec/changes/nps-insight-engine/` for all spec artifacts (proposal, design, specs, tasks).
+
+## License
+
+Private — not yet published.
