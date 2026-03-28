@@ -159,9 +159,14 @@ A Dev Container configuration (`.devcontainer/`) provides a one-click setup with
 - **CSV validation**: Multi-layer validation — client-side preview, server-side parse check, column type detection, then AI structure analysis
 
 ### Developer Experience
-- **Dev Container**: One-click setup with Node.js 22, SQL Server 2025, and pre-configured VS Code extensions (MSSQL, ESLint, Prettier, Tailwind CSS, Docker, GitHub Copilot)
+- **Dev Container**: One-click setup with Node.js 22, SQL Server 2025, and pre-configured VS Code extensions (MSSQL, ESLint, Prettier, Tailwind CSS, Docker, GitHub Copilot, Claude Code, OpenAI Codex)
 - **`.env.example`**: Documented template with generation instructions for the encryption key
 - **Client/server separation**: Client-safe constants (`lib/ai/models.ts`) separated from server-only provider imports (`lib/ai/providers.ts`) to prevent webpack bundling issues
+
+### TypeORM + Next.js Compatibility
+- **String-based relation targets**: All entity relations use string names (`@ManyToOne("Project", "dataSources")`) instead of class imports (`@ManyToOne(() => Project)`) to avoid circular dependency errors with webpack. No entity file imports another entity file.
+- **Dynamic entity imports in API routes**: API routes import entities via `await import("@/lib/db/entities/X")` to avoid triggering entity resolution at module load time
+- **Safe JSON parsing**: All client-side `res.json()` calls are wrapped in try/catch to handle non-JSON server errors (e.g., 500 HTML pages when DB is down)
 
 ### UI/UX
 - **Dark mode by default**: Class-based Tailwind dark mode on all pages
