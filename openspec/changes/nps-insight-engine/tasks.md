@@ -11,13 +11,13 @@
 
 ## 2. LLM Configuration
 
-- [ ] 2.1 Create LLM provider abstraction (lib/ai/providers.ts) using Vercel AI SDK with support for Anthropic, OpenAI, Azure OpenAI, and Ollama
-- [ ] 2.2 Create API key encryption/decryption utility (lib/ai/encryption.ts) using AES-256-GCM with env var key
-- [ ] 2.3 Build settings page (app/settings/page.tsx) with provider selector, API key input, model selector, and Azure/Ollama-specific fields
-- [ ] 2.4 Create API route (app/api/settings/route.ts) for CRUD operations on LLMConfig table
-- [ ] 2.5 Implement test connection endpoint (app/api/settings/test/route.ts) that validates API key by making a simple LLM call
-- [ ] 2.6 Add active provider indicator in the app header/navigation
-- [ ] 2.7 Verify: configure Anthropic API key, test connection succeeds, key is stored encrypted in DB
+- [x] 2.1 Create LLM provider abstraction (lib/ai/providers.ts) using Vercel AI SDK with support for Anthropic, OpenAI, Azure OpenAI, and Ollama
+- [x] 2.2 Create API key encryption/decryption utility (lib/ai/encryption.ts) using AES-256-GCM with env var key
+- [x] 2.3 Build settings page (app/settings/page.tsx) with provider selector, API key input, model selector, and Azure/Ollama-specific fields
+- [x] 2.4 Create API route (app/api/settings/route.ts) for CRUD operations on LLMConfig table
+- [x] 2.5 Implement test connection endpoint (app/api/settings/test/route.ts) that validates API key by making a simple LLM call
+- [x] 2.6 Add active provider indicator in the app header/navigation
+- [x] 2.7 Verify: configure Anthropic API key, test connection succeeds, key is stored encrypted in DB
 
 ## 3. Project Management
 

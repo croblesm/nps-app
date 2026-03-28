@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Header } from "@/components/ui/Header";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,6 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
+        <Header />
         {children}
       </body>
     </html>

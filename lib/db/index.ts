@@ -1,16 +1,15 @@
-import { AppDataSource } from "./data-source";
-
-let initialized = false;
+let dataSourcePromise: Promise<import("typeorm").DataSource> | null = null;
 
 export async function getDb() {
-  if (!initialized) {
-    if (!AppDataSource.isInitialized) {
-      await AppDataSource.initialize();
-    }
-    initialized = true;
+  if (!dataSourcePromise) {
+    dataSourcePromise = (async () => {
+      await import("reflect-metadata");
+      const { AppDataSource } = await import("./data-source");
+      if (!AppDataSource.isInitialized) {
+        await AppDataSource.initialize();
+      }
+      return AppDataSource;
+    })();
   }
-  return AppDataSource;
+  return dataSourcePromise;
 }
-
-export { AppDataSource } from "./data-source";
-export * from "./entities";
