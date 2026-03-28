@@ -61,15 +61,15 @@
 
 ## 7. AI Bulk Classification
 
-- [ ] 7.1 Create AI classification prompt template for batches of 20-30 comments against confirmed categories
-- [ ] 7.2 Define Zod output schema for classification: { classifications: { index, category, confidence, isActionable, reasoning }[] }
-- [ ] 7.3 Implement batch classification loop in API route with progress tracking via Server-Sent Events
-- [ ] 7.4 Store classification results in Comment table: category_id, ai_confidence, ai_reasoning, is_actionable
-- [ ] 7.5 Implement deterministic no-comment detection: flag empty/whitespace comments as "No Comment" before AI classification
-- [ ] 7.6 Implement non-actionable detection: AI flags nonsensical, single-word, redacted, emotional-only comments
-- [ ] 7.7 Build classification progress UI: progress bar with percentage, comment count, estimated time remaining
-- [ ] 7.8 Support re-classification: when categories change, re-run classification on all comments
-- [ ] 7.9 Verify: all 384 comments from data.csv are classified, progress bar works, non-actionable comments flagged
+- [x] 7.1 Create AI classification prompt template for batches of 20-30 comments against confirmed categories
+- [x] 7.2 Define Zod output schema for classification: { classifications: { index, category, confidence, isActionable, reasoning }[] }
+- [x] 7.3 Implement batch classification loop in API route with progress tracking via Server-Sent Events
+- [x] 7.4 Store classification results in Comment table: category_id, ai_confidence, ai_reasoning, is_actionable
+- [x] 7.5 Implement deterministic no-comment detection: flag empty/whitespace comments as "No Comment" before AI classification
+- [x] 7.6 Implement non-actionable detection: AI flags nonsensical, single-word, redacted, emotional-only comments
+- [x] 7.7 Build classification progress UI: progress bar with percentage, comment count, estimated time remaining
+- [x] 7.8 Support re-classification: when categories change, re-run classification on all comments
+- [x] 7.9 Verify: all 384 comments from data.csv are classified, progress bar works, non-actionable comments flagged
 
 ## 8. NPS Dashboard
 
