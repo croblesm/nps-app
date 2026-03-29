@@ -23,11 +23,33 @@ export default function AdminPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
 
+  // Profile data from DB (accurate provider info)
+  const [profileProvider, setProfileProvider] = useState<string | null>(null);
+  const [profileHasPassword, setProfileHasPassword] = useState(false);
+  const [profileLoaded, setProfileLoaded] = useState(false);
+
   useEffect(() => {
     if (session?.user?.name) {
       setName(session.user.name);
     }
   }, [session]);
+
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const res = await fetch("/api/auth/profile");
+        if (res.ok) {
+          const data = await res.json();
+          setProfileProvider(data.provider);
+          setProfileHasPassword(data.hasPassword);
+        }
+      } catch {
+        // Fall back to session heuristics
+      }
+      setProfileLoaded(true);
+    }
+    loadProfile();
+  }, []);
 
   if (status === "loading") {
     return (
@@ -89,7 +111,7 @@ export default function AdminPage() {
     }
   }
 
-  const hasPassword = session?.user?.email && !session.user.image;
+  const hasPassword = profileLoaded ? profileHasPassword : (session?.user?.email && !session.user.image);
 
   return (
     <div className="max-w-2xl mx-auto py-8 px-4 space-y-6">
@@ -167,8 +189,8 @@ export default function AdminPage() {
               </svg>
               <span className="text-sm font-medium">GitHub</span>
             </div>
-            <Badge variant={session?.user?.image ? "default" : "secondary"}>
-              {session?.user?.image ? "Connected" : "Not connected"}
+            <Badge variant={profileLoaded ? (profileProvider === "github" ? "default" : "secondary") : (session?.user?.image ? "default" : "secondary")}>
+              {profileLoaded ? (profileProvider === "github" ? "Connected" : "Not connected") : (session?.user?.image ? "Connected" : "Not connected")}
             </Badge>
           </div>
           <div className="flex items-center justify-between p-3 rounded-lg border border-border">
@@ -181,7 +203,9 @@ export default function AdminPage() {
               </svg>
               <span className="text-sm font-medium">Google</span>
             </div>
-            <Badge variant="secondary">Not connected</Badge>
+            <Badge variant={profileLoaded && profileProvider === "google" ? "default" : "secondary"}>
+              {profileLoaded ? (profileProvider === "google" ? "Connected" : "Not connected") : "Not connected"}
+            </Badge>
           </div>
         </CardContent>
       </Card>

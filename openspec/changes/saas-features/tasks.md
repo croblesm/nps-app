@@ -37,10 +37,10 @@
 - [x] 1.10 Write tests for auth schemas (register Zod validation, profile update schema), middleware logic (authorized callback), user scoping (getCurrentUserId)
 - [x] 1.11 Update specs, README, CLAUDE.md with auth documentation
 - [x] 1.12 Add provider/providerAccountId fields to User entity for OAuth tracking
-- [ ] 1.13 Implement OAuth user creation with profile callbacks (create/update User on GitHub/Google sign-in)
-- [ ] 1.14 Implement OAuth account linking (same email across GitHub + Google → single user)
-- [ ] 1.15 Accurate connected accounts detection in admin page (query DB instead of session heuristics)
-- [ ] 1.16 Add sign-out dropdown menu in header (user name, email, sign-out button)
+- [x] 1.13 Implement OAuth user creation with profile callbacks (create/update User on GitHub/Google sign-in)
+- [x] 1.14 Implement OAuth account linking (same email across GitHub + Google → single user)
+- [x] 1.15 Accurate connected accounts detection in admin page (query DB instead of session heuristics)
+- [x] 1.16 Add sign-out dropdown menu in header (user name, email, sign-out button)
 
 ## 2. GitHub Integration
 

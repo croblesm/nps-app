@@ -11,6 +11,28 @@ const updateProfileSchema = z.object({
   newPassword: z.string().min(8).max(128).optional(),
 });
 
+export async function GET() {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const db = await getDb();
+  const { User } = await import("@/lib/db/entities/User");
+  const user = await db.getRepository(User).findOneBy({ id: session.user.id });
+  if (!user) {
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  }
+
+  return NextResponse.json({
+    name: user.name,
+    email: user.email,
+    image: user.image,
+    provider: user.provider,
+    hasPassword: !!user.password,
+  });
+}
+
 export async function PATCH(request: Request) {
   const session = await auth();
   if (!session?.user?.id) {

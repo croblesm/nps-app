@@ -75,23 +75,25 @@ WHEN a user signs in via GitHub or Google
 THEN NextAuth.js SHALL handle user creation and account linking internally
 AND the User record SHALL have a null password field for OAuth-only accounts.
 
-#### Scenario: OAuth user creation with provider tracking (NOT YET IMPLEMENTED)
+#### Scenario: OAuth user creation with provider tracking
 
 WHEN a user signs in via GitHub for the first time
-THEN the system SHALL create a user record with the GitHub profile data
-AND store the provider name and provider account ID for tracking
-AND the User entity SHALL include `provider` (nvarchar) and `providerAccountId` (nvarchar) fields.
+THEN the signIn callback in lib/auth/index.ts SHALL create a user record with name, lowercased email, image, provider name, and provider account ID
+AND the User entity stores `provider` (nvarchar 50) and `providerAccountId` (nvarchar 255) fields.
 
-#### Scenario: OAuth account linking across providers (NOT YET IMPLEMENTED)
+#### Scenario: OAuth account linking across providers
 
 WHEN a user signs in via Google with the same email address as an existing GitHub-linked account
-THEN the system SHALL link both providers to the same user record
-AND the user SHALL be able to sign in with either provider.
+THEN the signIn callback SHALL find the existing user by lowercased email
+AND update the user's profile (name, image) with the latest data
+AND the user SHALL be able to sign in with either provider
+AND the `provider` field retains the original provider that created the account.
 
-#### Scenario: OAuth user profile updates (NOT YET IMPLEMENTED)
+#### Scenario: OAuth user profile updates
 
 WHEN a user who previously signed in via GitHub signs in again
-THEN the system SHALL update the existing user record with the latest profile data (name, avatar URL).
+THEN the signIn callback SHALL update the existing user record with the latest name and avatar URL
+AND set the updatedAt timestamp.
 
 ---
 
@@ -177,14 +179,7 @@ WHEN the user navigates to admin settings
 THEN the system SHALL display a list of providers (Email/Password, GitHub, Google) each in a bordered row with an icon (Lucide `Mail` for email, inline SVGs for GitHub and Google)
 AND provide a Badge component showing connection status.
 
-**Current implementation:** Uses session heuristics (image presence) to infer provider status. Does not query actual provider-account linkage from the database.
-
-#### Scenario: Accurate connected accounts detection (NOT YET IMPLEMENTED)
-
-WHEN the user navigates to admin settings
-THEN the system SHALL query the database for linked provider accounts
-AND display accurate "Connected"/"Not connected" status for each OAuth provider
-AND allow the user to link or unlink providers.
+The admin page queries `GET /api/auth/profile` to retrieve the user's `provider` and `hasPassword` fields from the database, then displays accurate connection status for each provider.
 
 #### Scenario: User changes their password
 
@@ -219,13 +214,18 @@ A SessionProvider from next-auth/react is wrapped around the root layout via com
 WHEN the user initiates a sign-out action
 THEN the system SHALL invalidate the current session
 AND redirect the user to the sign-in page.
-**Current implementation:** The Header component displays a `UserCircle` icon that links to the `/admin` page. There is no sign-out dropdown in the header itself.
+The Header component displays a `UserCircle` icon that opens a dropdown menu (shadcn DropdownMenu) showing the user's name, email, a link to Account Settings, and a "Sign Out" button.
 
-#### Scenario: Sign-out dropdown in header (NOT YET IMPLEMENTED)
+#### Scenario: User opens profile dropdown
 
 WHEN the user clicks the profile icon in the header
-THEN a dropdown menu SHALL appear showing the user's name, email, and a "Sign Out" button
-AND clicking "Sign Out" SHALL invalidate the session and redirect to the login page.
+THEN a dropdown menu SHALL appear showing the user's name, email, an "Account Settings" link, and a "Sign Out" button.
+
+#### Scenario: User signs out via header
+
+WHEN the user clicks "Sign Out" in the header dropdown
+THEN the system SHALL call signOut({ callbackUrl: "/login" })
+AND invalidate the session and redirect to the login page.
 
 #### Scenario: Session expires due to inactivity
 

@@ -3,8 +3,17 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
-import { Sun, Moon, Settings, UserCircle } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
+import { Sun, Moon, Settings, UserCircle, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ActiveProvider {
   provider: string;
@@ -14,6 +23,7 @@ interface ActiveProvider {
 export function Header() {
   const [active, setActive] = useState<ActiveProvider | null>(null);
   const { theme, setTheme } = useTheme();
+  const { data: session } = useSession();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
@@ -78,11 +88,32 @@ export function Header() {
               )}
             </Button>
           )}
-          <Link href="/admin">
-            <Button variant="ghost" size="icon" className="h-8 w-8">
+          <DropdownMenu>
+            <DropdownMenuTrigger className="inline-flex items-center justify-center h-8 w-8 rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors">
               <UserCircle className="h-4 w-4" />
-            </Button>
-          </Link>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              {session?.user && (
+                <>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium">{session.user.name || "User"}</p>
+                      <p className="text-xs text-muted-foreground">{session.user.email}</p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                </>
+              )}
+              <DropdownMenuItem>
+                <Link href="/admin" className="w-full">Account Settings</Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/login" })}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Link href="/settings">
             <Button variant="ghost" size="icon" className="h-8 w-8">
               <Settings className="h-4 w-4" />
