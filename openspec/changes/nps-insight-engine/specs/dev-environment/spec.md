@@ -58,6 +58,25 @@ The Docker Compose configuration SHALL set memory and CPU limits on the SQL Serv
 - **WHEN** the SQL Server container starts
 - **THEN** it does NOT consume 80% of host memory (the default), but instead stays within the 2GB container limit
 
+### Requirement: Claude Code hooks enforce spec-sync workflow
+The project SHALL include Claude Code hooks that enforce the spec-driven development workflow: every code change must be accompanied by spec and documentation updates.
+
+#### Scenario: Pre-commit blocks code-only commits
+- **WHEN** a developer commits code files (`app/`, `lib/`, `components/`) without any spec/doc files (`openspec/`, `README.md`, `CLAUDE.md`) staged
+- **THEN** the pre-commit hook blocks the commit with a descriptive error listing the code files that need spec updates
+
+#### Scenario: Pre-commit allows code + spec commits
+- **WHEN** a developer commits code files together with spec/doc updates
+- **THEN** the pre-commit hook allows the commit to proceed
+
+#### Scenario: Docs-only commits bypass check
+- **WHEN** a developer commits with a `docs:` or `chore:` prefix
+- **THEN** the pre-commit hook skips the spec check
+
+#### Scenario: Post-edit reminder on code files
+- **WHEN** a code file in `app/`, `lib/`, or `components/` is edited
+- **THEN** a reminder is printed: "Update the relevant OpenSpec spec and README for this change"
+
 ### Requirement: Database creation is managed by the application
 The Dev Container SHALL NOT use post-start or post-create hooks to create the database or schema. Database and table creation MUST be handled by the application (TypeORM synchronize or `npm run db:init`).
 

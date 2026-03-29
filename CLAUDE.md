@@ -68,6 +68,19 @@ openspec/                     # Spec-driven development artifacts
 
 ### Key Conventions
 - Server components by default, `"use client"` only for interactivity
-- TypeORM entities in `lib/db/entities/` — import dynamically in API routes to avoid circular deps
+- TypeORM entities in `lib/db/entities/` — use string-based relation targets, import dynamically in API routes to avoid circular deps
 - All AI calls use Vercel AI SDK with Zod-validated structured output
 - API routes use `getDb()` for lazy-initialized database connection
+
+## Workflow Rules (MANDATORY)
+
+**EVERY code change MUST include:**
+1. Update the relevant OpenSpec spec (`openspec/changes/nps-insight-engine/specs/`)
+2. Update `README.md` if the change affects setup, usage, features, or configuration
+3. Commit code + spec/doc updates together in one commit
+
+This is enforced by Claude Code hooks in `.claude/settings.json`:
+- **Pre-commit hook** (`enforce-spec-update.sh`): Blocks `git commit` if code files (`app/`, `lib/`, `components/`) are staged without any spec/doc files (`openspec/`, `README.md`, `CLAUDE.md`)
+- **Post-edit hook** (`remind-spec-update.sh`): Prints a reminder after editing code files
+
+Exceptions: commits prefixed with `docs:` or `chore:` skip the check.

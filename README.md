@@ -358,6 +358,18 @@ Next.js auto-loads `.env.local` for `npm run dev` and `npm run build`. The `npm 
 | `ENCRYPTION_KEY` | **Yes** | (none) | 64-char hex string for AES-256-GCM. Generate: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
 | `NODE_ENV` | No | `development` | Set to `production` to disable TypeORM synchronize and verbose logging |
 
+## Contributing
+
+This project uses **spec-driven development**. Every code change must include:
+
+1. Update the relevant OpenSpec spec in `openspec/changes/nps-insight-engine/specs/`
+2. Update `README.md` if the change affects setup, usage, features, or configuration
+3. Commit code + spec/doc updates together
+
+This is enforced by Claude Code hooks (`.claude/settings.json`):
+- **Pre-commit hook**: Blocks commits with code changes but no spec/doc updates
+- **Post-edit hook**: Reminds to update specs after editing code files
+
 ## Deferred Features (SaaS Phase)
 
 - **Authentication** — NextAuth.js v5 with GitHub, Google, email/password
