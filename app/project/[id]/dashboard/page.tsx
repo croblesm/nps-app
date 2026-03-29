@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { ScoreCards } from "@/components/nps/ScoreCards";
+import { NpsDonutChart } from "@/components/nps/NpsDonutChart";
+import { CategoryBarChart } from "@/components/nps/CategoryBarChart";
 import { CategoryBreakdown } from "@/components/nps/CategoryBreakdown";
 import { SearchBar } from "@/components/nps/SearchBar";
 import { FilterPanel } from "@/components/nps/FilterPanel";
@@ -468,6 +470,21 @@ export default function DashboardPage() {
         onFeedbackTypeChange={handleFeedbackType}
       />
 
+      <Card>
+        <CardContent className="py-5">
+          <div className="text-base font-medium mb-3">NPS Distribution</div>
+          <NpsDonutChart
+            npsScore={nps.npsScore}
+            promoters={nps.promoters}
+            passives={nps.passives}
+            detractors={nps.detractors}
+            promoterPct={nps.promoterPct}
+            passivePct={nps.passivePct}
+            detractorPct={nps.detractorPct}
+          />
+        </CardContent>
+      </Card>
+
       {nps.activeNoiseFilterCount > 0 && (
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted border border-border text-sm text-muted-foreground">
           <Filter className="size-4 shrink-0" />
@@ -492,6 +509,10 @@ export default function DashboardPage() {
             onCategoryChange={handleCategoryFilter}
             githubEnabled={githubEnabled}
             onExportToGitHub={handleExportCategory}
+          />
+          <CategoryBarChart
+            categories={categoryBreakdown}
+            onCategoryClick={handleCategoryFilter}
           />
         </CardContent>
       </Card>

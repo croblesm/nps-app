@@ -36,7 +36,7 @@ export function ScoreCards({
         onClick={() => onFeedbackTypeChange("")}
         className={`p-4 rounded-lg text-left transition-colors ${
           !feedbackType
-            ? "bg-primary text-primary-foreground"
+            ? "bg-gradient-to-br from-primary/80 to-primary text-primary-foreground"
             : "bg-card ring-1 ring-foreground/10 hover:ring-primary/30"
         }`}
       >
@@ -49,7 +49,7 @@ export function ScoreCards({
         onClick={() => toggle("promoter")}
         className={`p-4 rounded-lg text-left transition-colors ${
           feedbackType === "promoter"
-            ? "bg-[var(--nps-promoter)] text-white"
+            ? "bg-gradient-to-br from-[var(--nps-promoter)]/80 to-[var(--nps-promoter)] text-white"
             : "bg-card ring-1 ring-foreground/10 hover:ring-foreground/20"
         }`}
       >
@@ -63,7 +63,7 @@ export function ScoreCards({
         onClick={() => toggle("passive")}
         className={`p-4 rounded-lg text-left transition-colors ${
           feedbackType === "passive"
-            ? "bg-[var(--nps-passive)] text-white"
+            ? "bg-gradient-to-br from-[var(--nps-passive)]/80 to-[var(--nps-passive)] text-white"
             : "bg-card ring-1 ring-foreground/10 hover:ring-foreground/20"
         }`}
       >
@@ -77,7 +77,7 @@ export function ScoreCards({
         onClick={() => toggle("detractor")}
         className={`p-4 rounded-lg text-left transition-colors ${
           feedbackType === "detractor"
-            ? "bg-[var(--nps-detractor)] text-white"
+            ? "bg-gradient-to-br from-[var(--nps-detractor)]/80 to-[var(--nps-detractor)] text-white"
             : "bg-card ring-1 ring-foreground/10 hover:ring-foreground/20"
         }`}
       >
@@ -102,18 +102,7 @@ export function ScoreCards({
           NPS Score
         </div>
         <div className="text-2xl font-bold mt-1">
-          {nps.npsScore}{" "}
-          <span>
-            {nps.npsScore >= 70
-              ? "🤩"
-              : nps.npsScore >= 50
-              ? "😀"
-              : nps.npsScore >= 30
-              ? "🙂"
-              : nps.npsScore >= 0
-              ? "😐"
-              : "😟"}
-          </span>
+          {nps.npsScore}
         </div>
         <div className="text-xs opacity-70">{npsLabel}</div>
       </div>

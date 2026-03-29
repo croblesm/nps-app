@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardAction } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileText, Download, RefreshCw, Sparkles } from "lucide-react";
+import { NpsVisualCards } from "@/components/nps/NpsVisualCards";
 import { useAssistantContext } from "@/lib/assistant-context";
 
 interface SummaryData {
@@ -17,11 +18,23 @@ interface SummaryData {
   generatedAt: string;
 }
 
+interface NpsStats {
+  total: number;
+  promoters: number;
+  passives: number;
+  detractors: number;
+  npsScore: number;
+  promoterPct: number;
+  passivePct: number;
+  detractorPct: number;
+}
+
 export default function SummaryPage() {
   const params = useParams();
   const projectId = params.id as string;
 
   const [summary, setSummary] = useState<SummaryData | null>(null);
+  const [npsStats, setNpsStats] = useState<NpsStats | null>(null);
   const [generating, setGenerating] = useState(false);
   const [loading, setLoading] = useState(true);
   const { setPageContext } = useAssistantContext();
@@ -41,6 +54,19 @@ export default function SummaryPage() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
+  }, [projectId]);
+
+  // Load NPS stats on mount
+  useEffect(() => {
+    fetch(`/api/projects/${projectId}/stats`)
+      .then((res) => {
+        if (res.ok) return res.json();
+        return null;
+      })
+      .then((data) => {
+        if (data && data.total > 0) setNpsStats(data);
+      })
+      .catch(() => {});
   }, [projectId]);
 
   async function handleGenerate() {
@@ -89,7 +115,19 @@ export default function SummaryPage() {
   }
 
   return (
-    <div className="max-w-4xl">
+    <div className="max-w-4xl space-y-4">
+      {npsStats && (
+        <NpsVisualCards
+          npsScore={npsStats.npsScore}
+          promoters={npsStats.promoters}
+          passives={npsStats.passives}
+          detractors={npsStats.detractors}
+          promoterPct={npsStats.promoterPct}
+          passivePct={npsStats.passivePct}
+          detractorPct={npsStats.detractorPct}
+        />
+      )}
+
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
