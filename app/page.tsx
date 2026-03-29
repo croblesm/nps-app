@@ -153,52 +153,64 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <Link href={`/project/${project.id}/dashboard`}>
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {new Date(project.createdAt).toLocaleDateString()}
-                    </span>
-                    {project.commentCount > 0 && (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
-                        <MessageSquare className="h-3 w-3" />
-                        {project.commentCount} responses
+                        <Calendar className="h-3 w-3" />
+                        {new Date(project.createdAt).toLocaleDateString()}
                       </span>
-                    )}
-                    {project.npsScore !== null && (
-                      <Badge
-                        variant={project.npsScore >= 0 ? "default" : "destructive"}
-                        className="text-xs"
-                      >
-                        {project.npsScore >= 0 ? (
-                          <TrendingUp className="h-3 w-3 mr-1" />
-                        ) : (
-                          <TrendingDown className="h-3 w-3 mr-1" />
-                        )}
-                        NPS {project.npsScore}
-                      </Badge>
-                    )}
-                    {project.promoterPct !== null && project.passivePct !== null && project.detractorPct !== null && (
-                      <div className="flex items-center gap-2 ml-auto">
-                        <div className="flex h-2 w-32 rounded-full overflow-hidden bg-muted">
-                          <div
-                            className="h-full bg-[#22c55e]"
-                            style={{ width: `${project.promoterPct}%` }}
-                            title={`Promoters: ${project.promoterPct}%`}
-                          />
-                          <div
-                            className="h-full bg-[#eab308]"
-                            style={{ width: `${project.passivePct}%` }}
-                            title={`Passives: ${project.passivePct}%`}
-                          />
-                          <div
-                            className="h-full bg-[#ef4444]"
-                            style={{ width: `${project.detractorPct}%` }}
-                            title={`Detractors: ${project.detractorPct}%`}
-                          />
-                        </div>
-                        <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                          {project.promoterPct}% / {project.passivePct}% / {project.detractorPct}%
+                      {project.commentCount > 0 && (
+                        <span className="flex items-center gap-1">
+                          <MessageSquare className="h-3 w-3" />
+                          {project.commentCount} responses
                         </span>
+                      )}
+                      {project.npsScore !== null && (
+                        <Badge
+                          variant={project.npsScore >= 0 ? "default" : "destructive"}
+                          className="text-xs"
+                        >
+                          {project.npsScore >= 0 ? (
+                            <TrendingUp className="h-3 w-3 mr-1" />
+                          ) : (
+                            <TrendingDown className="h-3 w-3 mr-1" />
+                          )}
+                          NPS {project.npsScore}
+                          {" "}
+                          {project.npsScore >= 70 ? "🤩" : project.npsScore >= 50 ? "😀" : project.npsScore >= 30 ? "🙂" : project.npsScore >= 0 ? "😐" : "😟"}
+                        </Badge>
+                      )}
+                    </div>
+                    {project.promoterPct !== null && project.passivePct !== null && project.detractorPct !== null && (
+                      <div className="flex items-center gap-4">
+                        {/* Mini donut using CSS conic-gradient */}
+                        <div
+                          className="h-12 w-12 rounded-full shrink-0"
+                          style={{
+                            background: `conic-gradient(
+                              #22c55e 0% ${project.promoterPct}%,
+                              #eab308 ${project.promoterPct}% ${project.promoterPct + project.passivePct}%,
+                              #ef4444 ${project.promoterPct + project.passivePct}% 100%
+                            )`,
+                            mask: "radial-gradient(circle at center, transparent 40%, black 41%)",
+                            WebkitMask: "radial-gradient(circle at center, transparent 40%, black 41%)",
+                          }}
+                          title={`Promoters ${project.promoterPct}% / Passives ${project.passivePct}% / Detractors ${project.detractorPct}%`}
+                        />
+                        <div className="text-xs text-muted-foreground space-y-0.5 hidden sm:block">
+                          <div className="flex items-center gap-1.5">
+                            <span className="h-2 w-2 rounded-full bg-[#22c55e]" />
+                            {project.promoterPct}% Promoters
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="h-2 w-2 rounded-full bg-[#eab308]" />
+                            {project.passivePct}% Passives
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="h-2 w-2 rounded-full bg-[#ef4444]" />
+                            {project.detractorPct}% Detractors
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
