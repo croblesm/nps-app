@@ -27,6 +27,9 @@ interface ProjectSummary {
   createdAt: string;
   commentCount: number;
   npsScore: number | null;
+  promoterPct: number | null;
+  passivePct: number | null;
+  detractorPct: number | null;
 }
 
 export default function HomePage() {
@@ -173,6 +176,30 @@ export default function HomePage() {
                         )}
                         NPS {project.npsScore}
                       </Badge>
+                    )}
+                    {project.promoterPct !== null && project.passivePct !== null && project.detractorPct !== null && (
+                      <div className="flex items-center gap-2 ml-auto">
+                        <div className="flex h-2 w-32 rounded-full overflow-hidden bg-muted">
+                          <div
+                            className="h-full bg-[#22c55e]"
+                            style={{ width: `${project.promoterPct}%` }}
+                            title={`Promoters: ${project.promoterPct}%`}
+                          />
+                          <div
+                            className="h-full bg-[#eab308]"
+                            style={{ width: `${project.passivePct}%` }}
+                            title={`Passives: ${project.passivePct}%`}
+                          />
+                          <div
+                            className="h-full bg-[#ef4444]"
+                            style={{ width: `${project.detractorPct}%` }}
+                            title={`Detractors: ${project.detractorPct}%`}
+                          />
+                        </div>
+                        <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                          {project.promoterPct}% / {project.passivePct}% / {project.detractorPct}%
+                        </span>
+                      </div>
                     )}
                   </div>
                 </Link>

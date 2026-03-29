@@ -102,13 +102,13 @@ export function NpsVisualCards({
           </div>
 
           {/* Middle column: Promoter quotes */}
-          <div className="space-y-3">
+          <div className="space-y-3 min-w-0">
             <h4 className="text-sm font-medium text-[var(--nps-promoter,#22c55e)]">What promoters say</h4>
             {promoterQuotes && promoterQuotes.length > 0 ? (
               <div className="space-y-2">
                 {promoterQuotes.slice(0, 3).map((q, i) => (
-                  <blockquote key={i} className="border-l-2 border-[var(--nps-promoter,#22c55e)] pl-3 text-sm text-muted-foreground">
-                    <p className="line-clamp-2">{q.text}</p>
+                  <blockquote key={i} className="border-l-2 border-[var(--nps-promoter,#22c55e)] pl-3 text-sm text-muted-foreground max-w-full">
+                    <p className="line-clamp-2 break-words">{q.text}</p>
                     <Badge variant="outline" className="mt-1 text-xs">NPS {q.nps}</Badge>
                   </blockquote>
                 ))}
@@ -119,13 +119,13 @@ export function NpsVisualCards({
           </div>
 
           {/* Right column: Detractor quotes */}
-          <div className="space-y-3">
+          <div className="space-y-3 min-w-0">
             <h4 className="text-sm font-medium text-[var(--nps-detractor,#ef4444)]">What detractors say</h4>
             {detractorQuotes && detractorQuotes.length > 0 ? (
               <div className="space-y-2">
                 {detractorQuotes.slice(0, 3).map((q, i) => (
-                  <blockquote key={i} className="border-l-2 border-[var(--nps-detractor,#ef4444)] pl-3 text-sm text-muted-foreground">
-                    <p className="line-clamp-2">{q.text}</p>
+                  <blockquote key={i} className="border-l-2 border-[var(--nps-detractor,#ef4444)] pl-3 text-sm text-muted-foreground max-w-full">
+                    <p className="line-clamp-2 break-words">{q.text}</p>
                     <Badge variant="outline" className="mt-1 text-xs">NPS {q.nps}</Badge>
                   </blockquote>
                 ))}

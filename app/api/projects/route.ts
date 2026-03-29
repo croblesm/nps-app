@@ -42,8 +42,17 @@ export async function GET() {
   const summaries = projects.map((p) => {
     const s = statsMap.get(p.id);
     let npsScore: number | null = null;
+    let promoterPct: number | null = null;
+    let passivePct: number | null = null;
+    let detractorPct: number | null = null;
     if (s && s.scored > 0) {
       npsScore = Math.round(((s.promoters - s.detractors) / s.scored) * 100);
+      const passives = s.scored - s.promoters - s.detractors;
+      promoterPct = Math.round((s.promoters / s.scored) * 100);
+      detractorPct = Math.round((s.detractors / s.scored) * 100);
+      passivePct = 100 - promoterPct - detractorPct;
+      // Avoid negative from rounding
+      if (passivePct < 0) passivePct = 0;
     }
 
     return {
@@ -53,6 +62,9 @@ export async function GET() {
       createdAt: p.createdAt,
       commentCount: s?.total || 0,
       npsScore,
+      promoterPct,
+      passivePct,
+      detractorPct,
     };
   });
 

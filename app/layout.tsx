@@ -14,6 +14,7 @@ const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 export const metadata: Metadata = {
   title: "NPS Insight Engine",
   description: "AI-powered NPS analysis platform for product managers",
+  icons: { icon: "/favicon.svg" },
 };
 
 export default function RootLayout({

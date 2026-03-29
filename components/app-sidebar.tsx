@@ -44,10 +44,10 @@ interface ProjectInfo {
 }
 
 const PROJECT_NAV_ITEMS = [
-  { href: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "upload", label: "Data", icon: FileSpreadsheet, altHref: "structure" },
   { href: "categories", label: "Categories", icon: Tags },
   { href: "noise", label: "Noise Filters", icon: Filter },
+  { href: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "summary", label: "Summary", icon: FileText },
   { href: "github", label: "GitHub", icon: GitFork },
 ];

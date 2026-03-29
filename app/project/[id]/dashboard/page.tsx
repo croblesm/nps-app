@@ -83,7 +83,7 @@ export default function DashboardPage() {
   const [limit, setLimit] = useState(25);
   const [search, setSearch] = useState("");
   const [feedbackType, setFeedbackType] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
+  const [categoryFilters, setCategoryFilters] = useState<string[]>([]);
   const [actionableFilter, setActionableFilter] = useState("");
   const [sortBy, setSortBy] = useState("rowIndex");
   const [sortDir, setSortDir] = useState<"ASC" | "DESC">("ASC");
@@ -97,7 +97,7 @@ export default function DashboardPage() {
     });
     if (search) params.set("search", search);
     if (feedbackType) params.set("feedbackType", feedbackType);
-    if (categoryFilter) params.set("category", categoryFilter);
+    if (categoryFilters.length) params.set("category", categoryFilters.join(","));
     if (actionableFilter) params.set("actionable", actionableFilter);
 
     const res = await fetch(`/api/projects/${projectId}/comments?${params}`);
@@ -112,7 +112,7 @@ export default function DashboardPage() {
       }
     }
     setLoading(false);
-  }, [projectId, page, limit, search, feedbackType, categoryFilter, actionableFilter, sortBy, sortDir]);
+  }, [projectId, page, limit, search, feedbackType, categoryFilters, actionableFilter, sortBy, sortDir]);
 
   const fetchStats = useCallback(async () => {
     const res = await fetch(`/api/projects/${projectId}/stats`);
@@ -165,9 +165,9 @@ export default function DashboardPage() {
       passivePct: nps?.passivePct,
       detractorPct: nps?.detractorPct,
       categoryBreakdown: categoryBreakdown,
-      activeFilters: { feedbackType, category: categoryFilter, search },
+      activeFilters: { feedbackType, categories: categoryFilters, search },
     });
-  }, [nps, categoryBreakdown, feedbackType, categoryFilter, search, setPageContext]);
+  }, [nps, categoryBreakdown, feedbackType, categoryFilters, search, setPageContext]);
 
   async function handleClassify() {
     setClassifying(true);
@@ -390,7 +390,9 @@ export default function DashboardPage() {
   }
 
   function handleCategoryFilter(cat: string) {
-    setCategoryFilter(cat);
+    setCategoryFilters(prev =>
+      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+    );
     setPage(1);
   }
 
@@ -486,20 +488,30 @@ export default function DashboardPage() {
             <LayoutDashboard className="size-4" />
             Category Breakdown
           </div>
-          {categoryFilter && (
-            <div className="flex items-center gap-2 mb-3">
+          {categoryFilters.length > 0 && (
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
               <span className="text-sm text-muted-foreground">Filtered by:</span>
-              <Badge variant="secondary" className="flex items-center gap-1">
-                {categoryFilter}
-                <button onClick={() => handleCategoryFilter("")} className="ml-1 hover:text-foreground">
-                  <X className="size-3" />
+              {categoryFilters.map(cat => (
+                <Badge key={cat} variant="secondary" className="flex items-center gap-1">
+                  {cat}
+                  <button onClick={() => handleCategoryFilter(cat)} className="ml-1 hover:text-foreground">
+                    <X className="size-3" />
+                  </button>
+                </Badge>
+              ))}
+              {categoryFilters.length > 1 && (
+                <button
+                  onClick={() => { setCategoryFilters([]); setPage(1); }}
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                >
+                  Clear all
                 </button>
-              </Badge>
+              )}
             </div>
           )}
           <CategoryBreakdown
             categories={categoryBreakdown}
-            activeCategory={categoryFilter}
+            activeCategories={categoryFilters}
             onCategoryChange={handleCategoryFilter}
             githubEnabled={githubEnabled}
             onExportToGitHub={handleExportCategory}
@@ -559,7 +571,7 @@ export default function DashboardPage() {
           <ChatPanel
             projectId={projectId}
             onClose={() => setChatOpen(false)}
-            filters={{ feedbackType, category: categoryFilter, search, actionable: actionableFilter || undefined }}
+            filters={{ feedbackType, category: categoryFilters.join(","), search, actionable: actionableFilter || undefined }}
             onCitationClick={(commentId) => {
               const el = document.getElementById(`comment-${commentId}`);
               if (el) {

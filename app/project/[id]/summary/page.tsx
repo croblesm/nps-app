@@ -73,13 +73,13 @@ export default function SummaryPage() {
 
   // Fetch promoter and detractor quotes
   useEffect(() => {
-    fetch(`/api/projects/${projectId}/comments?feedbackType=promoter&limit=3&sortBy=npsScore&sortDir=DESC`)
+    fetch(`/api/projects/${projectId}/comments?feedbackType=promoter&limit=10&sortBy=npsScore&sortDir=DESC`)
       .then(res => res.json())
-      .then(data => setPromoterQuotes(data.comments?.filter((c: { commentText: string | null }) => c.commentText).map((c: { commentText: string; npsScore: number }) => ({ text: c.commentText, nps: c.npsScore })) || []))
+      .then(data => setPromoterQuotes((data.comments?.filter((c: { commentText: string | null }) => c.commentText).map((c: { commentText: string; npsScore: number }) => ({ text: c.commentText, nps: c.npsScore })) || []).slice(0, 3)))
       .catch(() => {});
-    fetch(`/api/projects/${projectId}/comments?feedbackType=detractor&limit=3&sortBy=npsScore&sortDir=ASC`)
+    fetch(`/api/projects/${projectId}/comments?feedbackType=detractor&limit=10&sortBy=npsScore&sortDir=ASC`)
       .then(res => res.json())
-      .then(data => setDetractorQuotes(data.comments?.filter((c: { commentText: string | null }) => c.commentText).map((c: { commentText: string; npsScore: number }) => ({ text: c.commentText, nps: c.npsScore })) || []))
+      .then(data => setDetractorQuotes((data.comments?.filter((c: { commentText: string | null }) => c.commentText).map((c: { commentText: string; npsScore: number }) => ({ text: c.commentText, nps: c.npsScore })) || []).slice(0, 3)))
       .catch(() => {});
   }, [projectId]);
 
