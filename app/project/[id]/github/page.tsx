@@ -22,7 +22,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface GitHubConfigData {
   id: string;
@@ -140,6 +140,8 @@ export default function GitHubPage() {
     );
   }
 
+  const defaultTab = config && issues.length > 0 ? "issues" : "config";
+
   return (
     <div className="space-y-6">
       <div>
@@ -151,187 +153,202 @@ export default function GitHubPage() {
         </p>
       </div>
 
-      {/* Configuration Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <GitFork className="h-5 w-5" />
-            Repository Configuration
-          </CardTitle>
-          <CardDescription>
-            Configure the GitHub repository where NPS feedback issues will be
-            created.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {config && (
-            <div className="flex items-center gap-2 p-3 rounded-md bg-primary/10 border border-primary/20">
-              <CheckCircle2 className="h-4 w-4 text-primary" />
-              <span className="text-sm text-primary">
-                Connected to{" "}
-                <span className="font-medium">
-                  {config.repoOwner}/{config.repoName}
-                </span>
-              </span>
-            </div>
-          )}
+      <Tabs defaultValue={defaultTab}>
+        <TabsList>
+          <TabsTrigger value="config">Configuration</TabsTrigger>
+          <TabsTrigger value="issues" className="gap-1.5">
+            Created Issues
+            {issues.length > 0 && (
+              <Badge variant="secondary" className="ml-1">
+                {issues.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+        </TabsList>
 
-          {error && (
-            <div className="flex items-center gap-2 p-3 rounded-md bg-destructive/10 border border-destructive/20">
-              <AlertCircle className="h-4 w-4 text-destructive" />
-              <span className="text-sm text-destructive">{error}</span>
-            </div>
-          )}
-
-          {success && (
-            <div className="flex items-center gap-2 p-3 rounded-md bg-primary/10 border border-primary/20">
-              <CheckCircle2 className="h-4 w-4 text-primary" />
-              <span className="text-sm text-primary">
-                {success}
-              </span>
-            </div>
-          )}
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="repoOwner">Repository Owner</Label>
-              <Input
-                id="repoOwner"
-                placeholder="e.g., microsoft"
-                value={repoOwner}
-                onChange={(e) => setRepoOwner(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="repoName">Repository Name</Label>
-              <Input
-                id="repoName"
-                placeholder="e.g., vscode-mssql"
-                value={repoName}
-                onChange={(e) => setRepoName(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="pat" className="flex items-center gap-1.5">
-              <Shield className="h-3.5 w-3.5" />
-              Personal Access Token
-            </Label>
-            <Input
-              id="pat"
-              type="password"
-              placeholder={
-                config?.hasToken
-                  ? "Token saved — enter a new one to update"
-                  : "ghp_xxxxxxxxxxxxxxxxxxxx"
-              }
-              value={pat}
-              onChange={(e) => setPat(e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              Requires <code>repo</code> scope. Your token is encrypted at rest.
-            </p>
-          </div>
-
-          <Button
-            onClick={handleSave}
-            disabled={saving || !repoOwner || !repoName || !pat}
-          >
-            {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            {config ? "Update & Validate" : "Test & Save"}
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* Created Issues */}
-      {issues.length === 0 && config && (
-        <Card>
-          <CardContent className="py-8 text-center">
-            <p className="text-sm text-muted-foreground">
-              No issues created yet. Go to the <strong>Dashboard</strong> tab to export categories or selected comments as GitHub issues.
-            </p>
-          </CardContent>
-        </Card>
-      )}
-      {issues.length > 0 && (
-        <>
-          <Separator />
+        <TabsContent value="config" className="mt-4">
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  Created Issues
-                  <Badge variant="secondary">{issues.length}</Badge>
-                </CardTitle>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleRefreshStatuses}
-                  disabled={refreshing}
-                >
-                  <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${refreshing ? "animate-spin" : ""}`} />
-                  {refreshing ? "Refreshing..." : "Refresh Status"}
-                </Button>
-              </div>
+              <CardTitle className="flex items-center gap-2">
+                <GitFork className="h-5 w-5" />
+                Repository Configuration
+              </CardTitle>
               <CardDescription>
-                Issues created from NPS feedback in this project.
+                Configure the GitHub repository where NPS feedback issues will be
+                created.
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {issues.map((issue) => {
-                  const labels: string[] = issue.labels
-                    ? JSON.parse(issue.labels)
-                    : [];
-                  return (
-                    <div
-                      key={issue.id}
-                      className="flex items-center justify-between p-3 rounded-md border border-border hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <span className="text-sm font-mono text-muted-foreground">
-                          #{issue.githubIssueNumber}
-                        </span>
-                        <Badge
-                          variant={issue.status === "open" ? "default" : "secondary"}
-                          className={`text-xs ${issue.status === "open" ? "bg-[hsl(var(--nps-promoter))]" : "bg-secondary text-secondary-foreground"}`}
-                        >
-                          {issue.status}
-                        </Badge>
-                        <span className="text-sm font-medium truncate">
-                          {issue.title}
-                        </span>
-                        <div className="flex items-center gap-1">
-                          {labels.map((label) => (
-                            <Badge
-                              key={label}
-                              variant="outline"
-                              className="text-xs"
-                            >
-                              {label}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                      <a
-                        href={issue.githubUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-shrink-0"
-                      >
-                        <Button variant="ghost" size="sm">
-                          <ExternalLink className="h-3.5 w-3.5" />
-                        </Button>
-                      </a>
-                    </div>
-                  );
-                })}
+            <CardContent className="space-y-4">
+              {config && (
+                <div className="flex items-center gap-2 p-3 rounded-md bg-primary/10 border border-primary/20">
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                  <span className="text-sm text-primary">
+                    Connected to{" "}
+                    <span className="font-medium">
+                      {config.repoOwner}/{config.repoName}
+                    </span>
+                  </span>
+                </div>
+              )}
+
+              {error && (
+                <div className="flex items-center gap-2 p-3 rounded-md bg-destructive/10 border border-destructive/20">
+                  <AlertCircle className="h-4 w-4 text-destructive" />
+                  <span className="text-sm text-destructive">{error}</span>
+                </div>
+              )}
+
+              {success && (
+                <div className="flex items-center gap-2 p-3 rounded-md bg-primary/10 border border-primary/20">
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                  <span className="text-sm text-primary">
+                    {success}
+                  </span>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="repoOwner">Repository Owner</Label>
+                  <Input
+                    id="repoOwner"
+                    placeholder="e.g., microsoft"
+                    value={repoOwner}
+                    onChange={(e) => setRepoOwner(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="repoName">Repository Name</Label>
+                  <Input
+                    id="repoName"
+                    placeholder="e.g., vscode-mssql"
+                    value={repoName}
+                    onChange={(e) => setRepoName(e.target.value)}
+                  />
+                </div>
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="pat" className="flex items-center gap-1.5">
+                  <Shield className="h-3.5 w-3.5" />
+                  Personal Access Token
+                </Label>
+                <Input
+                  id="pat"
+                  type="password"
+                  placeholder={
+                    config?.hasToken
+                      ? "Token saved — enter a new one to update"
+                      : "ghp_xxxxxxxxxxxxxxxxxxxx"
+                  }
+                  value={pat}
+                  onChange={(e) => setPat(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Requires <code>repo</code> scope. Your token is encrypted at rest.
+                </p>
+              </div>
+
+              <Button
+                onClick={handleSave}
+                disabled={saving || !repoOwner || !repoName || !pat}
+              >
+                {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                {config ? "Update & Validate" : "Test & Save"}
+              </Button>
             </CardContent>
           </Card>
-        </>
-      )}
+        </TabsContent>
+
+        <TabsContent value="issues" className="mt-4">
+          {issues.length === 0 && (
+            <Card>
+              <CardContent className="py-8 text-center">
+                <p className="text-sm text-muted-foreground">
+                  {config
+                    ? <>No issues created yet. Go to the <strong>Dashboard</strong> tab to export categories or selected comments as GitHub issues.</>
+                    : "Configure your GitHub repository first to start creating issues."}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+          {issues.length > 0 && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    Created Issues
+                    <Badge variant="secondary">{issues.length}</Badge>
+                  </CardTitle>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRefreshStatuses}
+                    disabled={refreshing}
+                  >
+                    <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${refreshing ? "animate-spin" : ""}`} />
+                    {refreshing ? "Refreshing..." : "Refresh Status"}
+                  </Button>
+                </div>
+                <CardDescription>
+                  Issues created from NPS feedback in this project.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {issues.map((issue) => {
+                    const labels: string[] = issue.labels
+                      ? JSON.parse(issue.labels)
+                      : [];
+                    return (
+                      <div
+                        key={issue.id}
+                        className="flex items-center justify-between p-3 rounded-md border border-border hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <span className="text-sm font-mono text-muted-foreground">
+                            #{issue.githubIssueNumber}
+                          </span>
+                          <Badge
+                            variant={issue.status === "open" ? "default" : "secondary"}
+                            className={`text-xs ${issue.status === "open" ? "bg-[hsl(var(--nps-promoter))]" : "bg-secondary text-secondary-foreground"}`}
+                          >
+                            {issue.status}
+                          </Badge>
+                          <span className="text-sm font-medium truncate">
+                            {issue.title}
+                          </span>
+                          <div className="flex items-center gap-1">
+                            {labels.map((label) => (
+                              <Badge
+                                key={label}
+                                variant="outline"
+                                className="text-xs"
+                              >
+                                {label}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <a
+                          href={issue.githubUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-shrink-0"
+                        >
+                          <Button variant="ghost" size="sm">
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </Button>
+                        </a>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

@@ -2,8 +2,19 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { Pencil, Plus, Sparkles, Wand2 } from "lucide-react";
 import { Spinner } from "@/components/ui/Spinner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useAssistantContext } from "@/lib/assistant-context";
 
 interface SampleComment {
@@ -47,6 +58,7 @@ export default function CategoriesPage() {
   // Suggest more
   const [suggesting, setSuggesting] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [addCategoryOpen, setAddCategoryOpen] = useState(false);
   const { setPageContext } = useAssistantContext();
 
   useEffect(() => {
@@ -318,27 +330,141 @@ export default function CategoriesPage() {
           </button>
         </>
       ) : (
-        <div className="flex items-center gap-4 mb-4">
+        <div className="flex items-center justify-between gap-4 mb-4 flex-wrap">
           <p className="text-sm text-muted-foreground">
             Analyzed {stats.sampleSize} of {stats.totalComments} comments.{" "}
             {activeCount} categories active.
           </p>
-          <button
-            onClick={() => {
-              if (
-                confirm(
-                  "Re-discover will replace all current categories. Continue?"
-                )
-              ) {
-                setDiscovered(false);
-                setCategories([]);
-                handleDiscover();
-              }
-            }}
-            className="text-xs text-primary hover:text-primary/80"
-          >
-            Re-discover
-          </button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSuggestMore}
+              disabled={suggesting}
+            >
+              {suggesting ? (
+                <Spinner size="sm" label="Suggesting..." />
+              ) : (
+                <>
+                  <Sparkles className="size-3.5" />
+                  Suggest More
+                </>
+              )}
+            </Button>
+            <Dialog open={addCategoryOpen} onOpenChange={setAddCategoryOpen}>
+              <DialogTrigger
+                render={<Button variant="outline" size="sm" />}
+              >
+                <Plus className="size-3.5" />
+                Add Category
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add Custom Category</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-3 pt-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="new-cat-name">Category name</Label>
+                    <Input
+                      id="new-cat-name"
+                      value={newCatName}
+                      onChange={(e) => {
+                        setNewCatName(e.target.value);
+                        setScanResult(null);
+                      }}
+                      placeholder="e.g., Competitor Comparisons"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="new-cat-desc">Description</Label>
+                    <Input
+                      id="new-cat-desc"
+                      value={newCatDesc}
+                      onChange={(e) => setNewCatDesc(e.target.value)}
+                      placeholder="e.g., Comments comparing to SSMS or Azure Data Studio"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleScanTheme}
+                      disabled={scanning || !newCatName.trim()}
+                    >
+                      {scanning ? (
+                        <Spinner size="sm" label="Scanning..." />
+                      ) : (
+                        <>
+                          <Wand2 className="size-3.5" />
+                          AI Scan
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        handleAddCustom();
+                        setAddCategoryOpen(false);
+                      }}
+                      disabled={!newCatName.trim()}
+                    >
+                      <Plus className="size-3.5" />
+                      Add Category
+                    </Button>
+                  </div>
+
+                  {/* Scan results */}
+                  {scanResult && (
+                    <div
+                      className={`p-3 rounded text-sm ${
+                        scanResult.isValid
+                          ? "bg-muted border border-border text-foreground"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      <p className="font-medium">
+                        {scanResult.isValid
+                          ? `Found ${scanResult.matchCount} matching comments`
+                          : `Only ${scanResult.matchCount} comments match — may not be a strong category`}
+                      </p>
+                      <p className="mt-1 text-xs opacity-80">
+                        {scanResult.refinedDescription}
+                      </p>
+                      {scanResult.sampleComments.length > 0 && (
+                        <div className="mt-2 space-y-1">
+                          {scanResult.sampleComments.slice(0, 3).map((sc, i) => (
+                            <div
+                              key={i}
+                              className="pl-2 border-l-2 border-current opacity-70 text-xs"
+                            >
+                              NPS {sc.nps ?? "?"} — {sc.text.slice(0, 120)}
+                              {sc.text.length > 120 ? "..." : ""}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+            <button
+              onClick={() => {
+                if (
+                  confirm(
+                    "Re-discover will replace all current categories. Continue?"
+                  )
+                ) {
+                  setDiscovered(false);
+                  setCategories([]);
+                  handleDiscover();
+                }
+              }}
+              className="text-xs text-primary hover:text-primary/80"
+            >
+              Re-discover
+            </button>
+          </div>
         </div>
       )}
 
@@ -376,27 +502,34 @@ export default function CategoriesPage() {
                       className="text-lg font-semibold bg-transparent border-b border-primary outline-none text-foreground w-full"
                     />
                   ) : (
-                    <h3
-                      className={`text-lg font-semibold text-foreground ${
-                        !cat.isFallback
-                          ? "cursor-pointer hover:text-primary group"
-                          : ""
-                      }`}
-                      onClick={() =>
-                        !cat.isFallback && setEditingIdx(idx)
-                      }
-                    >
-                      {cat.name}
-                      {cat.isFallback ? (
-                        <span className="ml-2 text-xs font-normal text-muted-foreground">
-                          (required fallback)
-                        </span>
-                      ) : (
-                        <span className="ml-2 text-xs font-normal text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
-                          click to rename
-                        </span>
+                    <div className="flex items-center gap-2">
+                      <h3
+                        className={`text-lg font-semibold text-foreground ${
+                          !cat.isFallback
+                            ? "cursor-pointer hover:text-primary"
+                            : ""
+                        }`}
+                        onClick={() =>
+                          !cat.isFallback && setEditingIdx(idx)
+                        }
+                      >
+                        {cat.name}
+                        {cat.isFallback && (
+                          <span className="ml-2 text-xs font-normal text-muted-foreground">
+                            (required fallback)
+                          </span>
+                        )}
+                      </h3>
+                      {!cat.isFallback && (
+                        <button
+                          onClick={() => setEditingIdx(idx)}
+                          className="text-muted-foreground hover:text-primary"
+                          title="Rename category"
+                        >
+                          <Pencil className="size-3.5" />
+                        </button>
                       )}
-                    </h3>
+                    </div>
                   )}
                   <p className="text-sm text-muted-foreground mt-1">
                     {cat.description}
@@ -439,96 +572,6 @@ export default function CategoriesPage() {
               )}
             </div>
           ))}
-
-          {/* Suggest More */}
-          <div className="flex items-center gap-2">
-            {suggesting && (
-              <Spinner size="sm" label="Asking AI for more themes..." />
-            )}
-            {!suggesting && (
-              <button
-                onClick={handleSuggestMore}
-                className="text-sm text-primary hover:text-primary/80"
-              >
-                Suggest More Categories
-              </button>
-            )}
-          </div>
-
-          {/* Add Custom Category — Enhanced */}
-          <div className="p-4 rounded-lg border border-dashed border-border space-y-3">
-            <p className="text-sm font-medium text-muted-foreground">
-              Add Custom Category
-            </p>
-            <input
-              value={newCatName}
-              onChange={(e) => {
-                setNewCatName(e.target.value);
-                setScanResult(null);
-              }}
-              placeholder="Category name (e.g., Competitor Comparisons)"
-              className="w-full p-2 rounded-lg border border-border bg-card text-foreground text-sm"
-            />
-            <input
-              value={newCatDesc}
-              onChange={(e) => setNewCatDesc(e.target.value)}
-              placeholder="Description (e.g., Comments comparing to SSMS or Azure Data Studio)"
-              className="w-full p-2 rounded-lg border border-border bg-card text-foreground text-sm"
-            />
-            <div className="flex gap-2">
-              <button
-                onClick={handleScanTheme}
-                disabled={scanning || !newCatName.trim()}
-                className="px-3 py-1.5 rounded bg-muted text-foreground hover:bg-muted/80 disabled:opacity-50 text-sm"
-              >
-                {scanning ? (
-                  <Spinner size="sm" label="Scanning..." />
-                ) : (
-                  "AI Scan"
-                )}
-              </button>
-              <button
-                onClick={handleAddCustom}
-                disabled={!newCatName.trim()}
-                className="px-3 py-1.5 rounded bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 text-sm"
-              >
-                Add Category
-              </button>
-            </div>
-
-            {/* Scan results */}
-            {scanResult && (
-              <div
-                className={`p-3 rounded text-sm ${
-                  scanResult.isValid
-                    ? "bg-muted border border-border text-foreground"
-                    : "bg-muted text-muted-foreground"
-                }`}
-              >
-                <p className="font-medium">
-                  {scanResult.isValid
-                    ? `Found ${scanResult.matchCount} matching comments`
-                    : `Only ${scanResult.matchCount} comments match — may not be a strong category`}
-                </p>
-                <p className="mt-1 text-xs opacity-80">
-                  {scanResult.refinedDescription}
-                </p>
-                {scanResult.sampleComments.length > 0 && (
-                  <div className="mt-2 space-y-1">
-                    {scanResult.sampleComments.slice(0, 3).map((sc, i) => (
-                      <div
-                        key={i}
-                        className="pl-2 border-l-2 border-current opacity-70 text-xs"
-                      >
-                        NPS {sc.nps ?? "?"} — {sc.text.slice(0, 120)}
-                        {sc.text.length > 120 ? "..." : ""}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
 
           {/* Confirm */}
           {saving && (

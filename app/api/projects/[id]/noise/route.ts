@@ -69,6 +69,40 @@ export async function DELETE(
   return NextResponse.json({ success: true });
 }
 
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const body = await request.json();
+  const { filterId, name, description, filterKeywords, excludeFromNps } = body;
+
+  if (!filterId) {
+    return NextResponse.json({ error: "filterId required" }, { status: 400 });
+  }
+
+  const db = await getDb();
+  const { NoiseFilter } = await import("@/lib/db/entities/NoiseFilter");
+  const repo = db.getRepository(NoiseFilter);
+
+  const filter = await repo.findOne({ where: { id: filterId, projectId: id } });
+  if (!filter) {
+    return NextResponse.json({ error: "Filter not found" }, { status: 404 });
+  }
+
+  if (name !== undefined) filter.name = name;
+  if (description !== undefined) filter.description = description || null;
+  if (filterKeywords !== undefined) filter.filterKeywords = JSON.stringify(filterKeywords);
+  if (excludeFromNps !== undefined) filter.excludeFromNps = excludeFromNps;
+
+  await repo.save(filter);
+
+  // Recalculate noise flags for this project
+  await recalculateNoise(db, id);
+
+  return NextResponse.json(filter);
+}
+
 async function applyNoiseFilter(
   db: import("typeorm").DataSource,
   projectId: string,

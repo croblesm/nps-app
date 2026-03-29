@@ -65,7 +65,23 @@ export default function UploadPage() {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [result, setResult] = useState<UploadResult | null>(null);
+  const [dataExists, setDataExists] = useState(false);
+  const [existingRowCount, setExistingRowCount] = useState(0);
+  const [showUploadZone, setShowUploadZone] = useState(false);
   const { setPageContext } = useAssistantContext();
+
+  // Check if data already exists on mount
+  useEffect(() => {
+    fetch(`/api/projects/${projectId}/comments?limit=1`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.total > 0) {
+          setDataExists(true);
+          setExistingRowCount(data.total);
+        }
+      })
+      .catch(() => {});
+  }, [projectId]);
 
   useEffect(() => {
     setPageContext({
@@ -165,8 +181,29 @@ export default function UploadPage() {
         Upload your NPS survey data as a CSV file
       </p>
 
+      {/* Data exists status */}
+      {dataExists && !showUploadZone && !result && (
+        <Card className="mb-6">
+          <CardContent className="flex items-center gap-3 pt-4">
+            <CheckCircle className="size-5 text-primary shrink-0" />
+            <div className="flex-1">
+              <p className="font-semibold text-foreground">Data uploaded</p>
+              <p className="text-sm text-muted-foreground">
+                {existingRowCount.toLocaleString()} rows loaded in this project
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => setShowUploadZone(true)}
+            >
+              Replace Data
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Drop zone */}
-      {!result && (
+      {!result && (!dataExists || showUploadZone) && (
         <Card
           onDragOver={(e: React.DragEvent) => {
             e.preventDefault();

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
-import { Filter, X, Plus, Trash2, Eye } from "lucide-react";
+import { Filter, X, Plus, Trash2, Eye, Pencil } from "lucide-react";
 import { Spinner } from "@/components/ui/Spinner";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +23,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface NoiseFilterData {
   id: string;
@@ -45,6 +51,18 @@ export default function NoisePage() {
   const [saving, setSaving] = useState(false);
   const [matchPreview, setMatchPreview] = useState<number | null>(null);
 
+  // Edit dialog state
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editFilterId, setEditFilterId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editKeywords, setEditKeywords] = useState("");
+  const [editExcludeFromNps, setEditExcludeFromNps] = useState(true);
+  const [editSaving, setEditSaving] = useState(false);
+
+  // Match counts per filter
+  const [matchCounts, setMatchCounts] = useState<Record<string, number>>({});
+
   const { setPageContext } = useAssistantContext();
 
   useEffect(() => {
@@ -63,7 +81,77 @@ export default function NoisePage() {
 
   async function fetchFilters() {
     const res = await fetch(`/api/projects/${projectId}/noise`);
-    if (res.ok) setFilters(await res.json());
+    if (res.ok) {
+      const data = await res.json();
+      setFilters(data);
+      // Compute match counts client-side
+      computeMatchCounts(data);
+    }
+  }
+
+  async function computeMatchCounts(filterList: NoiseFilterData[]) {
+    if (filterList.length === 0) return;
+    try {
+      const res = await fetch(`/api/projects/${projectId}/comments?limit=10000`);
+      if (!res.ok) return;
+      const data = await res.json();
+      const counts: Record<string, number> = {};
+      for (const f of filterList) {
+        const kws: string[] = JSON.parse(f.filterKeywords || "[]");
+        const lower = kws.map((k) => k.toLowerCase());
+        const matches = data.comments.filter(
+          (c: { commentText: string | null }) =>
+            c.commentText &&
+            lower.some((kw) => c.commentText!.toLowerCase().includes(kw))
+        );
+        counts[f.id] = matches.length;
+      }
+      setMatchCounts(counts);
+    } catch {
+      // silently fail
+    }
+  }
+
+  function openEditDialog(f: NoiseFilterData) {
+    setEditFilterId(f.id);
+    setEditName(f.name);
+    setEditDescription(f.description || "");
+    const kws: string[] = JSON.parse(f.filterKeywords || "[]");
+    setEditKeywords(kws.join(", "));
+    setEditExcludeFromNps(f.excludeFromNps);
+    setEditDialogOpen(true);
+  }
+
+  async function handleEditSave() {
+    if (!editFilterId) return;
+    const kws = editKeywords.split(",").map((k) => k.trim()).filter(Boolean);
+    if (!editName.trim() || kws.length === 0) return;
+
+    setEditSaving(true);
+    try {
+      const res = await fetch(`/api/projects/${projectId}/noise`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          filterId: editFilterId,
+          name: editName.trim(),
+          description: editDescription.trim() || null,
+          filterKeywords: kws,
+          excludeFromNps: editExcludeFromNps,
+        }),
+      });
+      if (res.ok) {
+        toast.success("Filter updated");
+        setEditDialogOpen(false);
+        await fetchFilters();
+      } else {
+        toast.error("Failed to update filter");
+      }
+    } catch {
+      toast.error("Failed to update filter");
+    } finally {
+      setEditSaving(false);
+    }
   }
 
   async function previewMatches() {
@@ -158,6 +246,11 @@ export default function NoisePage() {
                       <span className="font-medium text-foreground">
                         {f.name}
                       </span>
+                      {matchCounts[f.id] !== undefined && (
+                        <Badge variant="secondary">
+                          {matchCounts[f.id]} matches
+                        </Badge>
+                      )}
                       {f.excludeFromNps && (
                         <Badge variant="destructive">
                           Excluded from NPS
@@ -177,6 +270,14 @@ export default function NoisePage() {
                       ))}
                     </div>
                   </div>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => openEditDialog(f)}
+                    >
+                      <Pencil className="size-4 text-muted-foreground hover:text-primary" />
+                    </Button>
                   <AlertDialog>
                     <AlertDialogTrigger>
                       <Button variant="ghost" size="sm">
@@ -203,12 +304,68 @@ export default function NoisePage() {
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
+                  </div>
                 </CardContent>
               </Card>
             );
           })}
         </div>
       )}
+
+      {/* Edit filter dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Noise Filter</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div className="space-y-2">
+              <Label htmlFor="edit-filter-name">Filter name</Label>
+              <Input
+                id="edit-filter-name"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-filter-description">Description (optional)</Label>
+              <Input
+                id="edit-filter-description"
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-filter-keywords">Keywords (comma-separated)</Label>
+              <Input
+                id="edit-filter-keywords"
+                value={editKeywords}
+                onChange={(e) => setEditKeywords(e.target.value)}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="edit-exclude-nps"
+                checked={editExcludeFromNps}
+                onCheckedChange={(checked) => setEditExcludeFromNps(checked)}
+              />
+              <Label htmlFor="edit-exclude-nps" className="font-normal">
+                Exclude matching comments from NPS score calculation
+              </Label>
+            </div>
+            <Button
+              onClick={handleEditSave}
+              disabled={editSaving || !editName.trim() || !editKeywords.trim()}
+            >
+              {editSaving ? (
+                <Spinner size="sm" label="Saving..." />
+              ) : (
+                "Save Changes"
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Create new filter */}
       <Card>

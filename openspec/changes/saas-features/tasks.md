@@ -37,17 +37,17 @@
 - [x] 0.32 Update `app/layout.tsx` — replace Header with SidebarProvider + AppSidebar + SidebarInset + TopBar. Verify: home page renders with sidebar
 - [x] 0.33 Simplify `app/project/[id]/layout.tsx` — remove project header + tab navigation (sidebar handles it). Keep AssistantContextProvider + content wrapper. Verify: all 6 project pages still load
 - [x] 0.34 Delete `components/ui/Header.tsx` (replaced by TopBar + sidebar). Move LLM status logic to top-bar.tsx. Verify: build passes
-- [ ] 0.35 Refactor AssistantPanel from floating panel to sidebar-integrated. Sheet trigger in sidebar footer. Verify: assistant opens from sidebar
-- [ ] 0.36 Upload page: detect existing data on mount, show success card + "Replace Data" button. Hide upload zone when data exists. Verify: shows correct state for existing project
-- [ ] 0.37 Categories page: add visible Pencil icon next to each category name (always visible). Verify: pencil shows without hover
-- [ ] 0.38 Categories page: move "Suggest More" + "AI Scan" to toolbar row at top. Move custom category form into Dialog. Verify: actions accessible at top of page
-- [ ] 0.39 Noise filters: add edit icon → Dialog for existing filters. Add PATCH handler to noise API route. Verify: can edit name/keywords of existing filter
-- [ ] 0.40 Noise filters: show match count badge per filter. Verify: count displays next to filter name
-- [ ] 0.41 GitHub page: add Tabs component ("Configuration" | "Created Issues (N)"). Verify: tabs switch between config and issues
-- [ ] 0.42 Summary page: add NpsVisualCards component with recharts PieChart (promoter/passive/detractor donut). Fetch stats on mount. Verify: chart renders above markdown
-- [ ] 0.43 Dashboard: add NpsDonutChart component (recharts PieChart with NPS score center label). Verify: chart renders between score cards and category breakdown
-- [ ] 0.44 Dashboard: add CategoryBarChart component (recharts horizontal BarChart). Clicking bar filters dashboard. Verify: bar click triggers category filter
-- [ ] 0.45 Dashboard: add subtle gradient to active score cards (from-primary/5 to-card). Replace emoji with clean label. Verify: visual improvement
+- [x] 0.35 Refactor AssistantPanel — repositioned above sidebar footer (bottom-16). Sheet trigger in sidebar footer. Verify: assistant opens from sidebar
+- [x] 0.36 Upload page: detect existing data on mount, show success card + "Replace Data" button. Hide upload zone when data exists
+- [x] 0.37 Categories page: add visible Pencil icon next to each category name (always visible)
+- [x] 0.38 Categories page: move "Suggest More" + "AI Scan" to toolbar row at top. Move custom category form into Dialog
+- [x] 0.39 Noise filters: add edit icon → Dialog for existing filters. Add PATCH handler to noise API route
+- [x] 0.40 Noise filters: show match count badge per filter
+- [x] 0.41 GitHub page: add Tabs component ("Configuration" | "Created Issues (N)")
+- [x] 0.42 Summary page: add NpsVisualCards component with recharts PieChart (promoter/passive/detractor donut)
+- [x] 0.43 Dashboard: add NpsDonutChart component (recharts PieChart with NPS score center label)
+- [x] 0.44 Dashboard: add CategoryBarChart component (recharts horizontal BarChart). Clicking bar filters dashboard
+- [x] 0.45 Dashboard: add subtle gradient to active score cards. Replace emoji with clean label
 - [ ] 0.46 Polish: remove max-w-7xl constraints, consistent p-4 md:p-6 spacing, breadcrumb context. Verify: all pages look clean
 - [ ] 0.47 Update specs, README, CLAUDE.md with sidebar layout + charts documentation. Update test counts.
 
