@@ -67,6 +67,17 @@
 - [x] 3.10 Create API route to get chat history (app/api/projects/[id]/chat/route.ts)
 - [x] 3.11 Write tests for embedding provider abstraction (embedBatch, embedText, provider detection), chat message schemas (Zod validation)
 - [x] 3.12 Update specs, README with chat analysis documentation
+- [x] 3.13 Smart embedding provider resolution (lib/ai/get-embedding-config.ts) — auto-find embedding-capable provider, add EMBEDDING_CAPABLE_PROVIDERS constant
+- [x] 3.14 Update embed and chat routes to use getEmbeddingConfig() instead of hardcoded default lookup
+- [x] 3.15 Replace bottom Chat Analysis card with floating action button + overlay ChatPanel
+- [x] 3.16 Add onClose prop to ChatPanel for overlay dismissal
+- [ ] 3.17 Write tests for getEmbeddingConfig logic
+- [ ] 3.18 Update specs, README, CLAUDE.md with smart provider resolution and floating chat docs
+- [ ] 3.19 Apply active dashboard filters (category, score, search) to chat similarity search
+- [ ] 3.20 Make K (top results count) configurable, default to 20 instead of 10
+- [ ] 3.21 Migrate similarity search to SQL Server 2025 VECTOR_DISTANCE function
+- [ ] 3.22 Add resume UI for partially generated embeddings
+- [ ] 3.23 Make citations clickable — scroll to referenced comment in data table
 
 ## 4. Contextual AI Assistant
 
