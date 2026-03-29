@@ -100,11 +100,14 @@ THEN the system SHALL perform a vector similarity search using JavaScript cosine
 AND the LLM SHALL generate a response summarizing the findings
 AND the response SHALL include inline citations referencing specific comment text and NPS scores.
 
-#### Scenario: User asks a question with no relevant comments
+#### Scenario: User asks a question with no relevant comments (NOT YET IMPLEMENTED)
 
 WHEN the user submits a query that has no semantically similar comments in the dataset
-THEN the system SHALL respond with a message indicating no relevant feedback was found for that query
+THEN the system SHALL detect that no comments have sufficient similarity (e.g., all scores below a threshold)
+AND respond with a message indicating no relevant feedback was found for that query
 AND suggest alternative questions based on the available categories.
+
+**Current implementation:** The LLM receives empty context and generates a response anyway, which may be inaccurate.
 
 #### Scenario: Citations are clickable (NOT YET IMPLEMENTED)
 

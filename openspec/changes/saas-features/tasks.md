@@ -88,6 +88,7 @@
 - [ ] 3.21 Migrate similarity search to SQL Server 2025 VECTOR_DISTANCE function
 - [ ] 3.22 Add resume UI for partially generated embeddings
 - [ ] 3.23 Make citations clickable — scroll to referenced comment in data table
+- [ ] 3.24 Handle "no relevant comments" — detect low similarity scores, return guidance instead of empty-context LLM response
 
 ## 4. Contextual AI Assistant
 
