@@ -115,12 +115,12 @@
 - [x] 4.11 Summary page context — pass whether summary has been generated. Verify: assistant explains summary features
 
 ### 4d. Proactive Recommendations
-- [ ] 4.12 Detect unfiltered noise patterns (e.g., "N/A", "test", single-word comments) and suggest noise filters when user opens assistant on noise page. Verify: recommendation appears in response
-- [ ] 4.13 Detect high detractor categories on dashboard and suggest investigation. Verify: recommendation includes category name and detractor count
+- [x] 4.12 Detect unfiltered noise patterns (e.g., "N/A", "test", single-word comments) and suggest noise filters when user opens assistant on noise page. Verify: recommendation appears in response
+- [x] 4.13 Detect high detractor categories on dashboard and suggest investigation. Verify: recommendation includes category name and detractor count
 
 ### 4e. Tests and Documentation
-- [ ] 4.14 Write unit tests for buildAssistantSystemPrompt — test each page context type (upload, structure, categories, dashboard, noise, summary). Verify: npm test passes
-- [ ] 4.15 Update specs/ai-assistant/spec.md with implementation details. Update README and CLAUDE.md with assistant documentation. Verify: specs match code
+- [x] 4.14 Write unit tests for buildAssistantSystemPrompt — test each page context type (upload, structure, categories, dashboard, noise, summary). Verify: npm test passes
+- [x] 4.15 Update specs/ai-assistant/spec.md with implementation details. Update README and CLAUDE.md with assistant documentation. Verify: specs match code
 
 ## 5. Integration and Polish
 

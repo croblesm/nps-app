@@ -11,7 +11,7 @@ NPS Insight Engine — a generic, AI-powered NPS (Net Promoter Score) analysis p
 - **Dev server:** `npm run dev` (Next.js on localhost:3000)
 - **Build:** `npm run build`
 - **Start prod:** `npm start`
-- **Test:** `npm test` (Vitest, 141 tests across 10 suites)
+- **Test:** `npm test` (Vitest, 168 tests across 11 suites)
 - **Test watch:** `npm run test:watch`
 - **DB init:** `npm run db:init` (creates database + tables via TypeORM)
 - **Docker SQL Server:** `docker compose up -d` (starts SQL Server 2025 on port 1433)
@@ -70,6 +70,7 @@ components/
 lib/
   ai/                         # LLM providers, prompts, encryption
     get-embedding-config.ts   #   Smart embedding provider resolution (auto-finds OpenAI/Azure/Ollama)
+    assistant-prompts.ts      #   Page-aware system prompt builder for AI assistant
   auth/                       # Auth utilities
     get-user.ts               #   Server-side user resolution from session
   csv/                        # CSV validator, sampler

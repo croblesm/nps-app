@@ -104,17 +104,56 @@ export function buildAssistantSystemPrompt(
     );
   }
 
+  // Proactive recommendations based on data patterns
+  const recommendations: string[] = [];
+
+  if (page === "noise" && context.noiseFilters) {
+    const filters = context.noiseFilters as { name: string; keywords: string[] }[];
+    const allKeywords = filters.flatMap((f) => f.keywords.map((k) => k.toLowerCase()));
+    const commonNoise = ["n/a", "na", "test", "asdf", "xxx", "none", "no comment"];
+    const missing = commonNoise.filter((n) => !allKeywords.includes(n));
+    if (missing.length > 0) {
+      recommendations.push(
+        `Consider adding noise filters for: ${missing.map((m) => `"${m}"`).join(", ")}. These are common non-actionable patterns in NPS surveys.`
+      );
+    }
+  }
+
+  if (page === "dashboard" && context.categoryBreakdown && Array.isArray(context.categoryBreakdown)) {
+    const cats = context.categoryBreakdown as { name: string; count: number; percentage: number }[];
+    const highImpact = cats.filter((c) => c.percentage >= 20 && c.name !== "General Feedback");
+    if (highImpact.length > 0) {
+      recommendations.push(
+        `High-impact categories worth investigating: ${highImpact.map((c) => `"${c.name}" (${c.percentage}%)`).join(", ")}. Consider exporting these as GitHub issues for your team.`
+      );
+    }
+  }
+
+  if (page === "dashboard" && context.npsScore !== undefined) {
+    const score = context.npsScore as number;
+    if (score < 0) {
+      recommendations.push(
+        `Your NPS score is ${score}, which is below zero. Focus on understanding detractor feedback — check the category breakdown for the most common complaint themes.`
+      );
+    }
+  }
+
+  const recommendationBlock = recommendations.length
+    ? `\n\nProactive recommendations (share these with the user):\n${recommendations.map((r) => `- ${r}`).join("\n")}`
+    : "";
+
   const contextBlock = contextLines.length
     ? `\n\nCurrent context:\n${contextLines.join("\n")}`
     : "";
 
   return `You are an AI assistant for the NPS Insight Engine — an AI-powered NPS analysis platform for product managers. You help users understand their NPS data, navigate the workflow, and make data-driven decisions.
 
-${pageGuidance}${contextBlock}
+${pageGuidance}${contextBlock}${recommendationBlock}
 
 Guidelines:
 - Be concise and actionable — product managers value brevity
 - Reference specific data points from the context when available
+- If proactive recommendations are listed above, include them naturally in your first response
 - If you don't have enough context to answer, say so and suggest what the user can do
 - When suggesting actions, be specific about which page or button to use
 - Do not make up data — only reference what's in the context`;

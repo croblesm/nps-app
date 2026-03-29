@@ -363,7 +363,7 @@ npm test              # Run all tests once
 npm run test:watch    # Run tests in watch mode
 ```
 
-**Test suites (141 tests):**
+**Test suites (168 tests):**
 
 | Suite | File | What it covers |
 |-------|------|---------------|
@@ -505,8 +505,14 @@ Natural language Q&A over NPS data using retrieval-augmented generation:
 - **Chat history** — Conversations are persisted per project in the `chat_messages` table
 - Access from the floating chat button on the dashboard, or the Chat tab on any project
 
+#### AI Assistant
+Contextual AI helper available on every project page:
+- **Floating panel** — Bottom-left button opens a collapsible chat panel that persists across page navigation
+- **Page-aware context** — Each page injects its data (upload status, columns, categories, NPS stats, noise filters, summary status) into the assistant prompt without RAG
+- **Proactive recommendations** — Suggests noise filters for common patterns (N/A, test), highlights high-impact categories, warns about negative NPS scores
+- **Uses configured LLM** — Same provider as classification/summary; shows error with Settings link if unconfigured
+
 ### Planned (Not Yet Implemented)
-- **AI Assistant** — Contextual helper panel on every project page
 - **Cloud deployment** — Azure App Service or Vercel, migrate to Azure SQL
 - **Multi-tenancy** — User/org-scoped data isolation
 
