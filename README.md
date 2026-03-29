@@ -18,6 +18,7 @@ An AI-powered NPS (Net Promoter Score) analysis platform for product managers. U
 - **Noise filters** — Keyword-based filters that can exclude comments from NPS score calculation
 - **AI summary report** — On-demand markdown report with executive summary, theme analysis, key quotes, and recommendations
 - **RAG chat analysis** — Ask natural language questions about your NPS data; vector embeddings + cosine similarity search retrieve relevant comments, LLM generates cited answers
+- **GitHub integration** — Connect a repo, export NPS categories as GitHub issues with impact summaries, representative quotes, and recommendations; auto-creates labels; tracks all created issues
 - **Data export** — Download filtered CSV or project metadata JSON (categories, noise filters, structure)
 - **Multi-provider LLM** — Bring your own API key: Anthropic (priority), OpenAI, Azure OpenAI, or Ollama (local)
 - **Dark mode** — Enabled by default, full dark theme throughout

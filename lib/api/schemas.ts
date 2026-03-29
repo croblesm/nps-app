@@ -65,6 +65,28 @@ export const createNoiseFilterSchema = z.object({
   excludeFromNps: z.boolean().optional(),
 });
 
+export const githubConfigSchema = z.object({
+  repoOwner: z.string().min(1, "Repository owner is required").max(255),
+  repoName: z.string().min(1, "Repository name is required").max(255),
+  pat: z.string().min(1, "Personal access token is required"),
+});
+
+export const createGithubIssueSchema = z.object({
+  categoryId: z.string().uuid().nullable().optional(),
+  categoryName: z.string().min(1, "Category name is required").max(255),
+  commentCount: z.number().int().min(0),
+  npsImpact: z.string().min(1),
+  topComments: z
+    .array(
+      z.object({
+        text: z.string().min(1),
+        nps: z.number().int().min(0).max(10),
+      })
+    )
+    .min(1, "At least one comment is required"),
+  recommendation: z.string().min(1),
+});
+
 export const saveStructureSchema = z.object({
   includedColumns: z.array(z.string()),
   excludedColumns: z.array(z.string()),

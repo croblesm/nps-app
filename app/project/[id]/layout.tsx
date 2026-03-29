@@ -11,6 +11,7 @@ import {
   FileText,
   ArrowLeft,
   Download,
+  GitFork,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -28,6 +29,7 @@ const NAV_ITEMS = [
   { href: "categories", label: "Categories", icon: Tags },
   { href: "noise", label: "Noise Filters", icon: Filter },
   { href: "summary", label: "Summary", icon: FileText },
+  { href: "github", label: "GitHub", icon: GitFork },
 ];
 
 export default function ProjectLayout({
