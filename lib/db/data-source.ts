@@ -8,6 +8,10 @@ import { NoiseFilter } from "./entities/NoiseFilter";
 import { Comment } from "./entities/Comment";
 import { Summary } from "./entities/Summary";
 import { LlmConfig } from "./entities/LlmConfig";
+import { ChatMessage } from "./entities/ChatMessage";
+import { GitHubConfig } from "./entities/GitHubConfig";
+import { GitHubIssue } from "./entities/GitHubIssue";
+import { User } from "./entities/User";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -29,6 +33,10 @@ export const AppDataSource = new DataSource({
     Comment,
     Summary,
     LlmConfig,
+    ChatMessage,
+    GitHubConfig,
+    GitHubIssue,
+    User,
   ],
   options: {
     trustServerCertificate: true,

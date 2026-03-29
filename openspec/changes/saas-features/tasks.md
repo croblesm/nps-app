@@ -25,48 +25,48 @@
 
 ## 1. Authentication Foundation
 
-- [ ] 1.1 Install next-auth@5, @auth/typeorm-adapter, bcryptjs
-- [ ] 1.2 Create User entity (lib/db/entities/User.ts) with name, email, password, image fields
-- [ ] 1.3 Create NextAuth config (lib/auth/config.ts) with GitHub, Google, and Credentials providers
-- [ ] 1.4 Create auth API route (app/api/auth/[...nextauth]/route.ts)
-- [ ] 1.5 Create login page (app/login/page.tsx) with provider buttons and email/password form
-- [ ] 1.6 Create middleware.ts for route protection (exclude /login, /api/auth, static assets)
-- [ ] 1.7 Add userId FK to Project entity, update project CRUD to scope by authenticated user
-- [ ] 1.8 Create admin settings page (app/admin/page.tsx) with display name, connected accounts
-- [ ] 1.9 Add AUTH_REQUIRED env var to disable auth for local development
-- [ ] 1.10 Write tests for auth schemas, middleware logic, user scoping
-- [ ] 1.11 Update specs, README, CLAUDE.md with auth documentation
+- [x] 1.1 Install next-auth@5, @auth/typeorm-adapter, bcryptjs
+- [x] 1.2 Create User entity (lib/db/entities/User.ts) with name, email, password, image fields
+- [x] 1.3 Create NextAuth config (lib/auth/config.ts) with GitHub, Google, and Credentials providers
+- [x] 1.4 Create auth API route (app/api/auth/[...nextauth]/route.ts)
+- [x] 1.5 Create login page (app/login/page.tsx) with provider buttons and email/password form
+- [x] 1.6 Create middleware.ts for route protection (exclude /login, /api/auth, static assets)
+- [x] 1.7 Add userId FK to Project entity, update project CRUD to scope by authenticated user
+- [x] 1.8 Create admin settings page (app/admin/page.tsx) with display name, connected accounts
+- [x] 1.9 Add AUTH_REQUIRED env var to disable auth for local development
+- [x] 1.10 Write tests for auth schemas, middleware logic, user scoping
+- [x] 1.11 Update specs, README, CLAUDE.md with auth documentation
 
 ## 2. GitHub Integration
 
-- [ ] 2.1 Install @octokit/rest
-- [ ] 2.2 Create GitHubConfig entity (lib/db/entities/GitHubConfig.ts) with repoOwner, repoName, encryptedPat
-- [ ] 2.3 Create GitHubIssue entity (lib/db/entities/GitHubIssue.ts) with issueNumber, url, title, labels
-- [ ] 2.4 Create GitHub repo config page in project settings (app/project/[id]/github/page.tsx)
-- [ ] 2.5 Create API route to save/validate GitHub config (app/api/projects/[id]/github/route.ts) — validates PAT by calling repos endpoint
-- [ ] 2.6 Create issue template builder (lib/github/issue-template.ts) — markdown template with NPS impact, quotes, recommendations
-- [ ] 2.7 Create API route to export category as GitHub issue (app/api/projects/[id]/github/issues/route.ts)
-- [ ] 2.8 Add "Export to GitHub" action on category breakdown cards (components/nps/CategoryBreakdown.tsx)
-- [ ] 2.9 Add comment selection + batch export to GitHub from data table
-- [ ] 2.10 Create GitHub Issues tracker tab (app/project/[id]/github/page.tsx) showing created issues with status
-- [ ] 2.11 Add "GitHub" step to project sidebar navigation
-- [ ] 2.12 Write tests for issue template builder, GitHub config schema validation
-- [ ] 2.13 Update specs, README with GitHub integration documentation
+- [x] 2.1 Install @octokit/rest
+- [x] 2.2 Create GitHubConfig entity (lib/db/entities/GitHubConfig.ts) with repoOwner, repoName, encryptedPat
+- [x] 2.3 Create GitHubIssue entity (lib/db/entities/GitHubIssue.ts) with issueNumber, url, title, labels
+- [x] 2.4 Create GitHub repo config page in project settings (app/project/[id]/github/page.tsx)
+- [x] 2.5 Create API route to save/validate GitHub config (app/api/projects/[id]/github/route.ts) — validates PAT by calling repos endpoint
+- [x] 2.6 Create issue template builder (lib/github/issue-template.ts) — markdown template with NPS impact, quotes, recommendations
+- [x] 2.7 Create API route to export category as GitHub issue (app/api/projects/[id]/github/issues/route.ts)
+- [x] 2.8 Add "Export to GitHub" action on category breakdown cards (components/nps/CategoryBreakdown.tsx)
+- [x] 2.9 Add comment selection + batch export to GitHub from data table
+- [x] 2.10 Create GitHub Issues tracker tab (app/project/[id]/github/page.tsx) showing created issues with status
+- [x] 2.11 Add "GitHub" step to project sidebar navigation
+- [x] 2.12 Write tests for issue template builder, GitHub config schema validation
+- [x] 2.13 Update specs, README with GitHub integration documentation
 
 ## 3. RAG Chat Analysis
 
-- [ ] 3.1 Add embedding column to Comment entity: @Column("vector", { length: 1536, nullable: true })
-- [ ] 3.2 Add embeddingProvider, embeddingModel, embeddingDimensions, chatEnabled columns to Project entity
-- [ ] 3.3 Create embedding provider abstraction (lib/ai/embeddings.ts) — supports OpenAI, Azure, Ollama embedding endpoints
-- [ ] 3.4 Create API route for embedding pipeline (app/api/ai/embed/route.ts) — batch embed comments with progress
-- [ ] 3.5 Create API route for chat (app/api/ai/chat/route.ts) — embed question, vector search, LLM answer with citations
-- [ ] 3.6 Create ChatMessage entity (lib/db/entities/ChatMessage.ts)
-- [ ] 3.7 Build "Enable Chat Analysis" button on dashboard with embedding progress UI
-- [ ] 3.8 Build chat panel component (components/nps/ChatPanel.tsx) — input, message history, cited comments
-- [ ] 3.9 Handle Anthropic provider fallback — detect and prompt for embedding provider config
-- [ ] 3.10 Create API route to get chat history (app/api/projects/[id]/chat/route.ts)
-- [ ] 3.11 Write tests for embedding provider abstraction, chat message schemas
-- [ ] 3.12 Update specs, README with chat analysis documentation
+- [x] 3.1 Add embedding column to Comment entity: @Column("vector", { length: 1536, nullable: true })
+- [x] 3.2 Add embeddingProvider, embeddingModel, embeddingDimensions, chatEnabled columns to Project entity
+- [x] 3.3 Create embedding provider abstraction (lib/ai/embeddings.ts) — supports OpenAI, Azure, Ollama embedding endpoints
+- [x] 3.4 Create API route for embedding pipeline (app/api/ai/embed/route.ts) — batch embed comments with progress
+- [x] 3.5 Create API route for chat (app/api/ai/chat/route.ts) — embed question, vector search, LLM answer with citations
+- [x] 3.6 Create ChatMessage entity (lib/db/entities/ChatMessage.ts)
+- [x] 3.7 Build "Enable Chat Analysis" button on dashboard with embedding progress UI
+- [x] 3.8 Build chat panel component (components/nps/ChatPanel.tsx) — input, message history, cited comments
+- [x] 3.9 Handle Anthropic provider fallback — detect and prompt for embedding provider config
+- [x] 3.10 Create API route to get chat history (app/api/projects/[id]/chat/route.ts)
+- [x] 3.11 Write tests for embedding provider abstraction, chat message schemas
+- [x] 3.12 Update specs, README with chat analysis documentation
 
 ## 4. Contextual AI Assistant
 

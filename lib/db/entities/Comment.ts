@@ -54,4 +54,7 @@ export class Comment {
 
   @Column({ type: "nvarchar", length: "MAX", nullable: true })
   metadata!: string | null;
+
+  @Column({ type: "nvarchar", length: "MAX", nullable: true })
+  embedding!: string | null;
 }

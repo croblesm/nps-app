@@ -14,7 +14,9 @@ import { CategoryBreakdown } from "@/components/nps/CategoryBreakdown";
 import { SearchBar } from "@/components/nps/SearchBar";
 import { FilterPanel } from "@/components/nps/FilterPanel";
 import { DataTable } from "@/components/nps/DataTable";
-import { Filter, Sparkles, LayoutDashboard } from "lucide-react";
+import { ChatPanel } from "@/components/nps/ChatPanel";
+import { Progress } from "@/components/ui/progress";
+import { Filter, Sparkles, LayoutDashboard, MessageSquare, Zap } from "lucide-react";
 
 interface CommentRow {
   id: string;
@@ -68,6 +70,9 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [needsClassification, setNeedsClassification] = useState(false);
   const [classifying, setClassifying] = useState(false);
+  const [chatEnabled, setChatEnabled] = useState(false);
+  const [embedding, setEmbedding] = useState(false);
+  const [embeddingProgress, setEmbeddingProgress] = useState("");
 
   // Filters
   const [page, setPage] = useState(1);
@@ -114,8 +119,17 @@ export default function DashboardPage() {
     }
   }, [projectId]);
 
+  const fetchProject = useCallback(async () => {
+    const res = await fetch(`/api/projects/${projectId}`);
+    if (res.ok) {
+      const project = await res.json();
+      setChatEnabled(project.chatEnabled || false);
+    }
+  }, [projectId]);
+
   useEffect(() => { fetchComments(); }, [fetchComments]);
   useEffect(() => { fetchStats(); }, [fetchStats]);
+  useEffect(() => { fetchProject(); }, [fetchProject]);
 
   async function handleClassify() {
     setClassifying(true);
@@ -134,6 +148,36 @@ export default function DashboardPage() {
       toast.error(result.error || "Classification failed");
     }
     setClassifying(false);
+  }
+
+  async function handleEnableChat() {
+    setEmbedding(true);
+    setEmbeddingProgress("Starting embedding pipeline...");
+    try {
+      const res = await fetch("/api/ai/embed", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectId }),
+      });
+      const result = await res.json();
+      if (res.ok) {
+        if (result.status === "complete") {
+          toast.success(`Embedded ${result.embedded} comments. Chat is ready!`);
+          setChatEnabled(true);
+        } else {
+          toast.warning(
+            `Partial embedding: ${result.embedded}/${result.totalToEmbed} comments. ${result.errors.length} errors.`
+          );
+        }
+      } else {
+        toast.error(result.error || "Embedding failed");
+      }
+    } catch {
+      toast.error("Failed to start embedding pipeline");
+    } finally {
+      setEmbedding(false);
+      setEmbeddingProgress("");
+    }
   }
 
   function handleSort(col: string) {
@@ -277,6 +321,44 @@ export default function DashboardPage() {
           />
         </CardContent>
       </Card>
+
+      {/* Chat Analysis Section */}
+      {chatEnabled ? (
+        <ChatPanel projectId={projectId} />
+      ) : (
+        <Card>
+          <CardContent className="space-y-3">
+            <div className="flex items-center gap-2 text-base font-medium">
+              <MessageSquare className="size-4" />
+              Chat Analysis
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Enable AI-powered chat to ask natural language questions about your NPS data.
+              This will generate vector embeddings for all comments.
+            </p>
+            {embedding && embeddingProgress && (
+              <div className="space-y-2">
+                <Progress value={null} className="h-2" />
+                <p className="text-xs text-muted-foreground">{embeddingProgress}</p>
+              </div>
+            )}
+            <Button
+              onClick={handleEnableChat}
+              disabled={embedding}
+              variant="outline"
+            >
+              {embedding ? (
+                <Spinner size="sm" label="Embedding comments..." />
+              ) : (
+                <>
+                  <Zap className="size-4" />
+                  Enable Chat Analysis
+                </>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

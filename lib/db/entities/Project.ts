@@ -18,6 +18,9 @@ export class Project {
   @Column({ type: "nvarchar", length: "MAX", nullable: true })
   description!: string | null;
 
+  @Column({ type: "uniqueidentifier", nullable: true })
+  userId!: string | null;
+
   @Column({ type: "nvarchar", length: "MAX", nullable: true })
   analysisHints!: string | null;
 
@@ -32,6 +35,18 @@ export class Project {
 
   @UpdateDateColumn({ type: "datetime2" })
   updatedAt!: Date;
+
+  @Column({ type: "nvarchar", length: 50, nullable: true })
+  embeddingProvider!: string | null;
+
+  @Column({ type: "nvarchar", length: 255, nullable: true })
+  embeddingModel!: string | null;
+
+  @Column({ type: "int", nullable: true })
+  embeddingDimensions!: number | null;
+
+  @Column({ type: "bit", default: false })
+  chatEnabled!: boolean;
 
   @OneToMany("DataSource", "project")
   dataSources!: unknown[];
