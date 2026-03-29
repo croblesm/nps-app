@@ -61,25 +61,39 @@ THEN the register API route SHALL return 409 with error "An account with this em
 
 ### Requirement: User table in database
 
-The system SHALL store user accounts in a users database table. The table MUST include: id, name, email, hashed password (nullable for OAuth users), avatar URL, provider, provider account ID, created date, and updated date.
+The system SHALL store user accounts in a `users` database table using the TypeORM entity `lib/db/entities/User.ts`. The table includes the following columns: `id` (UUID, auto-generated), `name` (nvarchar 255, nullable), `email` (nvarchar 255, unique), `password` (nvarchar 255, nullable — null for OAuth-only users), `image` (nvarchar 500, nullable — avatar URL), `emailVerified` (datetime2, nullable), and `createdAt` (datetime2, auto-generated).
 
-#### Scenario: OAuth user record is created
+**Current implementation:** The User entity does not include provider or providerAccountId fields. OAuth user creation is handled internally by NextAuth.js.
+
+#### Scenario: Credentials user record is created
+
+WHEN a user registers via the sign-up form
+THEN the system SHALL create a user record with name, lowercased email, bcrypt-hashed password, and null image
+AND `createdAt` SHALL be set automatically.
+
+#### Scenario: OAuth user signs in
+
+WHEN a user signs in via GitHub or Google
+THEN NextAuth.js SHALL handle user creation and account linking internally
+AND the User record SHALL have a null password field for OAuth-only accounts.
+
+#### Scenario: OAuth user creation with provider tracking (NOT YET IMPLEMENTED)
 
 WHEN a user signs in via GitHub for the first time
-THEN the system SHALL create a user record with the GitHub display name, email, avatar URL, provider set to "github", and provider account ID
-AND the hashed password field SHALL be null.
+THEN the system SHALL create a user record with the GitHub profile data
+AND store the provider name and provider account ID for tracking
+AND the User entity SHALL include `provider` (nvarchar) and `providerAccountId` (nvarchar) fields.
 
-#### Scenario: Existing OAuth user signs in again
-
-WHEN a user who previously signed in via GitHub signs in again
-THEN the system SHALL update the existing user record with the latest name and avatar URL from GitHub
-AND SHALL NOT create a duplicate user record.
-
-#### Scenario: Account linking by email
+#### Scenario: OAuth account linking across providers (NOT YET IMPLEMENTED)
 
 WHEN a user signs in via Google with the same email address as an existing GitHub-linked account
 THEN the system SHALL link both providers to the same user record
-AND the user SHALL see all their projects regardless of which provider they used to sign in.
+AND the user SHALL be able to sign in with either provider.
+
+#### Scenario: OAuth user profile updates (NOT YET IMPLEMENTED)
+
+WHEN a user who previously signed in via GitHub signs in again
+THEN the system SHALL update the existing user record with the latest profile data (name, avatar URL).
 
 ---
 
@@ -162,8 +176,17 @@ AND display a toast notification confirming the update.
 #### Scenario: User views connected accounts
 
 WHEN the user navigates to admin settings
-THEN the system SHALL display a list of connected providers (Email/Password, GitHub, Google) each in a bordered row with a Lucide icon
-AND provide a Badge component showing "Active"/"Connected" or "Not set"/"Not connected" for each provider.
+THEN the system SHALL display a list of providers (Email/Password, GitHub, Google) each in a bordered row with an icon (Lucide `Mail` for email, inline SVGs for GitHub and Google)
+AND provide a Badge component showing connection status.
+
+**Current implementation:** Uses session heuristics (image presence) to infer provider status. Does not query actual provider-account linkage from the database.
+
+#### Scenario: Accurate connected accounts detection (NOT YET IMPLEMENTED)
+
+WHEN the user navigates to admin settings
+THEN the system SHALL query the database for linked provider accounts
+AND display accurate "Connected"/"Not connected" status for each OAuth provider
+AND allow the user to link or unlink providers.
 
 #### Scenario: User changes their password
 
@@ -195,9 +218,16 @@ A SessionProvider from next-auth/react is wrapped around the root layout via com
 
 #### Scenario: User signs out
 
-WHEN the user clicks "Sign Out" in the header dropdown
+WHEN the user initiates a sign-out action
 THEN the system SHALL invalidate the current session
 AND redirect the user to the sign-in page.
+**Current implementation:** The Header component displays a `UserCircle` icon that links to the `/admin` page. There is no sign-out dropdown in the header itself.
+
+#### Scenario: Sign-out dropdown in header (NOT YET IMPLEMENTED)
+
+WHEN the user clicks the profile icon in the header
+THEN a dropdown menu SHALL appear showing the user's name, email, and a "Sign Out" button
+AND clicking "Sign Out" SHALL invalidate the session and redirect to the login page.
 
 #### Scenario: Session expires due to inactivity
 
