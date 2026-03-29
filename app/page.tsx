@@ -35,11 +35,25 @@ interface ProjectSummary {
 export default function HomePage() {
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [quotes, setQuotes] = useState<Record<string, { promoter: string; detractor: string }>>({});
 
   useEffect(() => {
     fetch("/api/projects")
       .then((res) => res.json())
-      .then(setProjects)
+      .then((data: ProjectSummary[]) => {
+        setProjects(data);
+        // Fetch top quotes for each project with data
+        data.filter(p => p.commentCount > 0).forEach(p => {
+          Promise.all([
+            fetch(`/api/projects/${p.id}/comments?feedbackType=promoter&limit=5&sortBy=npsScore&sortDir=DESC`).then(r => r.json()),
+            fetch(`/api/projects/${p.id}/comments?feedbackType=detractor&limit=5&sortBy=npsScore&sortDir=ASC`).then(r => r.json()),
+          ]).then(([promo, detract]) => {
+            const promoText = promo.comments?.find((c: { commentText: string | null }) => c.commentText && c.commentText.length > 10)?.commentText || "";
+            const detractText = detract.comments?.find((c: { commentText: string | null }) => c.commentText && c.commentText.length > 10)?.commentText || "";
+            setQuotes(prev => ({ ...prev, [p.id]: { promoter: promoText, detractor: detractText } }));
+          }).catch(() => {});
+        });
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
@@ -121,14 +135,8 @@ export default function HomePage() {
                     )}
                   </Link>
                   <AlertDialog>
-                    <AlertDialogTrigger >
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                    <AlertDialogTrigger className="h-8 w-8 inline-flex items-center justify-center rounded-md text-muted-foreground hover:text-destructive hover:bg-muted transition-colors">
+                      <Trash2 className="h-4 w-4" />
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
@@ -153,51 +161,50 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <Link href={`/project/${project.id}/dashboard`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground mb-4">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {new Date(project.createdAt).toLocaleDateString()}
+                    </span>
+                    {project.commentCount > 0 && (
                       <span className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {new Date(project.createdAt).toLocaleDateString()}
+                        <MessageSquare className="h-3 w-3" />
+                        {project.commentCount} responses
                       </span>
-                      {project.commentCount > 0 && (
-                        <span className="flex items-center gap-1">
-                          <MessageSquare className="h-3 w-3" />
-                          {project.commentCount} responses
-                        </span>
-                      )}
-                      {project.npsScore !== null && (
-                        <Badge
-                          variant={project.npsScore >= 0 ? "default" : "destructive"}
-                          className="text-xs"
-                        >
-                          {project.npsScore >= 0 ? (
-                            <TrendingUp className="h-3 w-3 mr-1" />
-                          ) : (
-                            <TrendingDown className="h-3 w-3 mr-1" />
-                          )}
-                          NPS {project.npsScore}
-                          {" "}
-                          {project.npsScore >= 70 ? "🤩" : project.npsScore >= 50 ? "😀" : project.npsScore >= 30 ? "🙂" : project.npsScore >= 0 ? "😐" : "😟"}
-                        </Badge>
-                      )}
-                    </div>
-                    {project.promoterPct !== null && project.passivePct !== null && project.detractorPct !== null && (
-                      <div className="flex items-center gap-4">
-                        {/* Mini donut using CSS conic-gradient */}
+                    )}
+                    {project.npsScore !== null && (
+                      <Badge
+                        variant={project.npsScore >= 0 ? "default" : "destructive"}
+                        className="text-xs"
+                      >
+                        {project.npsScore >= 0 ? (
+                          <TrendingUp className="h-3 w-3 mr-1" />
+                        ) : (
+                          <TrendingDown className="h-3 w-3 mr-1" />
+                        )}
+                        NPS {project.npsScore}
+                        {" "}
+                        {project.npsScore >= 70 ? "🤩" : project.npsScore >= 50 ? "😀" : project.npsScore >= 30 ? "🙂" : project.npsScore >= 0 ? "😐" : "😟"}
+                      </Badge>
+                    )}
+                  </div>
+                  {project.promoterPct !== null && project.passivePct !== null && project.detractorPct !== null && (
+                    <div className="grid grid-cols-3 gap-6 items-center">
+                      {/* Donut chart */}
+                      <div className="flex items-center gap-3">
                         <div
-                          className="h-12 w-12 rounded-full shrink-0"
+                          className="h-16 w-16 rounded-full shrink-0"
                           style={{
                             background: `conic-gradient(
                               #22c55e 0% ${project.promoterPct}%,
                               #eab308 ${project.promoterPct}% ${project.promoterPct + project.passivePct}%,
                               #ef4444 ${project.promoterPct + project.passivePct}% 100%
                             )`,
-                            mask: "radial-gradient(circle at center, transparent 40%, black 41%)",
-                            WebkitMask: "radial-gradient(circle at center, transparent 40%, black 41%)",
+                            mask: "radial-gradient(circle at center, transparent 38%, black 39%)",
+                            WebkitMask: "radial-gradient(circle at center, transparent 38%, black 39%)",
                           }}
-                          title={`Promoters ${project.promoterPct}% / Passives ${project.passivePct}% / Detractors ${project.detractorPct}%`}
                         />
-                        <div className="text-xs text-muted-foreground space-y-0.5 hidden sm:block">
+                        <div className="text-xs text-muted-foreground space-y-1">
                           <div className="flex items-center gap-1.5">
                             <span className="h-2 w-2 rounded-full bg-[#22c55e]" />
                             {project.promoterPct}% Promoters
@@ -212,8 +219,26 @@ export default function HomePage() {
                           </div>
                         </div>
                       </div>
-                    )}
-                  </div>
+                      {/* Promoter highlight */}
+                      <div className="text-xs min-w-0">
+                        <div className="text-[#22c55e] font-medium mb-1">Top promoter</div>
+                        {quotes[project.id]?.promoter ? (
+                          <p className="text-muted-foreground line-clamp-2 italic">&quot;{quotes[project.id].promoter}&quot;</p>
+                        ) : (
+                          <p className="text-muted-foreground italic">Loading...</p>
+                        )}
+                      </div>
+                      {/* Detractor highlight */}
+                      <div className="text-xs min-w-0">
+                        <div className="text-[#ef4444] font-medium mb-1">Top concern</div>
+                        {quotes[project.id]?.detractor ? (
+                          <p className="text-muted-foreground line-clamp-2 italic">&quot;{quotes[project.id].detractor}&quot;</p>
+                        ) : (
+                          <p className="text-muted-foreground italic">Loading...</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </Link>
               </CardContent>
             </Card>

@@ -46,6 +46,10 @@ The application SHALL support both light and dark modes with a cohesive color pa
 ### Requirement: Polished card-based layouts
 All data display areas SHALL use shadcn/ui Card components with consistent padding, borders, hover effects, and shadow treatments.
 
+#### Scenario: Project list cards with NPS donut
+- **WHEN** the projects list page renders projects with NPS data
+- **THEN** each project card SHALL display a CSS donut chart showing promoter/passive/detractor distribution, a colored legend, and top promoter/detractor verbatim quotes
+
 #### Scenario: Dashboard score cards
 - **WHEN** the dashboard renders NPS score cards
 - **THEN** they SHALL use shadcn/ui Card components with proper border radius, shadow, and hover transitions
