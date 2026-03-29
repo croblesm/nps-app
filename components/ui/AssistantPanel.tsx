@@ -106,7 +106,7 @@ export function AssistantPanel({
     return (
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 left-6 z-50 flex items-center gap-2 rounded-full bg-secondary text-secondary-foreground px-4 py-3 shadow-lg hover:bg-secondary/80 transition-colors"
+        className="fixed bottom-16 left-6 z-50 flex items-center gap-2 rounded-full bg-secondary text-secondary-foreground px-4 py-3 shadow-lg hover:bg-secondary/80 transition-colors"
         title="Open AI Assistant"
       >
         <Sparkles className="size-5" />
@@ -116,7 +116,7 @@ export function AssistantPanel({
   }
 
   return (
-    <div className="fixed bottom-6 left-6 z-50 w-[380px] h-[500px] shadow-2xl rounded-xl border border-border bg-card flex flex-col overflow-hidden">
+    <div className="fixed bottom-16 left-6 z-50 w-[380px] h-[500px] shadow-2xl rounded-xl border border-border bg-card flex flex-col overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/50">
         <div className="flex items-center gap-2 text-sm font-medium">
