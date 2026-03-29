@@ -61,9 +61,7 @@ THEN the register API route SHALL return 409 with error "An account with this em
 
 ### Requirement: User table in database
 
-The system SHALL store user accounts in a `users` database table using the TypeORM entity `lib/db/entities/User.ts`. The table includes the following columns: `id` (UUID, auto-generated), `name` (nvarchar 255, nullable), `email` (nvarchar 255, unique), `password` (nvarchar 255, nullable — null for OAuth-only users), `image` (nvarchar 500, nullable — avatar URL), `emailVerified` (datetime2, nullable), and `createdAt` (datetime2, auto-generated).
-
-**Current implementation:** The User entity does not include provider or providerAccountId fields. OAuth user creation is handled internally by NextAuth.js.
+The system SHALL store user accounts in a `users` database table using the TypeORM entity `lib/db/entities/User.ts`. The table includes the following columns: `id` (UUID, auto-generated), `name` (nvarchar 255, nullable), `email` (nvarchar 255, unique), `password` (nvarchar 255, nullable — null for OAuth-only users), `image` (nvarchar 500, nullable — avatar URL), `provider` (nvarchar 50, nullable — OAuth provider name), `providerAccountId` (nvarchar 255, nullable — provider's user ID), `emailVerified` (datetime2, nullable), `createdAt` (datetime2, auto-generated), and `updatedAt` (datetime2, nullable).
 
 #### Scenario: Credentials user record is created
 

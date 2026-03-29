@@ -17,9 +17,18 @@ export class User {
   @Column({ type: "nvarchar", length: 500, nullable: true })
   image!: string | null;
 
+  @Column({ type: "nvarchar", length: 50, nullable: true })
+  provider!: string | null;
+
+  @Column({ type: "nvarchar", length: 255, nullable: true })
+  providerAccountId!: string | null;
+
   @Column({ type: "datetime2", nullable: true })
   emailVerified!: Date | null;
 
   @CreateDateColumn({ type: "datetime2" })
   createdAt!: Date;
+
+  @Column({ type: "datetime2", nullable: true })
+  updatedAt!: Date | null;
 }

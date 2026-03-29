@@ -36,7 +36,7 @@
 - [x] 1.9 Add AUTH_REQUIRED env var to disable auth for local development
 - [x] 1.10 Write tests for auth schemas (register Zod validation, profile update schema), middleware logic (authorized callback), user scoping (getCurrentUserId)
 - [x] 1.11 Update specs, README, CLAUDE.md with auth documentation
-- [ ] 1.12 Add provider/providerAccountId fields to User entity for OAuth tracking
+- [x] 1.12 Add provider/providerAccountId fields to User entity for OAuth tracking
 - [ ] 1.13 Implement OAuth user creation with profile callbacks (create/update User on GitHub/Google sign-in)
 - [ ] 1.14 Implement OAuth account linking (same email across GitHub + Google → single user)
 - [ ] 1.15 Accurate connected accounts detection in admin page (query DB instead of session heuristics)
