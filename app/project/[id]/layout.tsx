@@ -14,8 +14,8 @@ import {
   GitFork,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { AssistantPanel } from "@/components/ui/AssistantPanel";
 
 interface ProjectInfo {
   id: string;
@@ -123,6 +123,16 @@ export default function ProjectLayout({
 
       {/* Page content */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">{children}</div>
+
+      {/* AI Assistant */}
+      <AssistantPanel
+        projectId={projectId}
+        page={currentPage || "dashboard"}
+        pageContext={{
+          projectName: project?.name || "",
+          projectDescription: project?.description || "",
+        }}
+      />
     </div>
   );
 }

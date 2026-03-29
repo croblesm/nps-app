@@ -103,8 +103,8 @@
 - [x] 4.3 Create assistant prompt builder (lib/ai/assistant-prompts.ts) — buildAssistantSystemPrompt(page, context) returns a system prompt with page name, project metadata, and page-specific data injected. Verify: unit test for each page type
 
 ### 4b. Layout Integration
-- [ ] 4.4 Add AssistantPanel to project layout (app/project/[id]/layout.tsx) — render below children, pass current page name via usePathname(). Verify: panel visible on all 6 project pages
-- [ ] 4.5 Persist assistant open/closed state across page navigation — use React state in layout (not per-page). Verify: open panel, navigate to another tab, panel stays open
+- [x] 4.4 Add AssistantPanel to project layout (app/project/[id]/layout.tsx) — render below children, pass current page name via usePathname(). Verify: panel visible on all 6 project pages
+- [x] 4.5 Persist assistant open/closed state across page navigation — use React state in layout (not per-page). Verify: open panel, navigate to another tab, panel stays open
 
 ### 4c. Page Context Collection
 - [ ] 4.6 Upload page context — pass upload status (no file / file uploaded / structure confirmed) to assistant. Verify: assistant responds with CSV format guidance
