@@ -11,7 +11,7 @@ NPS Insight Engine — a generic, AI-powered NPS (Net Promoter Score) analysis p
 - **Dev server:** `npm run dev` (Next.js on localhost:3000)
 - **Build:** `npm run build`
 - **Start prod:** `npm start`
-- **Test:** `npm test` (Vitest, 87 tests across 7 suites)
+- **Test:** `npm test` (Vitest, 137 tests across 10 suites)
 - **Test watch:** `npm run test:watch`
 - **DB init:** `npm run db:init` (creates database + tables via TypeORM)
 - **Docker SQL Server:** `docker compose up -d` (starts SQL Server 2025 on port 1433)
@@ -30,9 +30,11 @@ Open in VS Code with Dev Containers extension → "Reopen in Container". Provide
 
 ### Stack
 - **Framework:** Next.js 15 (App Router), React 19, TypeScript
-- **Styling:** Tailwind CSS 4 with dark mode (class strategy, dark by default)
-- **Database:** SQL Server 2025 (Docker), TypeORM
+- **Styling:** Tailwind CSS 4 with shadcn/ui components, dark mode (class strategy, dark by default)
+- **Database:** SQL Server 2025 (Docker), TypeORM (with native VECTOR type for embeddings)
+- **Auth:** NextAuth.js v5 (GitHub, Google, credentials providers) — Edge-compatible config split (`auth.config.ts` for Edge, `auth.ts` for Node)
 - **AI:** Vercel AI SDK (`ai` package) — multi-provider (Anthropic, OpenAI, Azure OpenAI, Ollama)
+- **GitHub:** Octokit (GitHub issue creation from NPS data)
 - **CSV:** PapaParse
 - **Validation:** Zod (for AI structured output schemas)
 
@@ -41,19 +43,40 @@ Open in VS Code with Dev Containers extension → "Reopen in Container". Provide
 app/                          # Next.js App Router pages
   api/                        # API routes
     ai/{validate,categorize,classify,summarize}/
-    projects/[id]/{categories,comments,export,noise,structure}/
+    auth/                     # Auth API routes
+      register/               #   Email/password registration
+      profile/                #   User profile management
+      [...nextauth]/          #   NextAuth.js catch-all route
+    projects/[id]/            # Project CRUD + sub-resources
+      {categories,comments,export,noise,structure}/
+      chat/                   #   RAG chat messages (GET/POST)
+      embeddings/             #   Generate/store comment embeddings
+      github/                 #   GitHub integration (connect repo, create issues)
+        issues/               #   Issue creation from categories/comments
     settings/
     upload/
-  project/[id]/               # Project pages with sidebar layout
+  admin/                      # Admin settings page (user management)
+  login/                      # Login page (NextAuth)
+  register/                   # Registration page
+  project/[id]/               # Project pages with top-nav + tabs layout
     {upload,structure,categories,dashboard,noise,summary}/
+    chat/                     #   RAG chat analysis page
+    github/                   #   GitHub integration page
   settings/                   # LLM provider configuration
   new-project/                # Project creation
-components/ui/                # Shared UI components (Header)
+components/
+  providers.tsx               # SessionProvider + ThemeProvider wrapper
+  ui/                         # Shared UI components (shadcn/ui)
 lib/
   ai/                         # LLM providers, prompts, encryption
+  auth/                       # Auth utilities
+    get-user.ts               #   Server-side user resolution from session
   csv/                        # CSV validator, sampler
   db/                         # TypeORM entities, data source, connection
+    entities/                 #   Includes GitHubRepo, GitHubIssue, ChatMessage entities
   nps/                        # NPS calculation logic
+auth.ts                       # NextAuth.js config (Node runtime, DB adapter)
+auth.config.ts                # NextAuth.js config (Edge-compatible, no DB)
 openspec/                     # Spec-driven development artifacts
 ```
 
@@ -71,6 +94,10 @@ openspec/                     # Spec-driven development artifacts
 - TypeORM entities in `lib/db/entities/` — use string-based relation targets, import dynamically in API routes to avoid circular deps
 - All AI calls use Vercel AI SDK with Zod-validated structured output
 - API routes use `getDb()` for lazy-initialized database connection
+- Auth uses Edge-compatible config split: `auth.config.ts` (Edge middleware) and `auth.ts` (Node runtime with DB access). `SessionProvider` wraps the app in `components/providers.tsx`
+- GitHub integration entities (`GitHubRepo`, `GitHubIssue`) link to projects; Octokit handles GitHub API calls
+- `ChatMessage` entity stores RAG chat history; comment embeddings stored as SQL Server VECTOR type for cosine similarity search
+- `AUTH_REQUIRED=false` disables auth for local development (all projects accessible)
 
 ## Workflow Rules (MANDATORY)
 

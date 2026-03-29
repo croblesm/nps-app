@@ -1,0 +1,61 @@
+import { NextResponse } from "next/server";
+import { hash, compare } from "bcryptjs";
+import { z } from "zod";
+import { getDb } from "@/lib/db";
+import { auth } from "@/lib/auth";
+import { parseBody } from "@/lib/api/schemas";
+
+const updateProfileSchema = z.object({
+  name: z.string().min(1).max(255).optional(),
+  currentPassword: z.string().optional(),
+  newPassword: z.string().min(8).max(128).optional(),
+});
+
+export async function PATCH(request: Request) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const parsed = await parseBody(request, updateProfileSchema);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
+  }
+
+  const { name, currentPassword, newPassword } = parsed.data;
+
+  const db = await getDb();
+  const { User } = await import("@/lib/db/entities/User");
+  const repo = db.getRepository(User);
+
+  const user = await repo.findOneBy({ id: session.user.id });
+  if (!user) {
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  }
+
+  // Update name
+  if (name !== undefined) {
+    user.name = name.trim();
+  }
+
+  // Update password
+  if (currentPassword && newPassword) {
+    if (!user.password) {
+      return NextResponse.json(
+        { error: "No password set — this account uses OAuth login" },
+        { status: 400 }
+      );
+    }
+    const isValid = await compare(currentPassword, user.password);
+    if (!isValid) {
+      return NextResponse.json(
+        { error: "Current password is incorrect" },
+        { status: 400 }
+      );
+    }
+    user.password = await hash(newPassword, 12);
+  }
+
+  await repo.save(user);
+  return NextResponse.json({ name: user.name, email: user.email });
+}

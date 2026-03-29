@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
-import { Sun, Moon, Settings } from "lucide-react";
+import { Sun, Moon, Settings, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ActiveProvider {
@@ -78,6 +78,11 @@ export function Header() {
               )}
             </Button>
           )}
+          <Link href="/admin">
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <UserCircle className="h-4 w-4" />
+            </Button>
+          </Link>
           <Link href="/settings">
             <Button variant="ghost" size="icon" className="h-8 w-8">
               <Settings className="h-4 w-4" />

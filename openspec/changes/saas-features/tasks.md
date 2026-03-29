@@ -27,14 +27,14 @@
 
 - [x] 1.1 Install next-auth@5, @auth/typeorm-adapter, bcryptjs
 - [x] 1.2 Create User entity (lib/db/entities/User.ts) with name, email, password, image fields
-- [x] 1.3 Create NextAuth config (lib/auth/config.ts) with GitHub, Google, and Credentials providers
+- [x] 1.3 Create NextAuth config — split into Edge-compatible lib/auth/config.ts (callbacks only, no Node imports) and lib/auth/index.ts (GitHub, Google, Credentials providers with bcryptjs lookup)
 - [x] 1.4 Create auth API route (app/api/auth/[...nextauth]/route.ts)
 - [x] 1.5 Create login page (app/login/page.tsx) with provider buttons and email/password form
 - [x] 1.6 Create middleware.ts for route protection (exclude /login, /api/auth, static assets)
-- [x] 1.7 Add userId FK to Project entity, update project CRUD to scope by authenticated user
-- [x] 1.8 Create admin settings page (app/admin/page.tsx) with display name, connected accounts
+- [x] 1.7 Add userId FK to Project entity, update project CRUD to scope by authenticated user via getCurrentUserId() helper (lib/auth/get-user.ts)
+- [x] 1.8 Create admin settings page (app/admin/page.tsx) with profile name update, connected accounts display, and password change form (calls PATCH /api/auth/profile)
 - [x] 1.9 Add AUTH_REQUIRED env var to disable auth for local development
-- [x] 1.10 Write tests for auth schemas, middleware logic, user scoping
+- [x] 1.10 Write tests for auth schemas (register Zod validation, profile update schema), middleware logic (authorized callback), user scoping (getCurrentUserId)
 - [x] 1.11 Update specs, README, CLAUDE.md with auth documentation
 
 ## 2. GitHub Integration
@@ -46,11 +46,11 @@
 - [x] 2.5 Create API route to save/validate GitHub config (app/api/projects/[id]/github/route.ts) — validates PAT by calling repos endpoint
 - [x] 2.6 Create issue template builder (lib/github/issue-template.ts) — markdown template with NPS impact, quotes, recommendations
 - [x] 2.7 Create API route to export category as GitHub issue (app/api/projects/[id]/github/issues/route.ts)
-- [x] 2.8 Add "Export to GitHub" action on category breakdown cards (components/nps/CategoryBreakdown.tsx)
-- [x] 2.9 Add comment selection + batch export to GitHub from data table
+- [x] 2.8 Add "Export to GitHub" action on category breakdown cards (components/nps/CategoryBreakdown.tsx) — githubEnabled prop controls visibility, dashboard wires handleExportCategory callback
+- [x] 2.9 Add comment selection + batch export to GitHub from data table (DataTable.tsx) — checkbox column, selected state Set, selection toolbar with export/clear buttons, dashboard wires handleExportSelected
 - [x] 2.10 Create GitHub Issues tracker tab (app/project/[id]/github/page.tsx) showing created issues with status
 - [x] 2.11 Add "GitHub" step to project sidebar navigation
-- [x] 2.12 Write tests for issue template builder, GitHub config schema validation
+- [x] 2.12 Write tests for issue template builder (markdown output, NPS impact section), GitHub config schema validation (owner, repo, PAT fields)
 - [x] 2.13 Update specs, README with GitHub integration documentation
 
 ## 3. RAG Chat Analysis
@@ -63,9 +63,9 @@
 - [x] 3.6 Create ChatMessage entity (lib/db/entities/ChatMessage.ts)
 - [x] 3.7 Build "Enable Chat Analysis" button on dashboard with embedding progress UI
 - [x] 3.8 Build chat panel component (components/nps/ChatPanel.tsx) — input, message history, cited comments
-- [x] 3.9 Handle Anthropic provider fallback — detect and prompt for embedding provider config
+- [x] 3.9 Handle Anthropic provider detection — returns clear 400 error in both embed and chat API routes when provider is "anthropic", guiding user to configure OpenAI/Azure/Ollama
 - [x] 3.10 Create API route to get chat history (app/api/projects/[id]/chat/route.ts)
-- [x] 3.11 Write tests for embedding provider abstraction, chat message schemas
+- [x] 3.11 Write tests for embedding provider abstraction (embedBatch, embedText, provider detection), chat message schemas (Zod validation)
 - [x] 3.12 Update specs, README with chat analysis documentation
 
 ## 4. Contextual AI Assistant

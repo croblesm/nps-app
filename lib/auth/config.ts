@@ -1,28 +1,28 @@
 import type { NextAuthConfig } from "next-auth";
-import GitHub from "next-auth/providers/github";
-import Google from "next-auth/providers/google";
-import Credentials from "next-auth/providers/credentials";
 
+/**
+ * Edge-compatible auth config (no Node.js-only imports like TypeORM/bcryptjs).
+ * Used by middleware.ts for route protection.
+ * The Credentials provider with DB lookup is added in lib/auth/index.ts (Node.js only).
+ */
 export const authConfig: NextAuthConfig = {
-  providers: [
-    GitHub,
-    Google,
-    Credentials({
-      name: "Email",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        // Placeholder — will be implemented with DB lookup
-        return null;
-      },
-    }),
-  ],
+  providers: [],
   pages: {
     signIn: "/login",
   },
   callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token.id && session.user) {
+        session.user.id = token.id as string;
+      }
+      return session;
+    },
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const isAuthPage =

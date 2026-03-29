@@ -17,13 +17,31 @@ import { Separator } from "@/components/ui/separator";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleCredentialsLogin(e: React.FormEvent) {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
     try {
+      if (isSignUp) {
+        const res = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, password }),
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          setError(data.error || "Registration failed");
+          return;
+        }
+      }
       await signIn("credentials", { email, password, callbackUrl: "/" });
+    } catch {
+      setError("Something went wrong");
     } finally {
       setIsLoading(false);
     }
@@ -36,7 +54,9 @@ export default function LoginPage() {
           <CardTitle className="text-2xl font-bold">
             NPS Insight Engine
           </CardTitle>
-          <CardDescription>Sign in to your account to continue</CardDescription>
+          <CardDescription>
+            {isSignUp ? "Create a new account" : "Sign in to your account to continue"}
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <Button
@@ -81,7 +101,24 @@ export default function LoginPage() {
             </div>
           </div>
 
+          {error && (
+            <p className="text-sm text-destructive text-center">{error}</p>
+          )}
+
           <form onSubmit={handleCredentialsLogin} className="space-y-4">
+            {isSignUp && (
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="Your name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -98,16 +135,30 @@ export default function LoginPage() {
               <Input
                 id="password"
                 type="password"
-                placeholder="Enter your password"
+                placeholder={isSignUp ? "At least 8 characters" : "Enter your password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                minLength={isSignUp ? 8 : undefined}
               />
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Signing in..." : "Sign in with Email"}
+              {isLoading
+                ? isSignUp ? "Creating account..." : "Signing in..."
+                : isSignUp ? "Create Account" : "Sign in with Email"}
             </Button>
           </form>
+
+          <p className="text-center text-sm text-muted-foreground">
+            {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
+            <button
+              type="button"
+              onClick={() => { setIsSignUp(!isSignUp); setError(""); }}
+              className="text-primary hover:underline font-medium"
+            >
+              {isSignUp ? "Sign in" : "Sign up"}
+            </button>
+          </p>
         </CardContent>
       </Card>
     </div>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Header } from "@/components/ui/Header";
+import { Providers } from "@/components/providers";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
@@ -21,28 +22,30 @@ export default function RootLayout({
   return (
     <html lang="en" className={cn("font-sans", geist.variable)} suppressHydrationWarning>
       <body className="min-h-screen flex flex-col bg-background text-foreground">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Header />
-          <div className="flex-1">{children}</div>
-          <footer className="border-t border-border py-4 text-center text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()}{" "}
-            <a
-              href="https://croblesm.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-primary transition-colors"
-            >
-              croblesm
-            </a>
-            . All rights reserved.
-          </footer>
-          <Toaster />
-        </ThemeProvider>
+        <Providers>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Header />
+            <div className="flex-1">{children}</div>
+            <footer className="border-t border-border py-4 text-center text-xs text-muted-foreground">
+              &copy; {new Date().getFullYear()}{" "}
+              <a
+                href="https://croblesm.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-primary transition-colors"
+              >
+                croblesm
+              </a>
+              . All rights reserved.
+            </footer>
+            <Toaster />
+          </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );

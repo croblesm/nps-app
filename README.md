@@ -243,7 +243,21 @@ Go to the AI Summary page and click "Generate Summary" for a markdown report inc
 
 Download as `.md` file or view in-app.
 
-### Step 9: Export Data
+### Step 9: Chat with Your Data (Optional)
+Go to the Chat tab. If embeddings haven't been generated yet, click "Generate Embeddings" (requires OpenAI or Ollama — Anthropic does not support embeddings). Once ready, ask natural language questions like:
+- "What are the top complaints from detractors?"
+- "What do promoters love most?"
+- "Are there any comments about performance issues?"
+
+The system retrieves relevant comments via cosine similarity and generates a cited answer.
+
+### Step 10: Export to GitHub Issues (Optional)
+Go to the GitHub tab, connect a repository, then:
+- **Export categories**: Creates one issue per NPS category with impact summary, quotes, and recommendations
+- **Export comments**: Create issues from selected individual comments
+- Labels are auto-created in the repo. All issues are tracked in the GitHub tab.
+
+### Step 11: Export Data
 Use the export API endpoints:
 - **Filtered CSV**: `GET /api/projects/{id}/export?format=csv`
 - **Project metadata**: `GET /api/projects/{id}/export?format=metadata`
@@ -263,14 +277,25 @@ nps-app/
         categorize/                 #   Theme discovery
         classify/                   #   Bulk classification
         summarize/                  #   Summary generation
+      auth/                         # Auth API routes
+        register/                   #   Email/password registration
+        profile/                    #   User profile management
+        [...nextauth]/              #   NextAuth.js catch-all route
       projects/[id]/                # Project CRUD + sub-resources
         categories/                 #   Category management
         comments/                   #   Paginated comment queries
         export/                     #   CSV and metadata export
         noise/                      #   Noise filter CRUD
         structure/                  #   Report structure
+        chat/                       #   RAG chat messages (GET/POST)
+        embeddings/                 #   Generate/store comment embeddings
+        github/                     #   GitHub repo connection + issue creation
+          issues/                   #   Create issues from categories/comments
       settings/                     # LLM provider configuration
       upload/                       # CSV upload + validation
+    admin/                          # Admin settings page
+    login/                          # Login page
+    register/                       # Registration page
     project/[id]/                   # Project pages
       upload/                       #   CSV upload UI
       structure/                    #   Report structure review
@@ -278,14 +303,21 @@ nps-app/
       dashboard/                    #   NPS dashboard
       noise/                        #   Noise filter console
       summary/                      #   AI summary report
+      chat/                         #   RAG chat analysis
+      github/                       #   GitHub integration
     settings/                       # LLM settings page
     new-project/                    # Project creation form
-  components/ui/                    # Shared UI components
+  components/
+    providers.tsx                    # SessionProvider + ThemeProvider
+    ui/                             # Shared UI components (shadcn/ui)
   lib/
     ai/                             # LLM providers, prompts, encryption
+    auth/                           # Auth utilities (get-user.ts)
     csv/                            # CSV validator, sampler
     db/                             # TypeORM entities, data source, connection
     nps/                            # NPS calculation logic
+  auth.ts                           # NextAuth.js config (Node runtime)
+  auth.config.ts                    # NextAuth.js config (Edge-compatible)
   openspec/                         # Spec-driven development artifacts
   docker-compose.yml                # SQL Server 2025 container
 ```
@@ -302,6 +334,12 @@ nps-app/
 | `comments` | Individual survey responses with AI classifications |
 | `summaries` | AI-generated markdown reports |
 | `llm_configs` | LLM provider settings with encrypted API keys |
+| `users` | Registered user accounts (NextAuth) |
+| `accounts` | OAuth provider accounts linked to users |
+| `sessions` | Active user sessions |
+| `github_repos` | Connected GitHub repositories per project |
+| `github_issues` | Issues created from NPS data, linked to repo + project |
+| `chat_messages` | RAG chat conversation history per project |
 
 ## AI Agents
 
@@ -311,6 +349,7 @@ nps-app/
 | Theme Discoverer | Proposes categories from stratified comment sample | Best available |
 | Classifier | Batch-classifies comments into categories | Fast/cheap (Claude Haiku, GPT-4o-mini) |
 | Summary Generator | Produces markdown insight report | Best available |
+| Chat Analyst (RAG) | Answers natural language questions about NPS data using retrieved comment embeddings | Best available |
 
 ## Testing
 
@@ -321,7 +360,7 @@ npm test              # Run all tests once
 npm run test:watch    # Run tests in watch mode
 ```
 
-**Test suites (87 tests):**
+**Test suites (137 tests):**
 
 | Suite | File | What it covers |
 |-------|------|---------------|
@@ -332,6 +371,9 @@ npm run test:watch    # Run tests in watch mode
 | Encryption | `__tests__/lib/encryption.test.ts` | AES-256-GCM round-trip, random IV uniqueness, unicode support, tamper detection |
 | API Error Handling | `__tests__/lib/api-error-handling.test.ts` | Invalid JSON, empty body, missing fields, wrong types, valid input pass-through, UUID validation, null body |
 | AI Prompts | `__tests__/lib/prompts.test.ts` | Theme discovery (with/without hints), suggest-more (existing categories, hints), scan-for-theme (name, description, match threshold) |
+| Auth Utilities | `__tests__/lib/auth.test.ts` | User resolution from session, AUTH_REQUIRED toggle, unauthenticated handling |
+| GitHub Integration | `__tests__/lib/github.test.ts` | Issue creation payload, label formatting, repo connection validation |
+| Chat / RAG | `__tests__/lib/chat.test.ts` | Embedding generation, cosine similarity search, chat message formatting |
 
 ## Scripts
 
@@ -368,6 +410,13 @@ Next.js auto-loads `.env.local` for `npm run dev` and `npm run build`. The `npm 
 | `DATABASE_NAME` | No | `nps_insight_engine` | Database name (alphanumeric, underscores, hyphens only) |
 | `ENCRYPTION_KEY` | **Yes** | (none) | 64-char hex string for AES-256-GCM. Generate: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
 | `NODE_ENV` | No | `development` | Set to `production` to disable TypeORM synchronize and verbose logging |
+| `AUTH_SECRET` | Yes (if auth enabled) | (none) | NextAuth.js secret. Generate: `npx auth secret` |
+| `AUTH_REQUIRED` | No | `true` | Set to `false` to disable authentication for local development |
+| `AUTH_GITHUB_ID` | No | (none) | GitHub OAuth app client ID |
+| `AUTH_GITHUB_SECRET` | No | (none) | GitHub OAuth app client secret |
+| `AUTH_GOOGLE_ID` | No | (none) | Google OAuth client ID |
+| `AUTH_GOOGLE_SECRET` | No | (none) | Google OAuth client secret |
+| `GITHUB_TOKEN` | No | (none) | GitHub personal access token for issue creation (Octokit) |
 
 ## Contributing
 
@@ -410,12 +459,47 @@ npx skills add bmad-labs/skills@typescript-e2e-testing -g -y
 npx skills add bobmatnyc/claude-mpm-skills@api-design-patterns -g -y
 ```
 
-## SaaS Features (In Progress — `nps-saas-features` branch)
+## SaaS Features (`nps-saas-features` branch)
 
-- **UI Redesign** — shadcn/ui components, Lucide icons, light/dark theme toggle
-- **Authentication** — NextAuth.js v5 with GitHub, Google, email/password
-- **GitHub Integration** — Create issues from NPS categories/comments with templates and labels (Octokit)
-- **Chat Analysis (RAG)** — Natural language Q&A over NPS data using SQL Server 2025 VECTOR type
+### Implemented
+
+#### UI Redesign
+shadcn/ui components throughout, Lucide icons, top-nav + tabs layout (Spark app style), loading skeletons, light/dark theme toggle.
+
+#### Authentication (NextAuth.js v5)
+Full authentication system with three providers:
+- **GitHub OAuth** — Sign in with GitHub account
+- **Google OAuth** — Sign in with Google account
+- **Email/Password** — Register and login with credentials (bcrypt-hashed passwords)
+
+Key features:
+- Registration page (`/register`) and login page (`/login`)
+- Admin settings page (`/admin`) for user management
+- Session-based project scoping — each user sees only their own projects
+- `AUTH_REQUIRED=false` environment variable disables auth entirely for local development
+- Edge-compatible config split: `auth.config.ts` (Edge middleware) and `auth.ts` (Node runtime with DB adapter)
+- `SessionProvider` wraps the app via `components/providers.tsx`
+
+#### GitHub Integration (Octokit)
+Connect a GitHub repository to any project and export NPS insights as GitHub issues:
+- **Connect repo** — Link a GitHub repository to a project (GitHub tab)
+- **Export categories as issues** — Each NPS category becomes a GitHub issue with impact summary, representative quotes, and recommendations
+- **Export selected comments** — Create issues from individual comments or filtered selections
+- **Auto-label creation** — Automatically creates labels in the repo (e.g., `nps:promoter`, `nps:detractor`, category names)
+- **Issue tracking** — All created issues are tracked in the GitHub tab with links back to GitHub
+- Requires a `GITHUB_TOKEN` personal access token with repo scope
+
+#### Chat Analysis (RAG)
+Natural language Q&A over NPS data using retrieval-augmented generation:
+- **Enable from dashboard** — Generate embeddings for all classified comments
+- **Embedding providers** — OpenAI (`text-embedding-3-small`) or Ollama (local embeddings). Note: Anthropic does not provide an embedding model
+- **Vector storage** — Embeddings stored using SQL Server 2025 native VECTOR type
+- **Cosine similarity search** — Retrieves the most relevant comments for each question
+- **Cited answers** — LLM generates answers with references to specific comments
+- **Chat history** — Conversations are persisted per project in the `chat_messages` table
+- Access from the Chat tab on any project
+
+### Planned (Not Yet Implemented)
 - **AI Assistant** — Contextual helper panel on every project page
 - **Cloud deployment** — Azure App Service or Vercel, migrate to Azure SQL
 - **Multi-tenancy** — User/org-scoped data isolation

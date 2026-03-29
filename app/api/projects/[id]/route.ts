@@ -1,16 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { parseBody, updateProjectSchema } from "@/lib/api/schemas";
+import { getCurrentUserId } from "@/lib/auth/get-user";
+
+async function findProjectForUser(id: string) {
+  const userId = await getCurrentUserId();
+  const authRequired = process.env.AUTH_REQUIRED !== "false";
+
+  const db = await getDb();
+  const { Project } = await import("@/lib/db/entities/Project");
+
+  const where = authRequired && userId ? { id, userId } : { id };
+  return db.getRepository(Project).findOneBy(where);
+}
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const db = await getDb();
-  const { Project } = await import("@/lib/db/entities/Project");
-
-  const project = await db.getRepository(Project).findOneBy({ id });
+  const project = await findProjectForUser(id);
 
   if (!project) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
@@ -29,14 +38,14 @@ export async function PATCH(
     return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
 
-  const db = await getDb();
-  const { Project } = await import("@/lib/db/entities/Project");
-  const repo = db.getRepository(Project);
-
-  const project = await repo.findOneBy({ id });
+  const project = await findProjectForUser(id);
   if (!project) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
+
+  const db = await getDb();
+  const { Project } = await import("@/lib/db/entities/Project");
+  const repo = db.getRepository(Project);
 
   if (parsed.data.name !== undefined) project.name = parsed.data.name;
   if (parsed.data.description !== undefined) project.description = parsed.data.description;
@@ -50,14 +59,15 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const db = await getDb();
-  const { Project } = await import("@/lib/db/entities/Project");
+  const project = await findProjectForUser(id);
 
-  const result = await db.getRepository(Project).delete(id);
-
-  if (result.affected === 0) {
+  if (!project) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
+
+  const db = await getDb();
+  const { Project } = await import("@/lib/db/entities/Project");
+  await db.getRepository(Project).delete(id);
 
   return NextResponse.json({ success: true });
 }

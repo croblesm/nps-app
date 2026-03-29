@@ -1,15 +1,20 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { parseBody, createProjectSchema } from "@/lib/api/schemas";
+import { getCurrentUserId } from "@/lib/auth/get-user";
 
 export async function GET() {
+  const userId = await getCurrentUserId();
+  const authRequired = process.env.AUTH_REQUIRED !== "false";
+
   const db = await getDb();
   const { Project } = await import("@/lib/db/entities/Project");
   const { Comment } = await import("@/lib/db/entities/Comment");
 
+  const where = authRequired && userId ? { userId } : {};
   const projects = await db
     .getRepository(Project)
-    .find({ order: { createdAt: "DESC" } });
+    .find({ where, order: { createdAt: "DESC" } });
 
   const stats = await db
     .getRepository(Comment)
@@ -55,6 +60,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const userId = await getCurrentUserId();
+
   const parsed = await parseBody(request, createProjectSchema);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error }, { status: 400 });
@@ -70,6 +77,7 @@ export async function POST(request: Request) {
     name: name.trim(),
     description: description || null,
     analysisHints: analysisHints || null,
+    userId: userId || null,
   });
 
   await repo.save(project);
