@@ -167,6 +167,12 @@ A Dev Container configuration (`.devcontainer/`) provides a one-click setup with
 - **String-based relation targets**: All entity relations use string names (`@ManyToOne("Project", "dataSources")`) instead of class imports (`@ManyToOne(() => Project)`) to avoid circular dependency errors with webpack. No entity file imports another entity file.
 - **Dynamic entity imports in API routes**: API routes import entities via `await import("@/lib/db/entities/X")` to avoid triggering entity resolution at module load time
 - **Safe JSON parsing**: All client-side `res.json()` calls are wrapped in try/catch to handle non-JSON server errors (e.g., 500 HTML pages when DB is down)
+- **No empty criteria on update/delete**: MSSQL driver rejects `repo.update({}, ...)`. Use `createQueryBuilder().update().set().execute()` instead.
+- **Batch insert parameter limit**: MSSQL limits queries to 2,100 parameters. Batch size set to 50 rows (50 × 12 columns = 600 params) for safe margin.
+- **Bulk updates over N+1 writes**: Noise filter matching uses a single `UPDATE...WHERE LIKE` query. Classification results batch-saved per AI batch instead of one-by-one.
+
+### Vector Type Readiness
+TypeORM 0.3.28 includes native `"vector"` column type support in the MSSQL driver (`supportedDataTypes`, DDL generation, default 255 dimensions). Combined with SQL Server 2025's native `VECTOR(n)` data type and `VECTOR_DISTANCE()` function, the stack is ready for future RAG/semantic search features. No entities currently use vector columns — this will be added in the SaaS phase.
 
 ### UI/UX
 - **Dark mode by default**: Class-based Tailwind dark mode on all pages

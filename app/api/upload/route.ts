@@ -102,8 +102,9 @@ export async function POST(request: NextRequest) {
     const npsCol = columns.find((c) => c.type === "numeric" && c.name.toLowerCase().includes("nps"));
     const commentCol = columns.find((c) => c.type === "text" && c.name.toLowerCase().includes("comment"));
 
-    // Insert comments in batches
-    const batchSize = 100;
+    // Insert comments in batches — MSSQL has a 2,100 parameter limit per query
+    // Each Comment has ~12 columns, so 50 rows × 12 = 600 params (safe margin)
+    const batchSize = 50;
     for (let i = 0; i < rows.length; i += batchSize) {
       const batch = rows.slice(i, i + batchSize).map((row, idx) => {
         const npsScore = npsCol ? Number(row[npsCol.name]) : null;

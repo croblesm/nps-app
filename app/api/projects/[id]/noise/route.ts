@@ -74,22 +74,26 @@ async function applyNoiseFilter(
   projectId: string,
   keywords: string[]
 ) {
+  if (keywords.length === 0) return;
+
   const { Comment } = await import("@/lib/db/entities/Comment");
-  const comments = await db.getRepository(Comment).find({
-    where: { projectId },
+  const repo = db.getRepository(Comment);
+
+  // Build a single UPDATE with OR conditions instead of N+1 saves
+  const query = repo
+    .createQueryBuilder()
+    .update()
+    .set({ isNoise: true })
+    .where("projectId = :projectId", { projectId });
+
+  const conditions = keywords.map((kw, i) => `commentText LIKE :kw${i}`);
+  const params: Record<string, string> = {};
+  keywords.forEach((kw, i) => {
+    params[`kw${i}`] = `%${kw}%`;
   });
 
-  const lowerKeywords = keywords.map((k: string) => k.toLowerCase());
-
-  for (const comment of comments) {
-    if (comment.commentText) {
-      const lower = comment.commentText.toLowerCase();
-      if (lowerKeywords.some((kw) => lower.includes(kw))) {
-        comment.isNoise = true;
-        await db.getRepository(Comment).save(comment);
-      }
-    }
-  }
+  query.andWhere(`(${conditions.join(" OR ")})`, params);
+  await query.execute();
 }
 
 async function recalculateNoise(

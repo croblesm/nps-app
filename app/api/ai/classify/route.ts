@@ -82,21 +82,22 @@ export async function POST(request: Request) {
         prompt,
       });
 
-      // Apply classifications
+      // Apply classifications — batch save instead of one-by-one
+      const toSave = [];
       for (const result of object.classifications) {
         const comment = batch.find((c) => c.rowIndex === result.index);
         if (!comment) continue;
 
-        const matchedCategoryId =
+        comment.categoryId =
           categoryMap.get(result.category) || fallbackCategory?.id || null;
-
-        comment.categoryId = matchedCategoryId;
         comment.aiConfidence = result.confidence;
         comment.aiReasoning = result.reasoning;
         comment.isActionable = result.isActionable;
-
-        await commentRepo.save(comment);
+        toSave.push(comment);
         classified++;
+      }
+      if (toSave.length > 0) {
+        await commentRepo.save(toSave);
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Batch failed";
