@@ -1,47 +1,88 @@
-# OpenSpec Workflow — Step-by-Step Breakdown
+# OpenSpec Workflow — Spec-Driven Development
 
-This document explains the OpenSpec spec-driven development workflow used to plan the NPS Insight Engine project.
+This document explains the OpenSpec workflow, enforcement hooks, and best practices for the NPS Insight Engine project.
 
 ---
 
 ## What is OpenSpec?
 
-OpenSpec is a spec-driven development tool that structures your work into **changes** — self-contained units of work with standardized artifacts. It uses a schema (`spec-driven`) that defines what artifacts are needed and in what order.
-
-## The Schema: `spec-driven`
-
-The `spec-driven` schema requires 4 artifacts created in dependency order:
-
-```
-proposal.md → design.md ──┐
-                           ├→ tasks.md
-proposal.md → specs/*.md ──┘
-```
-
-| Artifact | Purpose | Depends On |
-|----------|---------|------------|
-| `proposal.md` | **WHY** — the problem, what changes, capabilities list | Nothing |
-| `design.md` | **HOW** — architecture decisions, trade-offs, data flow | proposal |
-| `specs/**/*.md` | **WHAT** — detailed requirements with testable scenarios | proposal |
-| `tasks.md` | **DO** — implementation checklist with trackable checkboxes | design + specs |
+OpenSpec is a spec-driven development tool that structures work into **changes** — self-contained units with standardized artifacts. It uses the `spec-driven` schema that defines what artifacts are needed and in what order.
 
 ---
 
-## Steps Followed
+## Workflow Diagram
+
+```mermaid
+flowchart TD
+    A["1. Configure<br/>config.yaml"] --> B["2. Create Change<br/>openspec new change"]
+    B --> C["3a. Proposal<br/><i>WHY — problem, capabilities</i>"]
+    C --> D["3b. Specs<br/><i>WHAT — requirements + scenarios</i>"]
+    C --> E["3c. Design<br/><i>HOW — architecture, decisions</i>"]
+    D --> F["3d. Tasks<br/><i>DO — checklist from specs</i>"]
+    E --> F
+    F --> G["4. Apply<br/><i>/opsx:apply — execute tasks</i>"]
+    G --> H{"All tasks<br/>done?"}
+    H -- No --> I["Work on next task"]
+    I --> J["Update spec + code + tests"]
+    J --> K["Commit per task group"]
+    K --> G
+    H -- Yes --> L["5. Archive<br/><i>/opsx:archive</i>"]
+    L --> M["Specs merged to<br/>openspec/specs/"]
+
+    style A fill:#1e293b,stroke:#3b82f6,color:#e2e8f0
+    style C fill:#1e293b,stroke:#22c55e,color:#e2e8f0
+    style D fill:#1e293b,stroke:#22c55e,color:#e2e8f0
+    style E fill:#1e293b,stroke:#22c55e,color:#e2e8f0
+    style F fill:#1e293b,stroke:#eab308,color:#e2e8f0
+    style G fill:#1e293b,stroke:#3b82f6,color:#e2e8f0
+    style L fill:#1e293b,stroke:#a855f7,color:#e2e8f0
+```
+
+### Enforcement During the Workflow
+
+```mermaid
+flowchart LR
+    subgraph "Claude Code Hooks"
+        direction TB
+        Edit["Edit/Write code file"] --> Remind["Post-edit hook<br/><i>remind-spec-update.sh</i><br/>Prints reminder"]
+        Commit["git commit"] --> Check{"Code files<br/>staged?"}
+        Check -- Yes --> SpecCheck{"Spec/doc files<br/>also staged?"}
+        Check -- No --> Allow["Allow commit"]
+        SpecCheck -- Yes --> Allow
+        SpecCheck -- No --> Block["BLOCK commit<br/>Exit code 2"]
+    end
+
+    style Block fill:#7f1d1d,stroke:#ef4444,color:#fca5a5
+    style Allow fill:#14532d,stroke:#22c55e,color:#bbf7d0
+    style Remind fill:#422006,stroke:#f59e0b,color:#fde68a
+```
+
+---
+
+## The Schema: `spec-driven`
+
+The schema requires 4 artifacts created in dependency order:
+
+| # | Artifact | Purpose | Depends On | Command |
+|---|----------|---------|------------|---------|
+| 1 | `proposal.md` | **WHY** — problem, capabilities list | Nothing | `openspec instructions proposal` |
+| 2 | `specs/**/*.md` | **WHAT** — requirements with WHEN/THEN scenarios | proposal | `openspec instructions specs` |
+| 3 | `design.md` | **HOW** — architecture, decisions, trade-offs | proposal | `openspec instructions design` |
+| 4 | `tasks.md` | **DO** — implementation checklist with checkboxes | specs + design | `openspec instructions tasks` |
+
+---
+
+## Steps
 
 ### Step 1: Configure OpenSpec Context
 
 **File:** `openspec/config.yaml`
-
-Before creating any change, I updated the config with project context so OpenSpec (and AI) understands the tech stack, conventions, and domain:
 
 ```yaml
 schema: spec-driven
 context: |
   Project: NPS Insight Engine
   Tech stack: Next.js 15, React 19, TypeScript, Tailwind CSS 4
-  ORM: Drizzle ORM with SQL Server 2025
-  AI: Vercel AI SDK — multi-provider
   ...
 rules:
   proposal:
@@ -49,196 +90,198 @@ rules:
   tasks:
     - Break tasks into chunks of max 4 hours
     - Each task should be independently testable
+    - Include verification steps in each task
+    - Commit changes after completing each task group
 ```
-
-**Command used:** Manual edit (no CLI command needed)
-
----
 
 ### Step 2: Create a New Change
 
-**Command:**
 ```bash
-npx openspec new change "nps-insight-engine"
+openspec new change "feature-name"
 ```
 
-**What it does:** Creates a scaffolded directory at `openspec/changes/nps-insight-engine/` with a `.openspec.yaml` file that tracks artifact status.
+Creates a scaffolded directory at `openspec/changes/feature-name/` with a `.openspec.yaml` file that tracks artifact status.
 
-**Result:**
-```
-openspec/changes/nps-insight-engine/
-  .openspec.yaml    ← tracks which artifacts exist and their status
-```
+### Step 3: Check Status
 
----
-
-### Step 3: Check Status (Artifact Build Order)
-
-**Command:**
 ```bash
-npx openspec status --change "nps-insight-engine" --json
+openspec status --change "feature-name" --json
 ```
 
-**What it tells you:** Which artifacts are `ready` (dependencies met, can be created), `blocked` (dependencies not yet created), or `done` (already created). Also shows `applyRequires` — the artifacts that must be done before you can implement.
-
-**Initial status:**
-```
-proposal  → ready
-design    → blocked (needs: proposal)
-specs     → blocked (needs: proposal)
-tasks     → blocked (needs: design, specs)
-```
-
----
+Shows which artifacts are `ready`, `blocked`, or `done`.
 
 ### Step 4: Get Instructions for Each Artifact
 
-**Command:**
 ```bash
-npx openspec instructions <artifact-id> --change "nps-insight-engine" --json
+openspec instructions <artifact-id> --change "feature-name" --json
 ```
 
-**What it returns:**
-- `template` — the structure/skeleton to use for the file
+Returns:
+- `template` — structure/skeleton for the file
 - `instruction` — guidelines on what to include
-- `context` — project context from config.yaml (used as constraints, NOT copied into the file)
-- `rules` — artifact-specific rules from config.yaml
+- `context` — project context from config.yaml
+- `rules` — artifact-specific rules
 - `dependencies` — completed artifacts to read for context
 - `outputPath` — where to write the file
-
-**Example:** `npx openspec instructions proposal --change "nps-insight-engine" --json`
-
----
 
 ### Step 5: Create Artifacts in Dependency Order
 
 #### 5a. Proposal (`proposal.md`)
 
-**Created first** because it has no dependencies.
+Created first — no dependencies. Defines:
+- **Why** — problem statement
+- **What Changes** — bullet list of changes
+- **Non-Goals** — out of scope
+- **Capabilities** — list of new capabilities (each becomes a spec file)
 
-**Sections written:**
-- **Why** — problem statement and motivation
-- **What Changes** — bullet list of all changes (new, removed, breaking)
-- **Non-Goals** — what's explicitly out of scope
-- **User Flow** — the step-by-step user journey
-- **Capabilities** — list of new capabilities (this is critical — each becomes a spec file)
+#### 5b. Specs (`specs/`) + Design (`design.md`)
 
-**Capabilities defined:**
-1. `project-management`
-2. `csv-upload-validation`
-3. `ai-categorization`
-4. `nps-dashboard`
-5. `noise-filters`
-6. `ai-summary`
-7. `llm-configuration`
-8. `data-export`
+Created in parallel — both depend only on the proposal.
 
----
-
-#### 5b. Design (`design.md`) + Specs (`specs/`)
-
-**Created in parallel** because both only depend on the proposal.
-
-**design.md sections:**
-- Context, Goals/Non-Goals
-- Decisions with rationale (why Next.js over CRA, why Drizzle over Prisma, etc.)
-- AI Agent architecture with input/output schemas
-- Data flow diagram
-- Risks and mitigations
-- Migration plan, open questions
-
-**specs/ structure** — one file per capability from the proposal:
-```
-specs/
-  project-management/spec.md
-  csv-upload-validation/spec.md
-  ai-categorization/spec.md
-  nps-dashboard/spec.md
-  noise-filters/spec.md
-  ai-summary/spec.md
-  llm-configuration/spec.md
-  data-export/spec.md
-```
-
-**Spec format:**
+**Specs** — one file per capability:
 ```markdown
 ## ADDED Requirements
 
 ### Requirement: User can create a new project
-The system SHALL allow users to create a new project by providing a tool name and description.
+The system SHALL allow users to create a new project.
 
 #### Scenario: Successful project creation
-- **WHEN** user fills in tool name and description and clicks "Create"
-- **THEN** system creates a new project record and redirects to the upload page
+- **WHEN** user fills in tool name and clicks "Create"
+- **THEN** system creates a project and redirects to upload page
 
 #### Scenario: Missing required fields
-- **WHEN** user submits the form with empty tool name
-- **THEN** system displays a validation error and does not create the project
+- **WHEN** user submits with empty tool name
+- **THEN** system displays a validation error
 ```
 
-Key rules for specs:
+Rules:
 - Use `SHALL` / `MUST` for normative requirements
 - Every requirement needs at least one `#### Scenario:` with WHEN/THEN
-- Scenarios are testable — each one can become a test case
+- Scenarios are testable — each can become a test case
+- Unimplemented features are marked `(NOT YET IMPLEMENTED)` in the scenario title
 
----
+**Design** — architecture decisions, data flow, risks.
 
 #### 5c. Tasks (`tasks.md`)
 
-**Created last** because it depends on both design and specs.
+Created last — depends on specs + design.
 
-**Format:** Numbered groups with checkbox items:
 ```markdown
-## 1. Project Scaffold and Infrastructure
-- [ ] 1.1 Initialize Next.js 15 project with App Router and TypeScript
-- [ ] 1.2 Install core dependencies
-...
+## 1. Setup
+- [ ] 1.1 Create new module structure
+- [ ] 1.2 Add dependencies to package.json
+
+## 2. Core Implementation
+- [ ] 2.1 Implement data export function
+- [ ] 2.2 Add CSV formatting utilities
 ```
 
-The checkbox format (`- [ ]`) is required — OpenSpec tracks progress by parsing these checkboxes during implementation.
+Rules:
+- Checkbox format (`- [ ]`) is required — OpenSpec parses these
+- Tasks should be max 4 hours, independently testable
+- Each spec scenario should map to one or more tasks
+- Group related tasks under `## N. Group Name` headings
 
----
+### Step 6: Implement via Apply
 
-### Step 6: Verify Completion
-
-**Command:**
 ```bash
-npx openspec status --change "nps-insight-engine"
+/opsx:apply
 ```
 
-**Final status:**
+Reads `tasks.md`, shows progress, walks through each pending task. For each task:
+1. Update the spec if needed
+2. Write the code
+3. Write/update tests
+4. Mark the task checkbox: `- [ ]` → `- [x]`
+5. Commit per task group
+
+### Step 7: Archive
+
+```bash
+/opsx:archive
 ```
-[x] proposal
-[x] design
-[x] specs
-[x] tasks
-All artifacts complete!
-```
+
+Merges completed specs from `openspec/changes/*/specs/` into `openspec/specs/` (the canonical spec directory).
 
 ---
 
-## File Map
+## Enforcement — Claude Code Hooks
 
+Two hooks in `.claude/settings.json` enforce the spec-first workflow:
+
+### Hook 1: Pre-Commit Blocker (`enforce-spec-update.sh`)
+
+**Location:** `.claude/hooks/enforce-spec-update.sh`
+**Trigger:** `PreToolUse` on any `Bash` command matching `git commit`
+**Behavior:** **BLOCKS** the commit (exit code 2) if code files are staged without spec/doc files
+
+**How it works:**
+1. Extracts the git command from Claude Code's JSON input
+2. Skips check for commits prefixed with `docs:` or `chore:` or containing "merge"
+3. Gets staged files via `git diff --cached --name-only`
+4. Checks if any code files are staged (`app/`, `lib/`, `components/`)
+5. If code changed, requires at least one spec/doc file also staged (`openspec/`, `README.md`, `CLAUDE.md`)
+6. If missing: prints error with list of offending files and exits with code 2
+
+**Configuration in `.claude/settings.json`:**
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/enforce-spec-update.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
 ```
-openspec/
-  config.yaml                                          ← project context & rules
-  changes/
-    nps-insight-engine/
-      .openspec.yaml                                   ← artifact tracking metadata
-      proposal.md                                      ← WHY: problem, changes, capabilities
-      design.md                                        ← HOW: architecture, decisions, data flow
-      tasks.md                                         ← DO: 55 implementation tasks in 12 groups
-      specs/
-        project-management/spec.md                     ← WHAT: 7 requirements, 14 scenarios
-        csv-upload-validation/spec.md                  ← WHAT: 8 requirements, 15 scenarios
-        ai-categorization/spec.md                      ← WHAT: 7 requirements, 16 scenarios
-        nps-dashboard/spec.md                          ← WHAT: 10 requirements, 18 scenarios
-        noise-filters/spec.md                          ← WHAT: 9 requirements, 13 scenarios
-        ai-summary/spec.md                             ← WHAT: 7 requirements, 10 scenarios
-        llm-configuration/spec.md                      ← WHAT: 10 requirements, 16 scenarios
-        data-export/spec.md                            ← WHAT: 8 requirements, 11 scenarios
-  specs/                                               ← archived specs (empty until first archive)
+
+### Hook 2: Post-Edit Reminder (`remind-spec-update.sh`)
+
+**Location:** `.claude/hooks/remind-spec-update.sh`
+**Trigger:** `PostToolUse` on `Edit` or `Write` tool calls
+**Behavior:** **REMINDS** (non-blocking, exit code 0) to update specs after editing code files
+
+**How it works:**
+1. Extracts the file path from Claude Code's JSON input
+2. If the file is in `app/`, `lib/`, or `components/`, prints a reminder to stderr
+3. Always exits 0 — never blocks work
+
+**Configuration in `.claude/settings.json`:**
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/remind-spec-update.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
 ```
+
+### What's Enforced vs. What Requires Discipline
+
+| Rule | Enforced? | How |
+|------|-----------|-----|
+| Specs included with code commits | Yes | Pre-commit hook blocks |
+| Reminded to update specs after edits | Yes | Post-edit hook reminds |
+| Specs written BEFORE code | No | Discipline — hooks only check at commit time |
+| Granular task breakdown | No | Must use `openspec instructions tasks` |
+| Using `/opsx:apply` for execution | No | Discipline — can manually edit tasks.md |
+| Never removing spec features | No | Discipline — mark as "NOT YET IMPLEMENTED" |
 
 ---
 
@@ -246,47 +289,41 @@ openspec/
 
 | Command | Purpose |
 |---------|---------|
-| `npx openspec new change "<name>"` | Create a new change scaffold |
-| `npx openspec status --change "<name>"` | Check artifact progress |
-| `npx openspec status --change "<name>" --json` | Same but machine-readable |
-| `npx openspec instructions <artifact> --change "<name>" --json` | Get creation guidelines for an artifact |
-| `/opsx:apply` | Start implementing tasks (Claude Code skill) |
-| `/opsx:archive` | Archive a completed change (merges specs into `openspec/specs/`) |
+| `openspec new change "<name>"` | Create a new change scaffold |
+| `openspec status --change "<name>"` | Check artifact progress |
+| `openspec status --change "<name>" --json` | Same but machine-readable |
+| `openspec instructions <artifact> --change "<name>"` | Get creation guidelines |
+| `openspec list` | List all active changes |
+| `openspec validate --change "<name>"` | Validate a change |
+| `/opsx:apply` | Execute tasks from tasks.md |
+| `/opsx:archive` | Archive completed change |
 
 ---
 
-## Workflow Summary
+## File Map
 
 ```
-1. Configure    →  Edit config.yaml with project context
-2. Create       →  openspec new change "name"
-3. Plan         →  Write proposal → design + specs → tasks
-4. Implement    →  /opsx:apply (works through tasks.md checkboxes)
-5. Archive      →  /opsx:archive (finalizes, merges specs to openspec/specs/)
+openspec/
+  config.yaml                                    # Project context, schema, rules
+  OPENSPEC-WORKFLOW.md                           # This file — workflow guide
+  specs/                                         # Archived specs (after /opsx:archive)
+  changes/
+    nps-insight-engine/                          # v1 core features (complete)
+      .openspec.yaml                             # Artifact tracking metadata
+      proposal.md                                # WHY
+      design.md                                  # HOW
+      specs/                                     # WHAT (10 capability specs)
+      tasks.md                                   # DO (113 tasks, all done)
+    saas-features/                               # SaaS features (in progress)
+      .openspec.yaml                             # Artifact tracking metadata
+      proposal.md                                # WHY
+      design.md                                  # HOW
+      specs/                                     # WHAT (5 capability specs)
+      tasks.md                                   # DO (grouped tasks)
+
+.claude/
+  settings.json                                  # Hook configuration
+  hooks/
+    enforce-spec-update.sh                       # Pre-commit: blocks code-only commits
+    remind-spec-update.sh                        # Post-edit: reminds to update specs
 ```
-
-## Enforcement
-
-Claude Code hooks enforce the spec-first workflow:
-
-| Hook | Trigger | Script | Behavior |
-|------|---------|--------|----------|
-| Pre-commit | Before `git commit` | `enforce-spec-update.sh` | **Blocks** commit if code files changed without spec/doc files staged |
-| Post-edit | After `Edit` or `Write` | `remind-spec-update.sh` | **Reminds** to update specs (non-blocking) |
-
-**What's enforced:**
-- Every commit with code changes (`app/`, `lib/`, `components/`) must include at least one spec/doc file (`openspec/`, `README.md`, `CLAUDE.md`)
-- Exceptions: commits prefixed with `docs:` or `chore:`
-
-**What's NOT enforced (discipline required):**
-- Writing specs BEFORE code (hooks only check at commit time)
-- Granular task breakdown (must use `openspec instructions tasks` properly)
-- Running `/opsx:apply` instead of manually editing tasks.md
-- Never removing spec features without user approval
-
-## Task Rules (from config.yaml)
-
-- Break tasks into chunks of max 4 hours
-- Each task should be independently testable
-- Include verification steps in each task
-- Commit changes after completing each task group (## heading) for rollback capability

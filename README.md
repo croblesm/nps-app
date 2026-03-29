@@ -516,16 +516,32 @@ This project uses [OpenSpec](https://github.com/Fission-AI/openspec) with the `s
 
 ### Workflow
 
+```mermaid
+flowchart TD
+    A["1. Configure<br/>config.yaml"] --> B["2. Create Change<br/>openspec new change"]
+    B --> C["3a. Proposal<br/><i>WHY — problem, capabilities</i>"]
+    C --> D["3b. Specs<br/><i>WHAT — requirements + scenarios</i>"]
+    C --> E["3c. Design<br/><i>HOW — architecture, decisions</i>"]
+    D --> F["3d. Tasks<br/><i>DO — checklist from specs</i>"]
+    E --> F
+    F --> G["4. Apply<br/><i>/opsx:apply — execute tasks</i>"]
+    G --> H{"All tasks<br/>done?"}
+    H -- No --> I["Work on next task"]
+    I --> J["Update spec + code + tests"]
+    J --> K["Commit per task group"]
+    K --> G
+    H -- Yes --> L["5. Archive<br/><i>/opsx:archive</i>"]
+    L --> M["Specs merged to<br/>openspec/specs/"]
 ```
-Step  Artifact     Purpose                         Command
-────  ──────────   ─────────────────────────────    ──────────────────────────────────────
-1.    Proposal     WHY — problem, capabilities      openspec instructions proposal
-2.    Specs        WHAT — requirements + scenarios   openspec instructions specs
-3.    Design       HOW — architecture, decisions     openspec instructions design
-4.    Tasks        DO — checklist from specs          openspec instructions tasks
-5.    Apply        Execute tasks one by one           /opsx:apply
-6.    Archive      Merge specs to openspec/specs/     /opsx:archive
-```
+
+| Step | Artifact | Purpose | Command |
+|------|----------|---------|---------|
+| 1 | Proposal | WHY — problem, capabilities | `openspec instructions proposal` |
+| 2 | Specs | WHAT — requirements + scenarios | `openspec instructions specs` |
+| 3 | Design | HOW — architecture, decisions | `openspec instructions design` |
+| 4 | Tasks | DO — checklist from specs | `openspec instructions tasks` |
+| 5 | Apply | Execute tasks one by one | `/opsx:apply` |
+| 6 | Archive | Merge specs to openspec/specs/ | `/opsx:archive` |
 
 **Rules:**
 - Specs first, then code — never write code before the spec exists
@@ -534,9 +550,28 @@ Step  Artifact     Purpose                         Command
 - Commit per task group — each commit includes spec + code + tests + docs
 - Never remove spec features — mark unimplemented ones as "NOT YET IMPLEMENTED"
 
-**Enforcement** (Claude Code hooks):
-- **Pre-commit**: Blocks `git commit` if code files changed without spec/doc files staged
-- **Post-edit**: Reminds to update specs after editing code files
+### Enforcement (Claude Code Hooks)
+
+```mermaid
+flowchart LR
+    subgraph "Pre-commit hook"
+        Commit["git commit"] --> CodeCheck{"Code files<br/>staged?"}
+        CodeCheck -- Yes --> SpecCheck{"Spec/doc files<br/>also staged?"}
+        CodeCheck -- No --> Allow["Allow"]
+        SpecCheck -- Yes --> Allow
+        SpecCheck -- No --> Block["BLOCK"]
+    end
+    subgraph "Post-edit hook"
+        Edit["Edit code file"] --> Remind["Print reminder"]
+    end
+```
+
+| Hook | Script | Trigger | Behavior |
+|------|--------|---------|----------|
+| Pre-commit | `.claude/hooks/enforce-spec-update.sh` | Before `git commit` | **Blocks** if code changed without specs |
+| Post-edit | `.claude/hooks/remind-spec-update.sh` | After `Edit`/`Write` | **Reminds** to update specs |
+
+Exceptions: commits prefixed with `docs:` or `chore:` skip the pre-commit check.
 
 ### Active Changes
 
