@@ -11,7 +11,7 @@ NPS Insight Engine — a generic, AI-powered NPS (Net Promoter Score) analysis p
 - **Dev server:** `npm run dev` (Next.js on localhost:3000)
 - **Build:** `npm run build`
 - **Start prod:** `npm start`
-- **Test:** `npm test` (Vitest, 137 tests across 10 suites)
+- **Test:** `npm test` (Vitest, 141 tests across 10 suites)
 - **Test watch:** `npm run test:watch`
 - **DB init:** `npm run db:init` (creates database + tables via TypeORM)
 - **Docker SQL Server:** `docker compose up -d` (starts SQL Server 2025 on port 1433)
@@ -42,7 +42,7 @@ Open in VS Code with Dev Containers extension → "Reopen in Container". Provide
 ```
 app/                          # Next.js App Router pages
   api/                        # API routes
-    ai/{validate,categorize,classify,summarize}/
+    ai/{validate,categorize,classify,summarize,embed}/
     auth/                     # Auth API routes
       register/               #   Email/password registration
       profile/                #   User profile management
@@ -69,6 +69,7 @@ components/
   ui/                         # Shared UI components (shadcn/ui)
 lib/
   ai/                         # LLM providers, prompts, encryption
+    get-embedding-config.ts   #   Smart embedding provider resolution (auto-finds OpenAI/Azure/Ollama)
   auth/                       # Auth utilities
     get-user.ts               #   Server-side user resolution from session
   csv/                        # CSV validator, sampler
@@ -97,6 +98,8 @@ openspec/                     # Spec-driven development artifacts
 - Auth uses Edge-compatible config split: `auth.config.ts` (Edge middleware) and `auth.ts` (Node runtime with DB access). `SessionProvider` wraps the app in `components/providers.tsx`
 - GitHub integration entities (`GitHubRepo`, `GitHubIssue`) link to projects; Octokit handles GitHub API calls
 - `ChatMessage` entity stores RAG chat history; comment embeddings stored as SQL Server VECTOR type for cosine similarity search
+- The `/api/ai/embed` route uses SSE (Server-Sent Events) streaming via `ReadableStream` + `text/event-stream` content type to push real-time progress to the client; follow this pattern for any long-running pipeline routes
+- `getEmbeddingConfig()` in `lib/ai/get-embedding-config.ts` auto-resolves an embedding-capable provider even when the default LLM (e.g., Anthropic) does not support embeddings
 - `AUTH_REQUIRED=false` disables auth for local development (all projects accessible)
 
 ## Workflow Rules (MANDATORY)

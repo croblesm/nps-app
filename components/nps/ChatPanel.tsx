@@ -15,6 +15,7 @@ import {
   Trash2,
   Bot,
   User,
+  X,
 } from "lucide-react";
 
 interface ChatMessage {
@@ -36,9 +37,10 @@ interface Citation {
 
 interface ChatPanelProps {
   projectId: string;
+  onClose?: () => void;
 }
 
-export function ChatPanel({ projectId }: ChatPanelProps) {
+export function ChatPanel({ projectId, onClose }: ChatPanelProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -203,14 +205,25 @@ export function ChatPanel({ projectId }: ChatPanelProps) {
                 <Trash2 className="size-3.5" />
               </Button>
             )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setCollapsed(true)}
-              title="Collapse"
-            >
-              <ChevronDown className="size-3.5" />
-            </Button>
+            {onClose ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClose}
+                title="Close"
+              >
+                <X className="size-3.5" />
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setCollapsed(true)}
+                title="Collapse"
+              >
+                <ChevronDown className="size-3.5" />
+              </Button>
+            )}
           </div>
         </div>
 

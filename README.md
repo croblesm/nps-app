@@ -17,7 +17,9 @@ An AI-powered NPS (Net Promoter Score) analysis platform for product managers. U
 - **Interactive dashboard** — Clickable NPS score cards, category breakdown grid, full-text search, sortable paginated table
 - **Noise filters** — Keyword-based filters that can exclude comments from NPS score calculation
 - **AI summary report** — On-demand markdown report with executive summary, theme analysis, key quotes, and recommendations
-- **RAG chat analysis** — Ask natural language questions about your NPS data; vector embeddings + cosine similarity search retrieve relevant comments, LLM generates cited answers
+- **RAG chat analysis** — Ask natural language questions about your NPS data via a floating chat button (bottom-right FAB on the dashboard); vector embeddings + cosine similarity search retrieve relevant comments, LLM generates cited answers
+- **Smart embedding provider** — Auto-detects an embedding-capable provider (OpenAI, Azure OpenAI, Ollama) even when the default LLM is Anthropic; Ollama auto-pulls the embedding model (`nomic-embed-text`) if it is not installed
+- **SSE embedding pipeline** — The `/api/ai/embed` route streams progress updates via Server-Sent Events so the UI can show real-time batch progress
 - **GitHub integration** — Connect a repo, export NPS categories as GitHub issues with impact summaries, representative quotes, and recommendations; auto-creates labels; tracks all created issues
 - **Data export** — Download filtered CSV or project metadata JSON (categories, noise filters, structure)
 - **Multi-provider LLM** — Bring your own API key: Anthropic (priority), OpenAI, Azure OpenAI, or Ollama (local)
@@ -244,7 +246,7 @@ Go to the AI Summary page and click "Generate Summary" for a markdown report inc
 Download as `.md` file or view in-app.
 
 ### Step 9: Chat with Your Data (Optional)
-Go to the Chat tab. If embeddings haven't been generated yet, click "Generate Embeddings" (requires OpenAI or Ollama — Anthropic does not support embeddings). Once ready, ask natural language questions like:
+Click the floating chat button (bottom-right of the dashboard) or go to the Chat tab. If embeddings haven't been generated yet, clicking the button triggers embedding generation automatically (the system auto-detects an embedding-capable provider — OpenAI, Azure OpenAI, or Ollama — even if your default LLM is Anthropic). Progress streams in real time via SSE. Once ready, ask natural language questions like:
 - "What are the top complaints from detractors?"
 - "What do promoters love most?"
 - "Are there any comments about performance issues?"
@@ -277,6 +279,7 @@ nps-app/
         categorize/                 #   Theme discovery
         classify/                   #   Bulk classification
         summarize/                  #   Summary generation
+        embed/                      #   Embedding pipeline (SSE streaming)
       auth/                         # Auth API routes
         register/                   #   Email/password registration
         profile/                    #   User profile management
@@ -360,7 +363,7 @@ npm test              # Run all tests once
 npm run test:watch    # Run tests in watch mode
 ```
 
-**Test suites (137 tests):**
+**Test suites (141 tests):**
 
 | Suite | File | What it covers |
 |-------|------|---------------|
@@ -491,13 +494,16 @@ Connect a GitHub repository to any project and export NPS insights as GitHub iss
 
 #### Chat Analysis (RAG)
 Natural language Q&A over NPS data using retrieval-augmented generation:
-- **Enable from dashboard** — Generate embeddings for all classified comments
-- **Embedding providers** — OpenAI (`text-embedding-3-small`) or Ollama (local embeddings). Note: Anthropic does not provide an embedding model
+- **Floating chat FAB** — A floating action button (bottom-right of the dashboard) opens an overlay chat panel; replaces the old bottom-of-page card layout
+- **Enable from dashboard** — Generate embeddings for all classified comments; progress streams in real time via Server-Sent Events (SSE)
+- **Smart embedding provider resolution** — `getEmbeddingConfig()` (`lib/ai/get-embedding-config.ts`) auto-finds an embedding-capable provider (OpenAI, Azure OpenAI, Ollama) even when the default LLM is Anthropic
+- **Auto-pull Ollama models** — When using Ollama, the embed pipeline checks if `nomic-embed-text` is installed and auto-pulls it via the Ollama API if missing
+- **Embedding providers** — OpenAI (`text-embedding-3-small`), Azure OpenAI (`text-embedding-3-small`), or Ollama (`nomic-embed-text`). Anthropic does not provide an embedding model
 - **Vector storage** — Embeddings stored using SQL Server 2025 native VECTOR type
 - **Cosine similarity search** — Retrieves the most relevant comments for each question
 - **Cited answers** — LLM generates answers with references to specific comments
 - **Chat history** — Conversations are persisted per project in the `chat_messages` table
-- Access from the Chat tab on any project
+- Access from the floating chat button on the dashboard, or the Chat tab on any project
 
 ### Planned (Not Yet Implemented)
 - **AI Assistant** — Contextual helper panel on every project page

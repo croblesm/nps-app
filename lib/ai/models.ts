@@ -26,3 +26,17 @@ export const DEFAULT_MODELS: Record<LlmProvider, string> = {
   "azure-openai": "",
   ollama: "",
 };
+
+/** Providers that support embedding APIs */
+export const EMBEDDING_CAPABLE_PROVIDERS: LlmProvider[] = [
+  "openai",
+  "azure-openai",
+  "ollama",
+];
+
+/** Default embedding model per provider */
+export const EMBEDDING_MODELS: Partial<Record<LlmProvider, string>> = {
+  openai: "text-embedding-3-small",
+  "azure-openai": "text-embedding-3-small",
+  ollama: "nomic-embed-text",
+};

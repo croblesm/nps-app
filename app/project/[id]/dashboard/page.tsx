@@ -15,8 +15,7 @@ import { SearchBar } from "@/components/nps/SearchBar";
 import { FilterPanel } from "@/components/nps/FilterPanel";
 import { DataTable } from "@/components/nps/DataTable";
 import { ChatPanel } from "@/components/nps/ChatPanel";
-import { Progress } from "@/components/ui/progress";
-import { Filter, Sparkles, LayoutDashboard, MessageSquare, Zap } from "lucide-react";
+import { Filter, Sparkles, LayoutDashboard, MessageSquare, X, Loader2 } from "lucide-react";
 
 interface CommentRow {
   id: string;
@@ -75,6 +74,7 @@ export default function DashboardPage() {
   const [embeddingProgress, setEmbeddingProgress] = useState("");
   const [githubEnabled, setGithubEnabled] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
 
   // Filters
   const [page, setPage] = useState(1);
@@ -170,18 +170,72 @@ export default function DashboardPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ projectId }),
       });
-      const result = await res.json();
-      if (res.ok) {
-        if (result.status === "complete") {
-          toast.success(`Embedded ${result.embedded} comments. Chat is ready!`);
-          setChatEnabled(true);
+
+      // Check for non-stream error responses (400s return JSON)
+      const contentType = res.headers.get("content-type") || "";
+      if (!contentType.includes("text/event-stream")) {
+        const result = await res.json();
+        if (result.code === "NO_EMBEDDING_PROVIDER" || result.code === "MISSING_EMBEDDING_MODEL") {
+          toast.error(result.error, {
+            action: {
+              label: "Open Settings",
+              onClick: () => window.location.assign("/settings"),
+            },
+            duration: 8000,
+          });
         } else {
-          toast.warning(
-            `Partial embedding: ${result.embedded}/${result.totalToEmbed} comments. ${result.errors.length} errors.`
-          );
+          toast.error(result.error || "Embedding failed");
         }
-      } else {
-        toast.error(result.error || "Embedding failed");
+        return;
+      }
+
+      // Consume SSE stream for progress updates
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      if (!reader) throw new Error("No response body");
+
+      let buffer = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        let currentEvent = "";
+        for (const line of lines) {
+          if (line.startsWith("event: ")) {
+            currentEvent = line.slice(7);
+          } else if (line.startsWith("data: ")) {
+            const data = JSON.parse(line.slice(6));
+            if (currentEvent === "progress") {
+              setEmbeddingProgress(data.step);
+            } else if (currentEvent === "complete") {
+              if (data.status === "complete") {
+                toast.success(`Embedded ${data.embedded} comments. Chat is ready!`);
+                setChatEnabled(true);
+                setChatOpen(true);
+              } else {
+                toast.warning(
+                  `Partial embedding: ${data.embedded}/${data.totalToEmbed} comments. ${data.errors?.length || 0} errors.`
+                );
+              }
+            } else if (currentEvent === "error") {
+              if (data.code === "MISSING_EMBEDDING_MODEL") {
+                toast.error(data.error, {
+                  action: {
+                    label: "Open Settings",
+                    onClick: () => window.location.assign("/settings"),
+                  },
+                  duration: 8000,
+                });
+              } else {
+                toast.error(data.error || "Embedding failed");
+              }
+            }
+          }
+        }
       }
     } catch {
       toast.error("Failed to start embedding pipeline");
@@ -428,43 +482,51 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Chat Analysis Section */}
-      {chatEnabled ? (
-        <ChatPanel projectId={projectId} />
-      ) : (
-        <Card>
-          <CardContent className="space-y-3">
-            <div className="flex items-center gap-2 text-base font-medium">
-              <MessageSquare className="size-4" />
-              Chat Analysis
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Enable AI-powered chat to ask natural language questions about your NPS data.
-              This will generate vector embeddings for all comments.
-            </p>
-            {embedding && embeddingProgress && (
-              <div className="space-y-2">
-                <Progress value={null} className="h-2" />
-                <p className="text-xs text-muted-foreground">{embeddingProgress}</p>
-              </div>
-            )}
-            <Button
-              onClick={handleEnableChat}
-              disabled={embedding}
-              variant="outline"
-            >
-              {embedding ? (
-                <Spinner size="sm" label="Embedding comments..." />
-              ) : (
-                <>
-                  <Zap className="size-4" />
-                  Enable Chat Analysis
-                </>
-              )}
-            </Button>
-          </CardContent>
-        </Card>
+      {/* Embedding progress banner */}
+      {embedding && embeddingProgress && (
+        <div className="fixed top-[49px] left-0 right-0 z-40 bg-blue-600 text-white px-4 py-2 text-sm flex items-center justify-center gap-2">
+          <Loader2 className="size-4 animate-spin" />
+          {embeddingProgress}
+        </div>
       )}
+
+      {/* Floating Chat FAB + Overlay */}
+      {chatOpen && chatEnabled && (
+        <div className="fixed bottom-20 right-6 z-50 w-[420px] h-[500px] shadow-2xl rounded-xl border border-border bg-card overflow-hidden">
+          <ChatPanel projectId={projectId} onClose={() => setChatOpen(false)} />
+        </div>
+      )}
+
+      <button
+        onClick={() => {
+          if (chatEnabled) {
+            setChatOpen((o) => !o);
+          } else if (!embedding) {
+            handleEnableChat();
+          }
+        }}
+        disabled={embedding}
+        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors disabled:opacity-60"
+      >
+        {embedding ? (
+          <>
+            <Loader2 className="size-5 animate-spin" />
+            <span className="text-sm font-medium">Embedding...</span>
+          </>
+        ) : chatOpen && chatEnabled ? (
+          <>
+            <X className="size-5" />
+            <span className="text-sm font-medium">Close</span>
+          </>
+        ) : (
+          <>
+            <MessageSquare className="size-5" />
+            <span className="text-sm font-medium">
+              {chatEnabled ? "Chat" : "Enable Chat"}
+            </span>
+          </>
+        )}
+      </button>
     </div>
   );
 }

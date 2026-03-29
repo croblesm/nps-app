@@ -4,7 +4,10 @@ import { generateText } from "ai";
 import { getDb } from "@/lib/db";
 import { getActiveModel } from "@/lib/ai/get-model";
 import { embedText } from "@/lib/ai/embeddings";
-import { decrypt } from "@/lib/ai/encryption";
+import {
+  getEmbeddingConfig,
+  getEmbeddingConfigForProvider,
+} from "@/lib/ai/get-embedding-config";
 import { parseBody } from "@/lib/api/schemas";
 
 const chatSchema = z.object({
@@ -34,42 +37,28 @@ export async function POST(request: Request) {
     );
   }
 
-  // Get LLM config for embedding
-  const { LlmConfig } = await import("@/lib/db/entities/LlmConfig");
-  const config = await db
-    .getRepository(LlmConfig)
-    .findOneBy({ isDefault: true });
+  // Resolve embedding provider — must match the one used to create embeddings
+  const embeddingConfig = project.embeddingProvider
+    ? await getEmbeddingConfigForProvider(project.embeddingProvider)
+    : await getEmbeddingConfig();
 
-  if (!config) {
+  if (!embeddingConfig) {
+    const msg = project.embeddingProvider
+      ? `The embedding provider (${project.embeddingProvider}) used for this project is no longer configured. Re-add it in Settings.`
+      : "No embedding-capable provider configured. Add OpenAI, Azure OpenAI, or Ollama in Settings.";
     return NextResponse.json(
-      { error: "No LLM provider configured." },
+      { error: msg, code: "NO_EMBEDDING_PROVIDER" },
       { status: 400 }
     );
   }
 
-  // Anthropic doesn't support embeddings — need an embedding-capable provider for the query
-  if (config.provider === "anthropic" && !project.embeddingProvider) {
-    return NextResponse.json(
-      {
-        error:
-          "Anthropic does not support embeddings. Configure OpenAI, Azure OpenAI, or Ollama in Settings to use Chat Analysis.",
-      },
-      { status: 400 }
-    );
-  }
-
-  const apiKey = config.apiKeyEncrypted
-    ? decrypt(config.apiKeyEncrypted)
-    : undefined;
-
-  // Embed the user's question
-  const embeddingModel = project.embeddingModel || "text-embedding-3-small";
+  // Embed the user's question using the same provider/model as the stored embeddings
   const queryEmbedding = await embedText(
     message,
-    config.provider,
-    apiKey,
-    config.endpointUrl || undefined,
-    embeddingModel
+    embeddingConfig.provider,
+    embeddingConfig.apiKey,
+    embeddingConfig.endpointUrl,
+    project.embeddingModel || embeddingConfig.embeddingModel
   );
 
   // Use raw SQL for VECTOR_DISTANCE similarity search

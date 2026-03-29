@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
+import {
+  EMBEDDING_CAPABLE_PROVIDERS,
+  EMBEDDING_MODELS,
+  type LlmProvider,
+} from "@/lib/ai/models";
 
 /**
  * Tests for embedding-related logic.
@@ -95,6 +100,31 @@ describe("chat schema validation", () => {
       message: "x".repeat(2001),
     });
     expect(result.success).toBe(false);
+  });
+});
+
+describe("EMBEDDING_CAPABLE_PROVIDERS", () => {
+  it("includes openai, azure-openai, ollama", () => {
+    expect(EMBEDDING_CAPABLE_PROVIDERS).toContain("openai");
+    expect(EMBEDDING_CAPABLE_PROVIDERS).toContain("azure-openai");
+    expect(EMBEDDING_CAPABLE_PROVIDERS).toContain("ollama");
+  });
+
+  it("excludes anthropic", () => {
+    expect(EMBEDDING_CAPABLE_PROVIDERS).not.toContain("anthropic");
+  });
+
+  it("has a model mapping for each capable provider", () => {
+    for (const provider of EMBEDDING_CAPABLE_PROVIDERS) {
+      expect(EMBEDDING_MODELS[provider as LlmProvider]).toBeDefined();
+      expect(EMBEDDING_MODELS[provider as LlmProvider]!.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("uses correct default models", () => {
+    expect(EMBEDDING_MODELS.openai).toBe("text-embedding-3-small");
+    expect(EMBEDDING_MODELS["azure-openai"]).toBe("text-embedding-3-small");
+    expect(EMBEDDING_MODELS.ollama).toBe("nomic-embed-text");
   });
 });
 
