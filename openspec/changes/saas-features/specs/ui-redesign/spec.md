@@ -39,7 +39,7 @@ The application SHALL support both light and dark modes with a cohesive color pa
 
 #### Scenario: Dark mode appearance
 - **WHEN** dark mode is active
-- **THEN** the application uses a deep blue-gray background (not pure black) with light text, blue primary accents, and colored badges that are readable on dark backgrounds. The dark theme SHALL use HSL-based blue-tinted grays for cards, borders, and muted elements to avoid the flat black appearance.
+- **THEN** the application uses a near-black neutral background (`hsl(0 0% 3.9%)`) with light text, blue primary accents, and neutral gray surfaces for cards/borders/muted elements. Cards use `hsl(0 0% 5.5%)` with `ring-1 ring-foreground/10` borders for subtle depth.
 
 ---
 
@@ -117,3 +117,21 @@ The application SHALL use shadcn/ui Toast/Sonner for success, error, and info no
 #### Scenario: Error notification
 - **WHEN** an API call fails
 - **THEN** a toast notification SHALL appear with the error message in red/destructive styling
+
+---
+
+### Requirement: Design system consistency — no hardcoded colors
+
+All component and page files SHALL use CSS variable-based color classes exclusively. No hardcoded Tailwind color classes (`gray-200`, `blue-600`, `green-500`, etc.) are allowed in `.tsx` files. Colors MUST reference the design system tokens (`text-foreground`, `bg-card`, `bg-muted`, `border-border`, `bg-primary`, `text-destructive`, etc.).
+
+#### Scenario: NPS domain colors as CSS custom properties
+- **WHEN** NPS score indicators render (promoter/passive/detractor badges, score cards)
+- **THEN** they SHALL use CSS custom properties (`--nps-promoter`, `--nps-passive`, `--nps-detractor`, `--nps-excellent`) defined in globals.css that adapt to light/dark mode
+
+#### Scenario: Raw HTML replaced with shadcn/ui components
+- **WHEN** any page renders form inputs, selects, checkboxes, buttons, or tables
+- **THEN** they SHALL use the corresponding shadcn/ui component (Input, Select, Checkbox, Button, Table) instead of raw HTML with hardcoded styles
+
+#### Scenario: Status and alert banners use semantic tokens
+- **WHEN** informational banners render (loading, warning, error, partial status)
+- **THEN** they SHALL use `bg-muted border-border text-muted-foreground` for informational, `bg-destructive/10 text-destructive` for errors, and `bg-primary text-primary-foreground` for active progress
