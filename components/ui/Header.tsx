@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 
 interface ActiveProvider {
@@ -11,22 +11,30 @@ interface ActiveProvider {
 export function Header() {
   const [active, setActive] = useState<ActiveProvider | null>(null);
 
-  useEffect(() => {
+  const fetchActive = useCallback(() => {
     fetch("/api/settings")
       .then((res) => res.json())
       .then((configs) => {
         const defaultConfig = configs.find(
           (c: { isDefault: boolean }) => c.isDefault
         );
-        if (defaultConfig) {
-          setActive({
-            provider: defaultConfig.provider,
-            modelName: defaultConfig.modelName,
-          });
-        }
+        setActive(
+          defaultConfig
+            ? { provider: defaultConfig.provider, modelName: defaultConfig.modelName }
+            : null
+        );
       })
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    fetchActive();
+
+    // Re-fetch when settings are saved (custom event from settings page)
+    const handler = () => fetchActive();
+    window.addEventListener("llm-config-changed", handler);
+    return () => window.removeEventListener("llm-config-changed", handler);
+  }, [fetchActive]);
 
   return (
     <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">

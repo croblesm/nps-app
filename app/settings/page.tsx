@@ -101,6 +101,7 @@ export default function SettingsPage() {
         setSaveMessage("Configuration saved");
         setApiKey("");
         await fetchConfigs();
+        window.dispatchEvent(new Event("llm-config-changed"));
       } else {
         try {
           const err = await res.json();
