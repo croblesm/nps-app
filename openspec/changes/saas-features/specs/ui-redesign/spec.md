@@ -86,12 +86,24 @@ All confirmation prompts and detail views SHALL use shadcn/ui Dialog components 
 
 ---
 
-### Requirement: Tabs for dashboard sub-views
-The dashboard SHALL use shadcn/ui Tabs to organize different views (Dashboard, Analytics, GitHub Issues) instead of separate sidebar items for related content.
+### Requirement: Top-nav + tabs layout instead of sidebar
+The project layout SHALL use a full-width top navigation with horizontal tabs instead of a vertical sidebar. The layout follows the GitHub Spark app pattern: project title bar at top, horizontal tabs below, full-width content area.
 
-#### Scenario: Dashboard tab navigation
-- **WHEN** the user is on the dashboard page
-- **THEN** tabs SHALL be available for "Dashboard" (score cards + table), and "GitHub Issues" (created issues tracker)
+#### Scenario: No sidebar visible
+- **WHEN** the user opens any project page
+- **THEN** there SHALL be no vertical sidebar. Content uses the full width of the viewport (max-w-7xl centered).
+
+#### Scenario: Project title bar
+- **WHEN** the user is on a project page
+- **THEN** the project name SHALL be displayed prominently (text-2xl bold) with description below it, and a "← All Projects" back link above it.
+
+#### Scenario: Horizontal tab navigation
+- **WHEN** the user navigates between project pages
+- **THEN** horizontal tabs with icons SHALL be displayed: Dashboard, Data (upload+structure), Categories, Noise Filters, Summary. The active tab SHALL have a primary-colored bottom border underline.
+
+#### Scenario: Data tab groups upload and structure
+- **WHEN** the user is on either the upload or structure page
+- **THEN** the "Data" tab SHALL be highlighted as active.
 
 ---
 

@@ -4,13 +4,13 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import {
-  Upload,
-  Columns3,
-  Tags,
   LayoutDashboard,
+  FileSpreadsheet,
+  Tags,
   Filter,
   FileText,
   ArrowLeft,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -23,12 +23,11 @@ interface ProjectInfo {
 }
 
 const NAV_ITEMS = [
-  { href: "upload", label: "Upload Data", icon: Upload },
-  { href: "structure", label: "Report Structure", icon: Columns3 },
-  { href: "categories", label: "Categories", icon: Tags },
   { href: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "upload", label: "Data", icon: FileSpreadsheet, altHref: "structure" },
+  { href: "categories", label: "Categories", icon: Tags },
   { href: "noise", label: "Noise Filters", icon: Filter },
-  { href: "summary", label: "AI Summary", icon: FileText },
+  { href: "summary", label: "Summary", icon: FileText },
 ];
 
 export default function ProjectLayout({
@@ -51,54 +50,77 @@ export default function ProjectLayout({
   const currentPage = pathname.split("/").pop();
 
   return (
-    <div className="flex min-h-[calc(100vh-49px)]">
-      <aside className="w-56 border-r border-border bg-card p-4 flex-shrink-0">
-        <div className="mb-4">
-          <Link href="/">
-            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-muted-foreground">
-              <ArrowLeft className="h-3 w-3 mr-1" />
-              All Projects
-            </Button>
-          </Link>
-          {project && (
-            <h2 className="text-sm font-semibold text-foreground mt-2 truncate px-2">
-              {project.name}
-            </h2>
-          )}
-        </div>
-
-        <Separator className="mb-3" />
-
-        <nav className="space-y-1">
-          {NAV_ITEMS.map((item, idx) => {
-            const isActive = currentPage === item.href;
-            const Icon = item.icon;
-            return (
+    <div className="min-h-[calc(100vh-49px)]">
+      {/* Project header */}
+      <div className="border-b border-border bg-card">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-start justify-between">
+            <div>
               <Link
-                key={item.href}
-                href={`/project/${projectId}/${item.href}`}
-                className={cn(
-                  "flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors",
-                  isActive
-                    ? "bg-primary/10 text-primary font-medium"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                )}
+                href="/"
+                className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mb-2"
               >
-                <Icon className="h-4 w-4 flex-shrink-0" />
-                <span className="truncate">{item.label}</span>
-                <span className={cn(
-                  "ml-auto text-[10px] font-medium w-4 h-4 flex items-center justify-center rounded-full",
-                  isActive ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-                )}>
-                  {idx + 1}
-                </span>
+                <ArrowLeft className="h-3 w-3" />
+                All Projects
               </Link>
-            );
-          })}
-        </nav>
-      </aside>
+              {project ? (
+                <>
+                  <h1 className="text-2xl font-bold text-foreground">
+                    {project.name}
+                  </h1>
+                  {project.description && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {project.description}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <div className="h-8" />
+              )}
+            </div>
+            <div className="flex items-center gap-2 mt-6">
+              <Link href={`/project/${projectId}/summary`}>
+                <Button variant="outline" size="sm">
+                  <Download className="h-3.5 w-3.5 mr-1.5" />
+                  Export
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <main className="flex-1 p-8">{children}</main>
+      {/* Tab navigation */}
+      <div className="border-b border-border bg-card">
+        <div className="max-w-7xl mx-auto px-6">
+          <nav className="flex gap-1 -mb-px">
+            {NAV_ITEMS.map((item) => {
+              const isActive =
+                currentPage === item.href ||
+                (item.altHref && currentPage === item.altHref);
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.href}
+                  href={`/project/${projectId}/${item.href}`}
+                  className={cn(
+                    "flex items-center gap-1.5 px-4 py-3 text-sm font-medium border-b-2 transition-colors",
+                    isActive
+                      ? "border-primary text-primary"
+                      : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+      </div>
+
+      {/* Page content */}
+      <div className="max-w-7xl mx-auto px-6 py-6">{children}</div>
     </div>
   );
 }
