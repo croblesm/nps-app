@@ -14,7 +14,8 @@ An AI-powered NPS (Net Promoter Score) analysis platform for product managers. U
 - **Category management** — Rename, remove, or add custom categories; "General Feedback" as mandatory fallback
 - **AI bulk classification** — Classifies all comments into confirmed categories with confidence scores
 - **Non-actionable detection** — AI flags nonsensical, single-word, redacted, or purely emotional feedback
-- **Interactive dashboard** — Clickable NPS score cards, category breakdown grid, full-text search, sortable paginated table
+- **Interactive dashboard** — NPS donut chart, category bar chart, clickable score cards with gradients, category breakdown grid, full-text search, sortable paginated table
+- **Sidebar navigation** — Collapsible left sidebar with project nav, user footer with sign-out, breadcrumb top bar
 - **Noise filters** — Keyword-based filters that can exclude comments from NPS score calculation
 - **AI summary report** — On-demand markdown report with executive summary, theme analysis, key quotes, and recommendations
 - **RAG chat analysis** — Ask natural language questions about your NPS data via a floating chat button (bottom-right FAB on the dashboard); vector embeddings + cosine similarity search retrieve relevant comments, LLM generates cited answers

@@ -48,8 +48,8 @@
 - [x] 0.43 Dashboard: add NpsDonutChart component (recharts PieChart with NPS score center label)
 - [x] 0.44 Dashboard: add CategoryBarChart component (recharts horizontal BarChart). Clicking bar filters dashboard
 - [x] 0.45 Dashboard: add subtle gradient to active score cards. Replace emoji with clean label
-- [ ] 0.46 Polish: remove max-w-7xl constraints, consistent p-4 md:p-6 spacing, breadcrumb context. Verify: all pages look clean
-- [ ] 0.47 Update specs, README, CLAUDE.md with sidebar layout + charts documentation. Update test counts.
+- [x] 0.46 Polish: max-w-7xl already removed, p-4 md:p-6 in root layout, breadcrumb in TopBar
+- [x] 0.47 Update specs, README, CLAUDE.md with sidebar layout + charts documentation
 
 ## 1. Authentication Foundation
 

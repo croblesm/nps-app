@@ -11,7 +11,7 @@ NPS Insight Engine — a generic, AI-powered NPS (Net Promoter Score) analysis p
 - **Dev server:** `npm run dev` (Next.js on localhost:3000)
 - **Build:** `npm run build`
 - **Start prod:** `npm start`
-- **Test:** `npm test` (Vitest, 168 tests across 11 suites)
+- **Test:** `npm test` (Vitest, 168 tests across 11 suites (run `npm test`))
 - **Test watch:** `npm run test:watch`
 - **DB init:** `npm run db:init` (creates database + tables via TypeORM)
 - **Docker SQL Server:** `docker compose up -d` (starts SQL Server 2025 on port 1433)
@@ -36,7 +36,9 @@ Open in VS Code with Dev Containers extension → "Reopen in Container". Provide
 - **AI:** Vercel AI SDK (`ai` package) — multi-provider (Anthropic, OpenAI, Azure OpenAI, Ollama)
 - **GitHub:** Octokit (GitHub issue creation from NPS data)
 - **CSV:** PapaParse
+- **Charts:** Recharts (PieChart, BarChart for NPS visualization)
 - **Validation:** Zod (for AI structured output schemas)
+- **Layout:** Collapsible sidebar (shadcn Sidebar) + minimal top bar, replaces top-nav + tabs
 
 ### Directory Structure
 ```
@@ -65,8 +67,14 @@ app/                          # Next.js App Router pages
   settings/                   # LLM provider configuration
   new-project/                # Project creation
 components/
+  app-sidebar.tsx             # Collapsible left sidebar (project nav + user footer)
+  top-bar.tsx                 # Minimal h-12 top bar (sidebar trigger, breadcrumb, LLM status, theme)
   providers.tsx               # SessionProvider + ThemeProvider wrapper
-  ui/                         # Shared UI components (shadcn/ui)
+  nps/                        # NPS-specific components
+    NpsDonutChart.tsx          #   Recharts donut chart (dashboard)
+    NpsVisualCards.tsx         #   Recharts pie chart + legend (summary)
+    CategoryBarChart.tsx       #   Recharts horizontal bar chart (dashboard)
+  ui/                         # Shared UI components (shadcn/ui, includes sidebar.tsx)
 lib/
   ai/                         # LLM providers, prompts, encryption
     get-embedding-config.ts   #   Smart embedding provider resolution (auto-finds OpenAI/Azure/Ollama)
