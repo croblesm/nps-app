@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Header } from "@/components/ui/Header";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: "NPS Insight Engine",
@@ -17,22 +19,30 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={cn("dark", "font-sans", geist.variable)}>
-      <body className="min-h-screen flex flex-col bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
-        <Header />
-        <div className="flex-1">{children}</div>
-        <footer className="border-t border-gray-200 dark:border-gray-800 py-4 text-center text-xs text-gray-400">
-          &copy; {new Date().getFullYear()}{" "}
-          <a
-            href="https://croblesm.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-blue-400 transition-colors"
-          >
-            croblesm
-          </a>
-          . All rights reserved.
-        </footer>
+    <html lang="en" className={cn("font-sans", geist.variable)} suppressHydrationWarning>
+      <body className="min-h-screen flex flex-col bg-background text-foreground">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Header />
+          <div className="flex-1">{children}</div>
+          <footer className="border-t border-border py-4 text-center text-xs text-muted-foreground">
+            &copy; {new Date().getFullYear()}{" "}
+            <a
+              href="https://croblesm.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-primary transition-colors"
+            >
+              croblesm
+            </a>
+            . All rights reserved.
+          </footer>
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

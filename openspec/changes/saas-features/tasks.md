@@ -1,11 +1,11 @@
 ## 0. UI Redesign — shadcn/ui Migration
 
-- [ ] 0.1 Initialize shadcn/ui: npx shadcn@latest init (new-york style, slate color, CSS variables)
-- [ ] 0.2 Install core shadcn/ui components: button, card, input, label, select, textarea, checkbox, badge, dialog, alert-dialog, tabs, progress, toast, dropdown-menu, separator, tooltip, avatar, sheet
-- [ ] 0.3 Install lucide-react for icons
-- [ ] 0.4 Add theme provider with next-themes for light/dark toggle, persist preference
-- [ ] 0.5 Add theme toggle button to Header component (sun/moon icon)
-- [ ] 0.6 Redesign Header: use shadcn Button, Avatar, DropdownMenu for settings/user menu
+- [x] 0.1 Initialize shadcn/ui: npx shadcn@latest init (new-york style, slate color, CSS variables)
+- [x] 0.2 Install core shadcn/ui components: button, card, input, label, select, textarea, checkbox, badge, dialog, alert-dialog, tabs, progress, toast, dropdown-menu, separator, tooltip, avatar, sheet
+- [x] 0.3 Install lucide-react for icons
+- [x] 0.4 Add theme provider with next-themes for light/dark toggle, persist preference
+- [x] 0.5 Add theme toggle button to Header component (sun/moon icon)
+- [x] 0.6 Redesign Header: use shadcn Button, Avatar, DropdownMenu for settings/user menu
 - [ ] 0.7 Redesign project sidebar: add Lucide icons to each step, use shadcn navigation patterns
 - [ ] 0.8 Redesign home page: project list as shadcn Cards with proper typography, hover effects, delete via AlertDialog
 - [ ] 0.9 Redesign new project form: shadcn Input, Textarea, Label, Button components
