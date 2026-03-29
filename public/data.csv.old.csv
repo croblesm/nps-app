@@ -1,0 +1,349 @@
+﻿Timestamp,NPS,Version,Comments
+"8/7/2025, 7:00:54.816 AM",0,1.34.0,"Please stop making us reauthenticate the connection twice and solve the problems with opened connections that end up don't executing the query (i.e. the conection is open, we don't know if the query is running or not, and we end up opening multiple connections that in the program don't seem to be executing)"
+"8/1/2025, 7:07:22.357 PM",0,1.34.0,running queries always take forever. also give me back sql notebooks from azure data studio.
+"7/31/2025, 2:17:46.385 PM",0,1.34.0,
+"7/25/2025, 7:02:28.737 AM",0,1.34.0,- SQL Server Profiler : https:/<REDACTED: user-file-path> - No success or error query execution indicator in status bar - Having total line count in result sets - lot of bug when a query return many result sets - We are far from quality software like SSMS or ADS...
+"8/17/2025, 11:38:59.983 PM",0,1.34.1,なんどF5を押しても、接続できない＆クエリーを実行できないことが頻発する。
+"8/15/2025, 1:24:31.485 PM",0,1.34.1,"Within my private circle of people, I tend not to speak about programming in much detail, so recommending is highly unlikely. At work, everyone else is already using it."
+"7/29/2025, 10:32:06.568 PM",1,1.34.0,
+"8/18/2025, 9:29:13.406 AM",1,1.34.1,Query execution has lot of issues and very slow.
+"8/11/2025, 11:14:45.81 AM",2,1.34.0,workflow needs vast improvment. Unable to view two queries at once is bad. Im not even able to quickly create a new window of the same database (i need to reconnect each time) What was wront with azure data studio?
+"8/7/2025, 10:59:16.924 AM",2,1.34.0,It does not co-exist well with the postgresql extension. I much preferred Azure Data Studio. There are issues with sp_blitzwho getting live query plans doesn't render in vscode but worked well in ADS. Overall the mssql extension is a poor cousin to ADS.
+"8/3/2025, 9:41:12.453 PM",2,1.34.0,"If this is supposed to the replacement for Azure Data Studio, it needs to be much more like Azure Data Studio in behaviour. At the moment it feels like an afterthought add-on, with integration feeling very clunkly. The are to many things to list here at the moment that need improvement, but the most pressing issue is that every time I make a new query into a data base I have to re-authenticate. This is infuriating when I am making multiple new queries a minute as part of a data investigation. Once I have authenticated to a particular server, there should be a sensible length of time before I need to re-authenticate to that database, e.g. wait at least 1 hour before needing to re-authenticate to a particular server."
+"7/31/2025, 5:42:02.297 PM",2,1.34.0,Not sure what it was asking for after update. KeyChain?
+"7/31/2025, 5:42:02.297 PM",2,1.34.0,Not sure what it was asking for after update. KeyChain?
+"7/31/2025, 1:58:14.903 AM",2,1.34.0,
+"7/30/2025, 11:41:56.043 AM",2,1.34.0,SI expect you to bring all the features from Azure Data Studio if no from SQL Server Management Studio
+"7/27/2025, 10:51:59.332 PM",2,1.34.0,"Are you dogfooding this? It's just not a very good tool. Azure data studio had it's issues, but the switchover to just a plugin in VS Code was premature. Too many things default to ""i'm a coder who occasionally uses sql"" rather than ""my primary environment is SQL""."
+"7/25/2025, 8:54:14.346 AM",2,1.34.0,"Compared to Azure Data Studio, the MSSQL extension just feels much slower and clunkier, which in turn is far slower than SSMS. But it is improving with each release. Mainly I think my gripes at the moment are with connection speeds. everything just feels like it takes a few seconds longer than it should"
+"8/15/2025, 7:53:52.94 AM",2,1.34.1,"If it is supposed to replace Azure Data Studio it needs a lot more work, for starters make it start quicker, connect quicker and extensible. "
+"8/13/2025, 1:11:54.546 PM",3,1.34.0,"If you guys insist on getting rid of the great Azure Data Studio, I badly want to use this MSSQL extension in vscode, but I can't until you add a command for ""> MS SQL: Execute Current Selection"" or make the ""> MS SQL: Execute Current Statement"" command respect the full selection or make the ""> MS SQL: Execute Query"" command use the current statement when there's no selection. Right now the current statement command only executes the FIRST statement in the selection. ""select 'a'; |select 'b'; select 'c';"" correctly returns b. ""select 'a'; |select 'b';| select 'c';"" correctly returns b. But ""|select 'a'; select 'b';| select 'c';"" incorrectly only returns a, when it should return two resultsets, one a and one b. This is a surprisingly annoying gap. "
+"8/7/2025, 5:05:27.953 PM",3,1.34.0,show connection colors as in SSMS 
+"8/1/2025, 3:17:16.311 AM",3,1.34.0,<REDACTED: secret>
+"7/31/2025, 9:07:19.759 PM",3,1.34.0,"If it's going to replace azure data studio, then it shouldn't perform worse than azure data studio"
+"7/30/2025, 7:03:03.972 PM",3,1.34.0,I would like to be able to see the SQL for the schema as well as make custom quick queries. Right now it's only select 1000 rows
+"7/29/2025, 5:27:24.997 PM",3,1.34.0,the autocomplete and intelisnese struggles 
+"7/28/2025, 3:43:18.973 PM",3,1.34.0,
+"7/28/2025, 8:18:33.614 AM",3,1.34.0,it's pretty unstable and cumbersome. Not comparable to proper SQL tools like Toad etc.
+"7/28/2025, 1:57:10.467 AM",3,1.34.0,not short cut to run queries
+"7/24/2025, 1:36:09.066 PM",3,1.34.0,"If this worked more like Azure Data Studio I would be happy. There are some nuances that are not fulfilled. Like for example the Query Result panel does not split between windows, you can only work see one result at a time. Also the export features are not as good."
+"8/18/2025, 10:03:11.336 PM",3,1.34.1,"It feels clunky, the auto complete is terrible. I was hoping for a good replacement for SSMS that was quick and usable and Azure Data Studio seemed to be headed in the right direction. If this is the replacement then it feels like you guys are just not serious aboiut buiilding a good tool."
+"8/18/2025, 7:28:47.68 AM",3,1.34.1,"The extension still feels a bit clunky compared to ADS. I think it's improving over updates, but still someones takes much longer to connect to a server, and there's still sometimes a delay when running a query while it attempts to re-connect to the server. Also I still dont like the Query results window. When running a couple of queries together, which I do regularly, I can't move them closer together to check differences. "
+"8/18/2025, 6:48:48.334 AM",3,1.34.1,Please bring all features was in Azure Data Studio
+"8/18/2025, 5:46:01.618 AM",3,1.34.1,Vorhandene Tabellen bearbeiten (Entwurf oder Daten) funktioniert Azure Data Studio besser.
+"8/14/2025, 12:53:02.899 PM",3,1.34.1,Improve Code Formatter  Improve Options to cancel queries
+"8/13/2025, 9:50:57.784 AM",4,1.34.0,Poder cancelar consultas fácilmente. Ver resultado en Texto
+"8/5/2025, 3:48:05.19 PM",4,1.34.0,"The connection handling still needs work, i have to constantly run kinit and <REDACTED: user-file-path> vscode"
+"8/4/2025, 10:57:14.843 AM",4,1.34.0,"1. Add a way to edit rows from a select query result (so in the Query Results tab, allow me to double click a row and edit values like that) 2. Make it easier to manage connections. A lot of my connections have the same base information (e.g. db server). It should be easier to either use templates, or to <REDACTED: user-file-path> an existing connection when making a new one. Now I have to open a separate instance to manually copy each field."
+"8/4/2025, 4:27:58.248 AM",4,1.34.0,"It occasionally just doesn't work (OSX) - unable to view the tile in the extensions bar, and occsionally - particularly after hibernation just doesn't connect until I restart vs code."
+"8/1/2025, 11:00:14.67 AM",4,1.34.0,There are a lot of missing features 
+"7/30/2025, 2:15:02.094 PM",4,1.34.0,
+"7/29/2025, 5:46:48.825 AM",4,1.34.0,1- The app keeps asking me to login for every sigle action 2- Should be integrated with the azure extension like other azure database extensions 3- The connection dialog doesn't show sql managed instances
+"7/28/2025, 7:02:42.111 PM",4,1.34.0,Bring the job management. I can view or edit sql server jobs.. 2) better performance in copying the output 3) Better generate script option.. ability to filter and select multiple objects..
+"7/25/2025, 9:10:16.844 AM",4,1.34.0,Connectivity and sortcut keys like SSMS.
+"8/18/2025, 7:52:01.494 AM",4,1.34.1,"I need to open a folder in VS code to access SQL tools. and then I cannot switch to a different folders without loosing all the queries. I want a standalone product back. Also, I never want to save queries! They are 99.9% ephemeral and I'm totally okay with just having a good, searchable query history! Don't block closing to ask ""Do you want to save your SELECT * FROM a"" query to a file? o.O"
+"8/15/2025, 6:28:58.835 PM",4,1.34.1,<REDACTED: secret>
+"8/14/2025, 6:38:55.435 AM",5,1.34.0,I really like the extension to vs code and want to see it well used and supported. I marked my satisfaction as dissatisfied so that this comment would be read (hopefullY) however I do like it. There were some useful features in Azure Data Studio that are not seemingly present in this vs code extension. The main one is the ability to import / export bacpac files. I would love that.
+"8/12/2025, 12:47:35.913 PM",5,1.34.0,
+"8/11/2025, 10:21:36.08 AM",5,1.34.0,"The inplace filtering the result returned by query is amazing, works very well as we do not have to query again with some where condition that we forgot. however, the query execution is slower compared to azure data studio (which will be replaced by this soon), also whenever I click ""New Query"" it asks me for credential even if I am logged in the database. "
+"8/8/2025, 5:48:50.705 AM",5,1.34.0,Slow
+"8/7/2025, 7:39:51.11 PM",5,1.34.0,"Reliability. I often get errors that the query couldn't execute, then simply clicking the execute button again, everything is all good.  Autocomplete can take quite some time to wake up and work. "
+"8/6/2025, 1:45:05.153 PM",5,1.34.0,"more formatting options, impove intelisence"
+"8/6/2025, 3:42:04.309 AM",5,1.34.0,Opening the table designer sometimes works but takes a while - a restart of VSC usually fixes it. The schema designer never opens - just says 'loading...' Drag & dropping connections in the LHS navigation menu sometimes means the connection disappears. Vertical scrolling in the LHS navigation menu is weird with some itsm sticking to the top temporarily
+"8/5/2025, 10:13:37.08 AM",5,1.34.0,keep same keyboard shortcuts as SQL Server Management 
+"8/4/2025, 10:17:12.358 AM",5,1.34.0,
+"8/4/2025, 7:36:11.826 AM",5,1.34.0,Focusing more on copying SQL Server Management Studio features
+"8/1/2025, 9:40:19.169 AM",5,1.34.0,"1. Please, Include the notebook extension similar to Azure Data Studio. Notebook makes life easier for debugging.  2. It is quite slow to run the query, sometimes not even running."
+"7/31/2025, 10:57:12.46 AM",5,1.34.0,
+"7/30/2025, 8:12:46.259 AM",5,1.34.0,"1. I work on a remote SQL Server and I frequently face this issue ""right click on a object in SQL Server Connections pan (right pan) and click ""script as alter or create"" and  it shows ""Fetching alter script"" status at right bottom for ever, nither it gives error or timesout or you can stop it.  I have to restart the VSCode. 2. The ""Query Results"" window height is same for all the Query Windows.  Which is quiet uncomfortable while working in multiple windows.  When each query window has it's own query results view then it should have its own height.   E.g.  I am writing a Procedure in one window and I want maximum area for Writing SQL and no results window needed, while in another query window I am writing working SQL Queries for debugging and I want query results window here."
+"7/30/2025, 8:09:11.991 AM",5,1.34.0,The Azure data studio was much nicer to use as a dedicated SQL tool I don't like that VSCode contains everything
+"7/30/2025, 5:50:05.922 AM",5,1.34.0,MAC會一直要授權
+"7/29/2025, 6:03:09.478 PM",5,1.34.0,It badly needs some kind of keep alive functionality so that connections can be maintained similar to SSMS.
+"7/29/2025, 10:50:58.031 AM",5,1.34.0,Improve the position of the currently selected connection and include formatting options.
+"7/28/2025, 1:58:28.165 PM",5,1.34.0,"Was forced to move away from Azure Data Studio to this extension; but this does not have all the features needed for proper SQL development. For instance, it's missing a profiler which is a must for debugging performance issue on servers"
+"7/26/2025, 3:00:17.408 PM",5,1.34.0,please add data manupilation in visual table
+"7/25/2025, 3:35:25.788 PM",5,1.34.0,"Table designs take a long time to load and there is no way to quickly collapse the ""script as create"" window at the bottom. Schema designs also take a long time to load and populate all tables in the database automatically instead of allowing me to choose which ones I want first. The schema designs are lacking a lot of features provided by other DBMS software, most annoyingly missing being the ability to resize tables with lots of fields and being able to quickly find tables with relationships."
+"7/25/2025, 12:22:14.493 PM",5,1.34.0,honestly I don't understand why ADS couldn't be supported instead of forcing data people onto your application coding platform
+"7/25/2025, 7:14:10.719 AM",5,1.34.0,"Please make this extension more similar to Azure Data Studio. It's very important to me that each query tab be color-coded based on the connection category (development, production, test), and this isn't possible yet."
+"8/18/2025, 9:51:08.93 PM",5,1.34.1,"F5 not working out of the box, instead launches the project (expected if not in .sql <REDACTED: user-file-path>) Saving as .sql files breaks CTRL+E / no longer seens as a SQL session. This is a real pain if you need to persist scripts often. Edit data / table data view like SSMS feels lacking, sure crafting SQL can do it too, sometimes a 2s job should be a 2s job though.  Ideally all features of <REDACTED: user-file-path> (including <REDACTED: user-file-path> and differential capabilities) would be nice too :)"
+"8/18/2025, 7:04:29.568 AM",5,1.34.1,when running multiple queries the space between the different result tables are very big and you have to do an annoying amount of scrolling and potentially completely miss that you actually receive multple results.
+"8/15/2025, 6:41:22.509 AM",5,1.34.1,SSMS is my go to tool but I use a Mac and this extension lacks a lot of the useful functionality of SSMS - currently I'd like to do some work on SQL Agent jobs which would be so easy in SSMS but with this extension I have to use DMVs :(
+"8/14/2025, 12:53:37.446 PM",5,1.34.1,"I have had an increasing occurance of results grids not rendering, servers failing to connect (or stuck trying to connect), and some unresponsive queries."
+"8/13/2025, 1:35:38.91 PM",6,1.34.0,Performance. It works slow sometimes.
+"8/13/2025, 7:00:48.954 AM",6,1.34.0,<REDACTED: secret>
+"8/11/2025, 6:35:19.83 AM",6,1.34.0,Designer and Stored Procdure execution.
+"8/8/2025, 3:47:30.853 PM",6,1.34.0,"I've encountered several usability issues with the MSSQL extension in Visual Studio Code that make the experience less reliable compared to SQL Server Management Studio (SSMS):  Connection Icon State Confusion The connection icons often do not accurately reflect the current state. Even when connected to a database, the icon does not always show a “disconnect” option. Clicking the button frequently prompts me to select a different database rather than providing a clear way to disconnect. This makes managing connections less intuitive.  Query Selection After Connecting If I attempt to execute a SELECT statement while disconnected, I’m prompted to select and wait for a database connection, which is fine. However, after connecting, the extension re-evaluates what is highlighted and executes whatever is currently selected—often not what I originally had highlighted when I triggered the execution. This is different (and less helpful) behavior compared to SSMS, where the original selection is what gets executed after connecting. This sometimes results in running the wrong query, which can be risky.  Tab and Result Mismatch When switching tabs while a connection is being established or a query is running, there are cases where the results of a query show up under the wrong editor tab. This can be confusing and leads to mistakes, especially when working with multiple queries across different databases.  IntelliSense Cache It seems that IntelliSense metadata is refreshed every time a new connection is established, resulting in slower query writing experiences. I would prefer if IntelliSense information (such as <REDACTED: user-file-path> suggestions) could be cached for longer periods or persist between connections to the same <REDACTED: user-file-path>, rather than requiring a full refresh every time.  Overall, these issues make the extension feel less predictable and harder to use efficiently, especially for those who are accustomed to SSMS behavior. Improving connection state visibility, query selection logic, <REDACTED: user-file-path> alignment, and IntelliSense caching would make a significant difference.  Thank you for your work on this extension!"
+"8/8/2025, 1:40:15.926 PM",6,1.34.0,No puedo editar datos de las tablas
+"8/7/2025, 2:51:41.258 PM",6,1.34.0,"It is fantastic but so brittle. It stops working constantly and then requires me to reboot all of VSCode to work again, which is crazy.  If it hasn't stopped working, it will sometimes make me run queries multiple times as it gets index out of range exceptions in the results view the first time.  Intellisense is also so good when it works, but sometimes it just doesn't load.  When the extension is working - it is GREAT.  It just only is working 40-60% of the time."
+"8/6/2025, 12:21:14.524 PM",6,1.34.0,"- first, I appreciate the development of this free product. I'm satisfied with the more ""core"" part of it (creating and using different connections, running SQL code inside the work I'm doing in VS Code). - but, I'm not so much satisfied with the query results <REDACTED: user-file-path>, I believe it can be improved. and I use this extension mainly for having easy results along with when I code. but recently I've needed to work with SLS SMS again, due to bugs in this results <REDACTED: user-file-path> many times, when I run a query, the grid in the query results, has some bugs, don't update with the latest query results (still has the previous results). also, it's not trivial to copy / paste the results (CTRL+C doesn't work; need to select a specific ""Copy"", there are 2 different Copy in the menu that shows up in right click). adjusting columns sizes is not trivial either (no double click auto adjust; if the column is in the far right, it seems it's not possible to increase its width in 1 time, need to do multiple small increases)."
+"8/6/2025, 10:26:31.713 AM",6,1.34.0,"The query execution hangs sometimes, showing missing tokens or something. Improve the performance. Then add more features."
+"8/5/2025, 11:27:53.765 AM",6,1.34.0,"Alterar a caixa com o start da query stop para o lado esquerdo, pois para quem tem monitor ultrawide fica ruim os comando ali. Melhorar o intellisense e principalmente adicionar a parte de gerenciamento de jobs."
+"8/5/2025, 11:03:40.879 AM",6,1.34.0,
+"8/4/2025, 2:57:22.618 PM",6,1.34.0,You are still misisng things from Azure Data Studio.  There are extensions that were there that are not here.  Colorizing the tab to match the server grouping is sorely needed so you can track projects being part of the same tab to not make a mistake.
+"8/4/2025, 6:42:46.46 AM",6,1.34.0,Poor coloring in resultset makes it less readable. In Azure data studio there was purple coloring for NULL values for example. 
+"8/1/2025, 8:57:00.018 AM",6,1.34.0,"At the moment I don't see an option to import flat files to tables using the MSSQL extension. I'm currently starting to use VS Code rather than Azure Data Studio, which will be obsolete in February.   However, Azure Data Studio, has an extension available named ""SQL Server Import"", which is used to import CSV files to a table within Synapse. I don't see anything similar yet in VS Code, so if we had that as part of the MSSQL extension that would be great. "
+"7/31/2025, 10:23:48.771 AM",6,1.34.0,There needs to be more feature parity with both Azure Data Studio and SSMS when the mssql extension is in use. The ability to port over to VS Code extensions that were only available in ADS would also be useful. 
+"7/31/2025, 9:06:24.777 AM",6,1.34.0,"I have transistioned from Azure Data Studio to VS code as ADS will be retired soon, however the experience using MSSQL extension for VS code still lacks in several areas compared to Azure Data Studio"
+"7/31/2025, 7:34:12.915 AM",6,1.34.0,
+"7/31/2025, 4:32:57.13 AM",6,1.34.0,<REDACTED: secret>
+"7/30/2025, 10:38:37.183 AM",6,1.34.0,
+"7/29/2025, 1:34:21.275 PM",6,1.34.0,
+"7/29/2025, 1:20:00.342 PM",6,1.34.0,I would love to see more of the functionality from SSMS moved over. The VSCode intellisense and editor experience is far superior but I still have to hop over to SSMS for missing <REDACTED: user-file-path>
+"7/29/2025, 12:08:01.198 PM",6,1.34.0,i like it to have a different editor for data (sql datastudio) then for code (vs code)
+"7/29/2025, 3:12:50.335 AM",6,1.34.0,I am having a problem when VS cose was installing new version. So my MS SQL extension was error
+"7/28/2025, 4:39:17.174 PM",6,1.34.0,"There are only a few things that I return to SSMS for regularly. If you built these features into this extension, I would probably never use SSMS again: -Activity Monitor (You could probably improve on this considerably. The one in SSMS hasn't changed in forever) -Ability to explore the schema of a Linked Server (right now, in VS Code, you can only see that the linked server exists, but you can't see the underlying catalogues, tables, views, etc.) "
+"7/28/2025, 1:33:47.989 PM",6,1.34.0,If it can read my database and my foreign keys it would be much helpful
+"7/25/2025, 1:29:02.079 PM",6,1.34.0,"I miss more features from Management Studio, like database Management: Index management, Create SP,FN menu, etc..."
+"7/24/2025, 10:50:46.02 AM",6,1.34.0,Need the Import option found on Azure Data Studio
+"7/23/2025, 7:47:30.599 PM",6,1.34.0,Speed is a real issue. . . . feature parity to SQL Server Management Studio is another.
+"8/18/2025, 9:04:27.87 PM",6,1.34.1,I sometimes get errors for diffrent tables when I give them aliases. This resolves when I close and reopen VSCode. I also many errors from SQLTools.
+"8/18/2025, 3:37:25.711 AM",6,1.34.1,make is so it is more integrated with visual studio code and works better. 
+"8/15/2025, 11:34:26.532 PM",6,1.34.1,"Speed, database control, better Azure Data Studio like integration of different databases"
+"8/15/2025, 5:07:00.888 PM",6,1.34.1,"Better Support to connect to a database, while fetching some script"
+"8/15/2025, 1:48:16.408 PM",6,1.34.1,
+"8/14/2025, 12:03:49.72 PM",6,1.34.1,For MFA I always need to open the browser twice.
+"8/13/2025, 2:17:51.315 PM",7,1.34.0,"It is improving nicely! I love how quickly it looks up table and column names, and that sqlproj(ects) can now be opened! I would love if the server explorer could be used like in SSMS, where I could see properties and configurations for on-prem servers, and drill into the databases on that server, instead of having to setup a separate connection to each DB."
+"8/13/2025, 12:05:55.795 PM",7,1.34.0,Having the possibility to edit the queried lines would be awesome. Making cross DB queries like in SSMS would also be nice !
+"8/12/2025, 6:42:47.521 PM",7,1.34.0,
+"8/12/2025, 6:22:50.957 AM",7,1.34.0,
+"8/12/2025, 12:38:19.415 AM",7,1.34.0,"i keep getting asked to reauthenticate ever few minutes, very frustrating"
+"8/11/2025, 1:57:07.899 PM",7,1.34.0,
+"8/9/2025, 5:37:14.986 PM",7,1.34.0,Allow a results window for every query window. It's quite challenging to work with multiple queries when you can only look at one result set at a time.
+"8/7/2025, 5:30:23.749 PM",7,1.34.0,"On macOS, there should be a background process for running kinit so that users don't have to manually get a Kerberos ticket every X hours. Otherwise it's solid."
+"8/7/2025, 12:02:12.635 PM",7,1.34.0,It isn't as robust as other technologies. Sometimes it just breaks down.
+"8/6/2025, 3:33:14.536 PM",7,1.34.0,"connections and databases isn't visible enough, it should prompt you to connect on opening and executing and if you open new (or have other open unconnected SQL queries) it should inherit form the one you've just connected. F5 needs to be the default execute command overriding VS Code default functionality rather than users needing to manually setup and ovverride."
+"8/5/2025, 2:45:03.224 PM",7,1.34.0,"when you switch files, the sql query results should be viewable. i dont want to go back to the sql file to get the data i need to reference."
+"8/5/2025, 12:35:43.999 PM",7,1.34.0,run query by F5 would be nice
+"8/5/2025, 11:54:08.92 AM",7,1.34.0,Add support for agent jobs
+"8/5/2025, 9:32:48.005 AM",7,1.34.0,Fix https:/<REDACTED: user-file-path>
+"8/3/2025, 2:42:54.515 AM",7,1.34.0,It's ok but it would be nice to have the results in the same window as the query rather that stuffed in the bottom.  I keep needing to resize the bottom tray while working with SQL and then resetting it back when doing other work in the project.  It's getting better but I still miss the full funcitonality of SQL Mgmt Studio on occassion.  I use copilot fairly exstensively and it mostly gets in the way when working with the database. there needs to be an easier way to give it the schema so it can stop guessing at the columns.  THis may also be one situation where an algorithm is better than an AI.  I don't need guesses just give me auto complete most of the time.  When I need deeper thinking and reasoning to build out a feature I can switch to the copilot chat window. 
+"8/2/2025, 1:19:39.382 AM",7,1.34.0,"Keep the run-query type icons always present, sometimes they get hidden behind tabs of queries. And it would be a dream if I could browse security, user roles, etc. on the left-hand pane like I can in SSMS, I still use SSMS for that. But I love VSCode and didn't like SSMS (I used Azure Data Studio until it got sunset) and am happier using this for my SQL queries!"
+"8/1/2025, 2:53:24.379 PM",7,1.34.0,
+"8/1/2025, 8:02:39.393 AM",7,1.34.0,Es soll nicht erneut nach PW fragen wenn ich z.Bsp. View <REDACTED: user-file-path> auslöse wenn ich bereits das PW in der Verbindung hinterlegt habe.
+"7/31/2025, 6:14:32.037 PM",7,1.34.0,"When reconnecting to a database or swapping what database I'm connected to, it seems to run my entire sql file on connection, rather than just what was highlighted if anyhting.. sucks when there were delete or drop statements in there...  Aka, 'd raher itdefault to not runnng things I maynot mean to run when reconnecting to a DB after I've been away awhile or just swapping."
+"7/31/2025, 5:15:26.502 PM",7,1.34.0,need the create to scripts and the edit data in a table
+"7/31/2025, 5:15:26.502 PM",7,1.34.0,need the create to scripts and the edit data in a table
+"7/31/2025, 4:02:16.524 PM",7,1.34.0,
+"7/31/2025, 5:20:28.419 AM",7,1.34.0,
+"7/30/2025, 6:16:10.509 PM",7,1.34.0,"En ocasiones se queda sin responder cuando se lanza una consulta al servidor, sobre todo cuando se ha estado trabajando con varias consultas."
+"7/30/2025, 5:41:06.696 PM",7,1.34.0,
+"7/29/2025, 7:09:04.142 PM",7,1.34.0,"remove default keybinding ""cmd shift e"" which executes the current focuses <REDACTED: user-file-path>, this is a default vscode keybinding for focusing the file explorer, so you can execute a half done sql command by accident, there should be at least a warning."
+"7/29/2025, 11:11:15.35 AM",7,1.34.0,main issue is not having enough privilege to install unless granted admin status which makes it tricky to configure in an enerprise environment
+"7/28/2025, 2:43:17.318 PM",7,1.34.0,
+"7/28/2025, 12:23:24.537 PM",7,1.34.0,There are extensions in Azure Data Studio that I use daily that have no equal in VS Code. It would be great to have a path for those extension to be easily converted to VS Code and parity between both applications can improve.
+"7/28/2025, 12:19:59.517 PM",7,1.34.0,"more stability, better ui (like for query results), formatter with more options, detecting sqlcmd in formatting"
+"7/27/2025, 10:00:33.633 PM",7,1.34.0,"I primarily use Azure Data Studio, but since the announcement of no support after February 28th, I switched to Visual Studio Code with the MSSQL extension. Azure Data Studio offers many more capabilities and has a more user-friendly interface. I hope you can make Visual Studio Code as good as Azure Data Studio."
+"7/26/2025, 10:39:48.445 PM",7,1.34.0,"Bring over the SQL Server management features you created from Azure Data Studio - you can't drop that product until this one has at least those features, as a bare minimum. To drop MS SQL Server Management Studio, there are a few more features to add as well. The only reason I stopped using Azure Data Studio is that you guys said you were planning to drop that tool, so I figured I'd better start investing my knowledge into VS Code.  I do love the speed of VS Code."
+"7/26/2025, 4:11:50.662 AM",7,1.34.0,SSMSのように上位200行のレコードの直接編集機能が欲しい
+"7/25/2025, 1:48:07.76 PM",7,1.34.0,
+"7/25/2025, 8:33:35.504 AM",7,1.34.0,
+"7/25/2025, 8:17:47.34 AM",7,1.34.0,
+"7/24/2025, 8:44:12.819 PM",7,1.34.0,"Would like to have a default SQL connection. When i'm on a tab connected to a server, when i create a new tab, i would like that tab to be already connected to the same DB"
+"7/24/2025, 8:15:18.852 PM",7,1.34.0,<REDACTED: secret>
+"7/24/2025, 6:28:39.441 PM",7,1.34.0,It should be on par with features from the deprecated Azure Data Studio
+"7/24/2025, 6:28:30.087 PM",7,1.34.0,
+"7/24/2025, 5:11:54.447 PM",7,1.34.0,"Matching functionality of Azure Data Studio would be great - still feels a little more clunky here. Add some ADS features - query history, more admin stuff. If I could get rid of SMSS, would be great. Having the postgres extension and this one seem to clash with each other. Maybe merging some of the functionality could be good. Some sort of debugging would be amazing"
+"7/24/2025, 4:40:23.639 PM",7,1.34.0,"Connecting to a database server can seemingly hang for a long time without any indicaton why.  Sometimes it never connects, and then trying SSMS connects in seconds. Allow a timeout value before intellisense kicks in.  Many times I don't want the suggestion but it goes into my code when I hit space or tab."
+"7/24/2025, 2:42:21.022 PM",7,1.34.0,it does not seem to really offer anything that i am aware of and it does not feel natural to make it a part of my development workflow
+"7/24/2025, 2:58:31.246 AM",7,1.34.0,"I would appreciate more management features such as JOBS. On the other hand, it would be good if the F12 feature on a table showed the definition of the table."
+"8/18/2025, 5:20:51.462 PM",7,1.34.1,Support for other functionality that we had with Azure Data Studio.  Especailly support for creating bacpac and importing a bacpac.
+"8/18/2025, 2:19:02.049 PM",7,1.34.1,- filter displayed columns in query results
+"8/18/2025, 1:44:04.33 PM",7,1.34.1,VS Code needs to have parity with Azure Data Studio
+"8/18/2025, 1:15:55.739 PM",7,1.34.1,The biggest issue I have is managing the amount of Memory allocated to cache larger Databases.  At least 50% of the time the information is missing.   Keep up the good work and I am confident you will figure the large database caching.
+"8/18/2025, 9:40:06.355 AM",7,1.34.1,"sometimes I don't know if the current query tab is connected to the server or not. It kinda acts randomly.  the colours on the results selection grid a bit different from the rest of the theme. it would be great if there were built-in functions in the staus bar like sum, count, etc"
+"8/18/2025, 7:48:15.699 AM",7,1.34.1,<REDACTED: secret>
+"8/17/2025, 11:38:27.494 PM",7,1.34.1,"La parte de los diagramadas y poder editar los datos gráficamente, en lugar de hacer UPDATEs"
+"8/15/2025, 9:27:44.044 AM",7,1.34.1,edit top n records would be a very useful enhancement
+"8/15/2025, 9:27:33.127 AM",7,1.34.1,"Importing data from external sources; visual cues when working in different environments: test, prod, dev"
+"8/14/2025, 5:40:36.17 PM",7,1.34.1,Loading times
+"8/14/2025, 3:16:33.565 PM",7,1.34.1,
+"8/14/2025, 1:56:35.239 PM",7,1.34.1,A data viewer that really works ... 
+"8/14/2025, 9:31:16.307 AM",7,1.34.1,"F5 should execute the query, as it is in SSMS and Azure Data Studio"
+"8/14/2025, 5:16:31.696 AM",7,1.34.1,希望可以筛选表的数据并生成 Insert 语句，方便数据的迁移。
+"8/18/2025, 7:41:24.787 PM",8,1.34.0,"If Azure Data Studio is a 10, then this extension is an 8. The VSCode wrapper makes it feel less intuitive"
+"8/14/2025, 3:58:21.691 PM",8,1.34.0,make it easier to script data
+"8/14/2025, 8:58:05.564 AM",8,1.34.0,I find that the query results pane loses focus sometimes and it displays results from other queries. I'm very bad about the number tabs I have open and I would like a feature where I can multiselect tabs that I want to close and then get one 'you haven't saved' warning rather than for each tab. I would also probably need a preview of what is on each tab. I also get an occasional error message saying a query is already running when I know it isn't.
+"8/13/2025, 2:55:57.721 PM",8,1.34.0,I have another extension installed (for postgres) and they dont play along nicely
+"8/13/2025, 2:53:13.109 PM",8,1.34.0,
+"8/13/2025, 2:37:47.178 PM",8,1.34.0,
+"8/13/2025, 1:58:17.971 PM",8,1.34.0,UI
+"8/13/2025, 12:45:27.763 PM",8,1.34.0,
+"8/12/2025, 10:47:37.837 AM",8,1.34.0,
+"8/12/2025, 7:33:18.311 AM",8,1.34.0,add linq-to-sql support like in linqpad to make short scripts
+"8/11/2025, 1:58:36.453 PM",8,1.34.0,"Focus of query results seems to not show results of current tab script which completed.  Or, perhaps there is a long delay, but no indication that it is still running"
+"8/11/2025, 6:29:13.695 AM",8,1.34.0,"I encountered two issues while using the tool:  1. Occasionally, a query gets terminated unexpectedly, but the UI continues to display the ""Executing Query"" state. Additionally, there's no ""Stop"" button available in such cases, leaving the interface unresponsive and preventing any new queries from being executed.  2. It would be helpful if the SQL execution plan feature allowed saving all generated plans from multiple queries into a single file for easier analysis and sharing."
+"8/9/2025, 5:55:17.392 AM",8,1.34.0,"Need more functions on right click 'script insert', 'script update', etc."
+"8/8/2025, 11:22:06.36 AM",8,1.34.0,"Ctrl+Shift+E to run a query is a little unfamiliar, would prefer ctrl+F5"
+"8/8/2025, 10:18:20.247 AM",8,1.34.0,
+"8/7/2025, 6:58:19.681 PM",8,1.34.0,you can add more native features that is there in the SSMS to vscode so that people dont need to depend on SSMS anymore... After all both SSMS and MSSQL extension are owned by microsoft... 
+"8/7/2025, 3:44:17.732 PM",8,1.34.0,
+"8/7/2025, 6:55:26.261 AM",8,1.34.0,The display and more intellisense
+"8/6/2025, 2:48:58.906 PM",8,1.34.0,"Would love to see SQL Server Agent added to this extension, along with the other features that SSMS currently provides, so I could manage my SQL server instance entirely in Visual Studio code using only one extension."
+"8/6/2025, 2:18:39.199 PM",8,1.34.0,I find that I need to run kinit from time to time. It would be nice if this was done automatically or the need to run it as often be reduced.
+"8/6/2025, 9:39:47.497 AM",8,1.34.0,add option to freeze query results when the active query window looses focus
+"8/6/2025, 7:55:54.436 AM",8,1.34.0,
+"8/5/2025, 6:27:34.421 PM",8,1.34.0,
+"8/4/2025, 6:03:30.85 AM",8,1.34.0,"Incluir atajos de teclado para poder aabrir elementos de la BBDD, como por ejemplo Store procedures o definiciones de tablasa"
+"8/2/2025, 11:26:06.02 PM",8,1.34.0,In fairness it could be environment factors and it is improving with addition of schema compare but compared to SQL Management Studio (SSMS) it is not as reliable for me
+"8/1/2025, 1:19:48.019 PM",8,1.34.0,Better syntax highlighting and admit keyboard shortcuts as in SSMS for e.g. sp_help
+"8/1/2025, 9:49:17.367 AM",8,1.34.0,It is sometimes very slow relative to SSMS
+"8/1/2025, 7:47:06.734 AM",8,1.34.0,We should make options to run sql extenion by default and should show option for coloring connecttion profiles.
+"7/31/2025, 12:37:49.777 PM",8,1.34.0,Display of query results sets is not very <REDACTED: user-file-path> (especially navigating through more query results grids get messy on scrollbars). Instellisense integrated with connected database (objects) and retreiving DB object defintiion form DB.
+"7/31/2025, 11:59:03.517 AM",8,1.34.0,
+"7/31/2025, 5:05:50.965 AM",8,1.34.0,"The session often hangs, probably after some update. It is difficult to close a session and when trying to disconnect it stucks in cacelling the query. Started facing this issue only recently."
+"7/30/2025, 5:34:33.843 PM",8,1.34.0,"The way query results are shown is kind of clunky; it frequently seems to fail to display results (especially large result sets) or display results from the wrong sql editor tab when switching between multiple tabs.  My wishlist item: I wish there was a clearer way to separate sql tabs from regular editor tabs. I like using vs code for my sql needs because it's faster to startup and work with than SSMS, but I miss having a dedicated ""space"" for sql operations. Even just a way to group sql tabs separate from other editor tabs would be helpful. (Maybe there's a separate extension I'm missing out on for that? I haven't explored very far.)"
+"7/30/2025, 3:32:23.657 PM",8,1.34.0,Keep up the good work ;)
+"7/30/2025, 2:39:39.2 PM",8,1.34.0,The biggest thing is to automatically make F5 run the query
+"7/30/2025, 1:55:16.394 PM",8,1.34.0,
+"7/30/2025, 10:31:23.101 AM",8,1.34.0,Including modelling tools
+"7/30/2025, 9:51:15.49 AM",8,1.34.0,
+"7/30/2025, 9:06:55.603 AM",8,1.34.0,display the connection name in the status bar or the tab title
+"7/30/2025, 5:43:02.416 AM",8,1.34.0,
+"7/29/2025, 9:26:34.506 PM",8,1.34.0,"I feel like it's ok to see if queries work, but it lacks features that I am use to in SSMS"
+"7/29/2025, 3:04:16.732 PM",8,1.34.0,The thing that frustrates me the most is that I can't always cancel a query. The 'stop' button is not always visible.
+"7/29/2025, 1:59:46.944 PM",8,1.34.0,
+"7/29/2025, 6:12:28.523 AM",8,1.34.0,
+"7/29/2025, 1:57:17.627 AM",8,1.34.0,"Interact with data (Edit , Delete ...) , loading , executing speed , error processing.."
+"7/28/2025, 4:50:52.001 PM",8,1.34.0,Periodically the connection to SQL server is broken and the only way to get it working again is to restart VS Code.
+"7/28/2025, 2:17:21.762 AM",8,1.34.0,"more like ssms please, full feature"
+"7/25/2025, 7:00:35.613 PM",8,1.34.0,"Provide secure storage for DB credentials, or make it clear they are already stored securely."
+"7/25/2025, 6:50:06.245 AM",8,1.34.0,"Better conncection. It takes quite some time before a query starts running for instance. Better intellisense, because it is very bad"
+"7/25/2025, 1:08:56.073 AM",8,1.34.0,"Cuando se ejecuta una consulta que no tiene conexión asociada, te pide la conexión, eso está perfecto. Lo que no está perfecto es esperar la actualización del intelisense para ejecutar tu consulta. Debería mandar a ejecutar primero la consulta y luego de eso, actualizar el intelisense."
+"7/24/2025, 8:34:34.474 PM",8,1.34.0,"SQL querys are made relatively fast, and I like integration with Copilot, it has improved a lot since I started using it, I would like to have the most relevant options of MSSQL Managment Studio. In v. 1.33 There was an error that was asked to enter the CREDENTIAL SQL server every time I wanted to edit SP instructions, views or functions."
+"7/24/2025, 3:24:47.439 PM",8,1.34.0,"Implement more features from SSMS and Azure Data Studio. Edit Top 200 Rows From Azure Data Studio, edit permissions for users, tables, views, stored procedures, etc Improve Copilot integration with Azure DevOps repos - NOT just GIT Better connection to Azure SQL - think Azure Data Studio Azure resource browser"
+"7/24/2025, 2:43:56.354 PM",8,1.34.0,
+"7/24/2025, 9:25:01.011 AM",8,1.34.0,"Connection resilience in case of bad connectivity leaves a lot to be desired even compared to Azure Data Studio.  Also, returning to SSMS-like object filter also doesn't feel as a step in a right direction,  as ADS-like search was significantly faster to operate."
+"7/24/2025, 6:48:40.541 AM",8,1.34.0,
+"8/19/2025, 2:39:34.559 AM",8,1.34.1,
+"8/18/2025, 4:12:19.063 PM",8,1.34.1,apply filters from query result view to the where in DQL
+"8/18/2025, 3:25:10.111 PM",8,1.34.1,
+"8/18/2025, 3:02:29.871 PM",8,1.34.1,
+"8/18/2025, 2:38:34.518 PM",8,1.34.1,
+"8/18/2025, 1:52:18.301 PM",8,1.34.1,"3 Things that would be very, very helpful:  1) Provide a setting or method to allow us to control how a script (such as ""Script as Create"") is formatted when it is generated.  Example 1: when I start to build a query with multiple joins using R-Click menu item ""Select TOP 1000"", I ALWAYS have to go back and add an alias (first letter of the table name) and replace all the "",["" with "",a.["" with the alias.  Example 2: I very often put ""WITH(NOLOCK)"" on my tables.  It would help my workflow a LOT if there was a place to preset templates for this so it would come up like I need that each time.  Then when I select ""Select Top 1000"", I could get a selection box of ""Default"" OR I could pick one of my pre-defined templates.  2) Azure Data Ops had an ""Edit Data"" option in the R-Click Menu - that was useful, and is not found in the plugin.  3) VSCode editor: Rectangle Editing (<REDACTED: user-file-path>, etc) like in Visual Studio."
+"8/18/2025, 12:50:45.512 PM",8,1.34.1,"SSMS is still better in a lot of cases for administration tasks. For example, I especially make heavy use of querying multiple servers via registered servers. If you had a feature where I could check which servers I want to query so I don't have to create a new Registered Servers group, you'd immediately be a compelling alternative to SSMS.  I tend to use SSMS any time I want to use Object Explorer, so improving on Object Explorer functionality would keep me in VSCode for longer."
+"8/17/2025, 11:43:53.174 PM",8,1.34.1,インポートの機能拡張で使いやすいものが欲しい
+"8/16/2025, 1:28:23.566 PM",8,1.34.1,"I very often lose connection with my servers. It’s worth mentioning that I use several servers with numerous databases, and sometimes I have to keep restarting in order for IntelliSense to update, and that stresses me out and slows me down."
+"8/16/2025, 1:13:15.716 PM",8,1.34.1,Intellesense of the table and column names can be improved.
+"8/15/2025, 3:12:00.989 PM",8,1.34.1,"I can't quite put my finger on it but it doesn't feel quite ""polished"" yet. "
+"8/15/2025, 1:45:59.121 PM",8,1.34.1,
+"8/15/2025, 7:16:24.594 AM",8,1.34.1,"Add more settings for ""mssql.format."" . For example """"mssql.format.indent"" <REDACTED: user-file-path>  ..when false it should not put the <BLANK>'s here: select * from AA <BLANK><BLANK><BLANK>join BB where xx <BLANK><BLANK><BLANK>and YY"
+"8/14/2025, 11:22:42.853 PM",8,1.34.1,Support SQL kernel like Azure Data Studio. 
+"8/14/2025, 7:49:30.787 PM",8,1.34.1,"Some features from SSMS, like Job management, Workbench ShortCut for SQL. But the extension is in a good way."
+"8/14/2025, 3:23:38.479 PM",8,1.34.1,
+"8/14/2025, 3:21:11.34 PM",8,1.34.1,"Ability to stop over-running queries. Sometimes, the stop button is not active and the query keeps running in the background"
+"8/18/2025, 10:48:10.727 PM",9,1.34.0,"Edit data. Other than that, pretty good!"
+"8/15/2025, 8:18:23.207 PM",9,1.34.0,Move the Run button to the top left side like SSMS and Azure Data Studio.
+"8/15/2025, 1:54:44.658 PM",9,1.34.0,"Don't interrupt my workflow with surveys, went to run a query and it wouldn't run until I responded to a tiny window in the lower right hand corner of the screen."
+"8/14/2025, 2:11:49.001 PM",9,1.34.0,
+"8/13/2025, 5:15:15.546 PM",9,1.34.0,
+"8/13/2025, 9:21:54.942 AM",9,1.34.0,
+"8/12/2025, 2:41:44.242 PM",9,1.34.0,Integrate a tool to import data directly from flat files to the sql servers using this extension
+"8/12/2025, 2:31:11.905 PM",9,1.34.0,provide clearer guidance on whether this extension is replacing SSMS
+"8/12/2025, 9:00:03.453 AM",9,1.34.0,
+"8/11/2025, 8:37:59.59 AM",9,1.34.0,I think better color theme for the SQL language would make this extension even better.
+"8/11/2025, 2:35:13.823 AM",9,1.34.0,I get a lot of connection cancelled since the last upgrade
+"8/7/2025, 7:43:32.077 PM",9,1.34.0,
+"8/7/2025, 2:29:19.639 PM",9,1.34.0,
+"8/7/2025, 9:51:19.75 AM",9,1.34.0,
+"8/7/2025, 9:41:25.469 AM",9,1.34.0,The connection manager could be easier to use. It feels a bit clumsy at the moment.
+"8/7/2025, 7:53:19.9 AM",9,1.34.0,"The update in some cases lost connection, or I click play first on a broken connection with the application, never connecting the database"
+"8/5/2025, 1:15:31.503 PM",9,1.34.0,What would really be cool is if this had some Data Modeling capabilities.  Maybe it does and I just haven't found them yet.
+"8/4/2025, 6:45:11.665 PM",9,1.34.0,
+"8/4/2025, 4:57:35.134 AM",9,1.34.0,SSRS wäre gut integriert zu haben
+"8/3/2025, 1:17:36.248 PM",9,1.34.0,"There is visible latency sometimes on connection management and query execution, which makes the experience clunky. The extensions fixed most of issues I experienced in the Azure Data Studio application, but the smoothness of changing tabs (with different connections) or opening new ones is a new one. The navigation over query results cells, selecting and copying is not as smoonth as in SQL server management studio. But overall pretty good of course."
+"8/1/2025, 5:39:16.918 PM",9,1.34.0,"The results window side buttons need to be moved to corner so that results window can take less size.  In case of multiple queries are executed, the results window is taking more size due to the side buttons (like export to excel and other buttons)"
+"8/1/2025, 8:34:11.764 AM",9,1.34.0,
+"7/31/2025, 8:38:04.648 AM",9,1.34.0,"I'd like more advanced features like the XEvent Profiler in SSMS, and more options for Schema Information and  Script Generation. Great Job so far 👍🏽"
+"7/30/2025, 8:43:35.61 AM",9,1.34.0,I would prefer quick execution of my SQL over Intellisense updates. Sometimes the intellisense is stopping my code from running because it doesn't synch quick enough with the changes I've made.
+"7/29/2025, 8:37:56.844 PM",9,1.34.0,
+"7/29/2025, 3:57:50.587 PM",9,1.34.0,Continue adding more management features for On Promises and Azure SQL Instances.
+"7/29/2025, 2:15:00.349 PM",9,1.34.0,"Does most of what I want, would be nice if it had an importer from spreadsheet format.  I'm using Linux and runs just fine on there, so no complaints in that regard, appreciate that it has a Linux release.   I understand that the migration of features from Azure Data Studio is still ongoing and so I can't really offer feedback that isn't already in the roadmap, but at this point, it seems to work very well.  The only little annoyance is opening new tabs, typing the >connect command and then it asking you to set your document language to SQL. I don't see the harm in it changing the language to SQL automatically if it's a blank file at that point. literally 1 second thing, but I do it quite a lot and it feels like SQL is implicit, especially if its a requirement to run the extension on the file."
+"7/28/2025, 9:41:34.252 AM",9,1.34.0,Add support for flat file imports
+"7/27/2025, 10:16:57.905 AM",9,1.34.0,
+"7/25/2025, 12:07:10.896 PM",9,1.34.0,
+"7/25/2025, 5:24:26.546 AM",9,1.34.0,<REDACTED: secret>
+"7/24/2025, 6:24:45.263 AM",9,1.34.0,
+"8/15/2025, 10:10:26.262 AM",9,1.34.1,
+"8/14/2025, 5:07:00.68 PM",9,1.34.1,
+"8/14/2025, 3:23:27.001 PM",9,1.34.1,
+"8/14/2025, 7:42:38.858 AM",9,1.34.1,
+"8/15/2025, 6:45:38.075 PM",10,1.34.0,"I have used this extension pretty much every day at work for the last 3 years. It rocks! Yall have improved it SOOO much in the last ~six months, and i love the focus shift from azure data studio to this extension.  As background, I am someone who uses a lot of SQL to do analysis and browse data directly, rather than pulling data into other analytical tools.  - I love that you resurected the option to display results in a separate window. I prefer this greatly because i often limit my columns to only those that i need, and i often am writing very long queries... so i need nice height for my query editor, and i dont demand that much width for my results table. - One dream of mine would be an even MORE <REDACTED: user-file-path> tailor-able way to view the data.     - Number formatting         - Something to allow for quick formatting of numeric fields. Maybe a quick little button that formats numbers with commas and 2 decimals or something. I would also love it if this formatting was persisted by column name upon rerunning the query (maybe asking too much).         - It always feels like a nuisance to wrap my columns in the sql format function.     - Option to visually display column data types. This one is stolen from the databricks browser, but it is super clean. - Updates through VPN.     - My work VPN blocks the updates to the extension... no idea how this works behind the scenes, but i know the VS app itself has the rights to update itself, so i would love if that were the case for this extension too.       - When there is an update, my query doesnt go through and i have to disconect from the VPN in order to update the extension... and i dont want to install locally because yall have so many good new updates. - Database browser     - My workplace has an old app called AQT for browsing some old Db2 databases... the app sucks, but it has EPIC browsing features....         - A search bar for searching database for table names, views, column names, etc.         - Abilitiy to browse the columns of a table *using* a table.... meaning i get name, data type, PK, size, whatever in a little table, and i can sort by the different columns."
+"8/14/2025, 3:59:09.894 PM",10,1.34.0,
+"8/14/2025, 3:56:17.458 PM",10,1.34.0,telesense constantly brings up the potential things to enter but sometimes it does it when I'm juat adding something like quotes so it would be nice for there to be an easier way to not autoclick something by hitting enter. 
+"8/14/2025, 2:20:39.374 PM",10,1.34.0,
+"8/14/2025, 12:56:08.699 PM",10,1.34.0,
+"8/14/2025, 9:34:57.475 AM",10,1.34.0,"Bring back the 'Manage...' option on Right-Click -> SQL Server name so that I can elasticsearch for stored procs, tables, views etc. or at least the option to text search for the above :)"
+"8/13/2025, 7:11:23.806 PM",10,1.34.0,"Keep adding more features to make it as close to SSMS. Can't think of anything right now, but I am sure there's a thing or two  that I've said ""I wish"" for. Overall, I enjoy the extension and hope it stays in support for a long time"
+"8/13/2025, 6:38:51.5 AM",10,1.34.0,
+"8/12/2025, 5:04:11.044 PM",10,1.34.0,
+"8/12/2025, 2:50:12.563 PM",10,1.34.0,
+"8/12/2025, 2:03:51.979 PM",10,1.34.0,a veces se cuega mientras estoy realizando ejecutando una query no permite detener la query mi ejecutar una nueva. En esos casos hay que reiniciar vs code para que funcione  nuevamente
+"8/11/2025, 3:17:16.05 PM",10,1.34.0,
+"8/11/2025, 2:04:45.059 PM",10,1.34.0,It fails to download every time and I have to do it manually.
+"8/11/2025, 3:18:56.508 AM",10,1.34.0,Integrate directly with Copilot to be able to read my DB schema in a way that keeps my schema info private and not used for training
+"8/11/2025, 2:19:30.526 AM",10,1.34.0,"I love this. cuz this is very light weight, fast and provide execution plan function also!"
+"8/8/2025, 8:56:13.539 PM",10,1.34.0,
+"8/8/2025, 6:46:16.588 PM",10,1.34.0,"Work on the syntax linter and allow easy configuration or make it more obvious how to adjust it to your coding style More export options when running a query - plain text (copy), text file (<REDACTED: user-file-path> delimited)"
+"8/8/2025, 2:31:28.876 PM",10,1.34.0,"Here are some issues I found:  - Cccasionally when I use ""Script as Create"" or ""Script as Alter"" MSSQL extension ask me to input connection credentials when I already connected to the DB. - This one is related with the issue mentioned before, when I failed to input the credentials correctly I can't be able to dismiss the connection notification at the bottom (I don't remember if is an error notification or <REDACTED: user-file-path> notification).  - I don't remember well if there is a way to list jobs and be able to inspect them maybe with ""Script as Create"" or something? It should be great to have this feature in the future.  Greetings "
+"8/7/2025, 3:38:09.796 PM",10,1.34.0,
+"8/7/2025, 2:37:51.59 PM",10,1.34.0,
+"8/7/2025, 11:45:38.816 AM",10,1.34.0,nothing at this point 
+"8/7/2025, 6:02:36.024 AM",10,1.34.0,
+"8/6/2025, 4:09:47.535 PM",10,1.34.0,It'd be good if query results didn't dissapear when you change tabs. Still great extension
+"8/6/2025, 3:28:34.79 PM",10,1.34.0,"Allow totals (sum, avg, etc.) on filtered values by clicking a column header, thus highlighting a column, as well as <REDACTED: user-file-path> columns. "
+"8/6/2025, 3:05:26.479 PM",10,1.34.0,
+"8/6/2025, 1:54:56.033 PM",10,1.34.0,
+"8/6/2025, 9:36:36.852 AM",10,1.34.0,
+"8/6/2025, 2:35:32.128 AM",10,1.34.0,"Nothing to date, i see the functionality of the Azure Desktop is slowly moving in, great!"
+"8/6/2025, 2:30:05.674 AM",10,1.34.0,<REDACTED: user-file-path>
+"8/4/2025, 2:19:43.666 PM",10,1.34.0,
+"8/4/2025, 12:54:19.709 PM",10,1.34.0,
+"8/4/2025, 4:35:12.274 AM",10,1.34.0,Less surveys.
+"8/1/2025, 3:01:01.099 PM",10,1.34.0,
+"8/1/2025, 2:31:02.26 PM",10,1.34.0,
+"8/1/2025, 11:13:02.436 AM",10,1.34.0,"this is very useful, since i am using VS code for all my development. it need to be add many features as SSMS having."
+"7/31/2025, 11:24:29.269 PM",10,1.34.0,
+"7/30/2025, 10:57:00.437 PM",10,1.34.0,"I currently use VSCode workspaces as a way to colour code servers and editor tabs. It is not a perfect workaround though the ""connections"" section is still shared accross workspaces. Ideally, I would like to pick a colour for a registered connection and then colour code each edit tab that is connected to that connection."
+"7/30/2025, 10:28:28.683 PM",10,1.34.0,
+"7/30/2025, 4:49:25.281 PM",10,1.34.0,"me molesta ver errores de syntaxis inexistentes cuando hago consultas a bases de datos alojadas en otros servidores a travez de un linked server, es un error molesto que me molesta desde hace mucho"
+"7/30/2025, 2:47:51.202 PM",10,1.34.0,"Hola, en Azure Data Studio al hacer click en una de las columnas del resultado de la consulta, en la barra de estado se veía la suma y la cuenta de esa columna, Esa funcionalidad aún no está implementada en Visual Studio Code."
+"7/30/2025, 1:59:35.398 PM",10,1.34.0,"Please make the currently connected server and database more visible. At present, this information is located in the bottom right corner, but when the server or database names are long, they get truncated, making it difficult to clearly identify the active connection.  In Azure Data Studio, the connection details were conveniently displayed in the top left corner, which provided better visibility and ease of access. Restoring or improving this feature would greatly enhance usability and help prevent accidental execution of queries against the wrong server or database."
+"7/29/2025, 4:35:40.295 PM",10,1.34.0,
+"7/29/2025, 2:34:33.374 PM",10,1.34.0,
+"7/29/2025, 1:43:24.154 PM",10,1.34.0,
+"7/29/2025, 1:14:56.907 PM",10,1.34.0,"Sometimes, when running a query via the green play button the button does not change but the query starts running so there is no way to cancel it, except for closing VS code. "
+"7/29/2025, 10:54:44.497 AM",10,1.34.0,
+"7/28/2025, 6:53:12.573 PM",10,1.34.0,"Speed up expanding the object nodes in the tree. I.e. when you expand Tables, and your connection is over a VPN on Starlink it can take a while to load the list of table. Local server are no problem. Make the syntax validation a little more aware of things like sql-command mode <REDACTED: user-file-path> Also the results tab is kinda clunky to use with multiple result sets. Overall, though I tried and abandoned the early version of the extension, but almost exclusively use it now vs SSMS. Especially like writing SQL with GitHub Copilot. "
+"7/28/2025, 4:37:05.602 PM",10,1.34.0,si van a remplazar azure con esta extension creo que faltan herramientas importantes como el profiler para ver las consultas o procesos que estan ejecutandose o se ejecutaron
+"7/28/2025, 1:56:41.558 PM",10,1.34.0,
+"7/28/2025, 10:16:00.115 AM",10,1.34.0,
+"7/27/2025, 2:28:20.361 AM",10,1.34.0,Don't know. It's still fine now.
+"7/26/2025, 3:22:19.803 PM",10,1.34.0,Opcoes de importação assim como tinha no azure data studio
+"7/25/2025, 3:14:47.064 PM",10,1.34.0,
+"7/25/2025, 1:22:18.672 PM",10,1.34.0,
+"7/25/2025, 12:20:06.999 PM",10,1.34.0,
+"7/25/2025, 10:55:02.68 AM",10,1.34.0,
+"7/25/2025, 10:44:04.414 AM",10,1.34.0,
+"7/25/2025, 7:17:42.422 AM",10,1.34.0,
+"7/25/2025, 3:32:22.608 AM",10,1.34.0,
+"7/24/2025, 10:34:18.427 PM",10,1.34.0,
+"7/24/2025, 3:50:32.163 PM",10,1.34.0,I dunno.
+"7/24/2025, 3:45:22.496 PM",10,1.34.0,
+"7/24/2025, 2:06:14.163 PM",10,1.34.0,The query sometimes goes forever when executed. the cancellation doesn't help. the same query on SSMS runs instantaniously.  Not sure how the execution is handled but somewhere there is a glitch and it kind of hangs the query tab.  Only solution is to close the VSCode and relaunch. the query runs successfully on the fresh connection. over period the issue comes back again. 
+"7/24/2025, 1:45:40.128 PM",10,1.34.0,"Give an option to stay with a DB connection across SQL files, without having to reconnect for each one."
+"8/18/2025, 7:46:19.06 PM",10,1.34.1,
+"8/18/2025, 11:55:38.712 AM",10,1.34.1,
+"8/18/2025, 11:18:19.954 AM",10,1.34.1,
+"8/15/2025, 10:22:53.053 PM",10,1.34.1,Herramienta muy util
+"8/15/2025, 4:55:04.181 PM",10,1.34.1,copilot schema awareness for inline suggestions
+"8/15/2025, 3:36:19.703 PM",10,1.34.1,
+"8/15/2025, 2:11:28.389 PM",10,1.34.1,Just keep adding missing features from Azure Data Studio and SSMS
+"8/15/2025, 10:50:20.486 AM",10,1.34.1,
+"8/15/2025, 10:14:42.313 AM",10,1.34.1,"I'd love it if intellisense worked for stored procedure parameters, it's useful to see the paramters in the pop up but intellisense completion would be cool. Filtering databases and tables is really useful,, it would also be nice if you could sort them."
+"8/15/2025, 6:47:04.87 AM",10,1.34.1,
+"8/14/2025, 11:19:32.674 PM",10,1.34.1,"I would like to use the mssql extension as a dependency in my vscode extension to add embedded language service support so that inside javascript I could write sql queries with intellisense support. I tried to figure out the mssql extension API, but it seemed complicated if there were examples it would be much better"
+"8/14/2025, 7:13:33.687 PM",10,1.34.1,"It's great for running queries. I had run into some problems a while back when trying to edit database objects using the UI, which led me to use DataGrip for that kind of thing. But I still spend 90% of my SQL editing time in VS Code."
+"8/14/2025, 6:00:06.5 PM",10,1.34.1,the sql server extension does not work well. please fix it and adding more option than the studio management 
+"8/14/2025, 3:39:04.383 PM",10,1.34.1,"Hay una extensión de sql que permite conectarse a bases de datos y muestra los resultados y ahí mismo cada columna tiene filtros y uno puede editar directamente, creo que es de database-client"
+"8/14/2025, 3:08:34.606 PM",10,1.34.1,"Allow the ability to query multiple Sql Servers at once like SSMS!! One other thing, not directly related, but making Notebooks more like Azure Data Studio. I found the ability to run SQL cells so much simpler (especially the results grid). Setting up Kernels sucks.   One thing that keeps happening, now that I think about it, is when I right click a DB Table and ""select top"", VSC sometimes auto highlights  just the word ""Select"" and causes an error at execution. Happens randomly but is super annoying. Otherwise, it works great!"
+"8/14/2025, 9:34:41.259 AM",10,1.34.1,
