@@ -62,9 +62,12 @@ export default function CategoriesPage() {
         totalComments: data.totalComments,
       });
 
-      // Convert to editable + add General Feedback fallback
+      // Convert to editable — deduplicate "General Feedback" if AI proposed one
+      const aiCategories = proposed.filter(
+        (c) => c.name.toLowerCase() !== "general feedback"
+      );
       const editable: EditableCategory[] = [
-        ...proposed.map((c) => ({
+        ...aiCategories.map((c) => ({
           name: c.name,
           description: c.description,
           sampleComments: c.sampleComments,
@@ -217,14 +220,21 @@ export default function CategoriesPage() {
                     />
                   ) : (
                     <h3
-                      className="text-lg font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:text-blue-500"
+                      className={`text-lg font-semibold text-gray-900 dark:text-gray-100 ${
+                        !cat.isFallback
+                          ? "cursor-pointer hover:text-blue-500 group"
+                          : ""
+                      }`}
                       onClick={() => !cat.isFallback && setEditingIdx(idx)}
-                      title={cat.isFallback ? "" : "Click to rename"}
                     >
                       {cat.name}
-                      {cat.isFallback && (
+                      {cat.isFallback ? (
                         <span className="ml-2 text-xs font-normal text-gray-400">
                           (required fallback)
+                        </span>
+                      ) : (
+                        <span className="ml-2 text-xs font-normal text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                          click to rename
                         </span>
                       )}
                     </h3>

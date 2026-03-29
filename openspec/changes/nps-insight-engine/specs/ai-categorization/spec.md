@@ -65,6 +65,16 @@ THEN the system SHALL prevent the deletion and display a message explaining that
 WHEN the AI Theme Discovery agent returns categories that do not include a "General Feedback" category
 THEN the system SHALL automatically add "General Feedback" as an additional category before presenting the list to the user.
 
+#### Scenario: AI proposal includes General Feedback (deduplication)
+
+WHEN the AI Theme Discovery agent returns a category named "General Feedback"
+THEN the system SHALL remove the AI-proposed version and keep only the mandatory fallback version to avoid duplicate entries.
+
+#### Scenario: Rename hint visible on hover
+
+WHEN the user hovers over a non-fallback category name
+THEN a "click to rename" hint SHALL appear next to the name to indicate editability.
+
 ---
 
 ### Requirement: AI Classifier classifies all comments in batches
