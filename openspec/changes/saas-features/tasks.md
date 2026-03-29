@@ -51,6 +51,20 @@
 - [x] 0.46 Polish: max-w-7xl already removed, p-4 md:p-6 in root layout, breadcrumb in TopBar
 - [x] 0.47 Update specs, README, CLAUDE.md with sidebar layout + charts documentation
 
+### 0c. UI Polish — 12 Fixes
+
+- [ ] 0.48 Dashboard: remove CategoryBarChart + NpsDonutChart card. Verify: no bar chart, no separate donut
+- [ ] 0.49 ScoreCards: add emoji back to NPS score card. Verify: emoji shows next to score
+- [ ] 0.50 Dashboard: add dismissible category filter chip above grid when filtered. Verify: chip appears, X clears
+- [ ] 0.51 Categories page: improve Confirm button — consistent Button styling, sticky or top position. Verify: button matches page style
+- [ ] 0.52 Summary: add promoter/detractor quote columns next to donut in NpsVisualCards. Fetch top comments. Verify: quotes render
+- [ ] 0.53 Summary: add "Charts shown in-app only" note near download button. Verify: note visible
+- [ ] 0.54 GitHub: use GitHub colors for issue status — green #238636 open, purple #8957e5 closed. Verify: visible in light+dark
+- [ ] 0.55 Noise: make filter cards expandable/collapsible, fix font consistency. Verify: click toggles keywords
+- [ ] 0.56 CategoryBreakdown: rename "Export to GitHub" to "Create Issue" with Git icon. Verify: label changed
+- [ ] 0.57 TopBar: add user avatar + dropdown on right side. Verify: avatar shows, dropdown has Account/SignOut
+- [ ] 0.58 Update specs with polish fixes. Verify: specs match code
+
 ## 1. Authentication Foundation
 
 - [x] 1.1 Install next-auth@5, @auth/typeorm-adapter, bcryptjs

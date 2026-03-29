@@ -185,17 +185,72 @@ The GitHub page SHALL use tabs to separate configuration from issue tracking.
 
 ---
 
-### Requirement: Dashboard data visualization charts
-The dashboard SHALL include data visualization charts for NPS distribution and category breakdown using recharts.
+### Requirement: Dashboard — clean score cards with emoji + filter chips
+The dashboard score cards SHALL include emoji indicators and the category breakdown SHALL show dismissible filter chips when a category is selected.
 
-#### Scenario: NPS distribution donut chart
-- **WHEN** the dashboard renders with NPS stats
-- **THEN** a donut/pie chart SHALL display showing promoter/passive/detractor segments with the NPS score in the center
+#### Scenario: NPS score emoji
+- **WHEN** the NPS score card renders
+- **THEN** it SHALL include an emoji: >=70 star-eyes, >=50 grin, >=30 smile, >=0 neutral, <0 worried
 
-#### Scenario: Category breakdown bar chart
-- **WHEN** the dashboard renders with category breakdown data
-- **THEN** a horizontal bar chart SHALL display showing comment count per category
-- **AND** clicking a bar SHALL filter the dashboard by that category
+#### Scenario: Category filter chips
+- **WHEN** a category is selected in the breakdown grid
+- **THEN** a dismissible Badge chip SHALL appear above the grid showing the active category name with an X button to clear the filter
+
+#### Scenario: No bar chart or separate donut on dashboard
+- **WHEN** the dashboard renders
+- **THEN** there SHALL be no separate "NPS Distribution" donut card or category bar chart — the score cards and category grid are sufficient
+
+---
+
+### Requirement: Summary page with quotes alongside donut
+The summary page SHALL display the NPS donut chart alongside promoter/detractor verbatim quotes.
+
+#### Scenario: Promoter and detractor quotes
+- **WHEN** the summary page renders with NPS stats
+- **THEN** the NPS visual card SHALL show the donut chart plus two columns: "What promoters say" (top 3 verbatim) and "What detractors say" (top 3 verbatim)
+
+#### Scenario: Charts in-app only note
+- **WHEN** the summary page renders with the donut chart
+- **THEN** a small note SHALL indicate that visual charts are shown in-app only and not included in the markdown export
+
+---
+
+### Requirement: GitHub issue status uses GitHub colors
+The GitHub issue status badges SHALL use GitHub's actual color scheme.
+
+#### Scenario: Open issues are green, closed issues are purple
+- **WHEN** the GitHub page renders issue status badges
+- **THEN** open issues SHALL use GitHub green (#238636) and closed issues SHALL use GitHub purple (#8957e5)
+- **AND** colors SHALL be visible in both light and dark mode
+
+---
+
+### Requirement: Noise filter cards are expandable
+Existing noise filter cards SHALL be expandable/collapsible and have consistent font sizes.
+
+#### Scenario: Filter card expand/collapse
+- **WHEN** the user clicks a noise filter card header
+- **THEN** the keywords section SHALL expand or collapse
+- **AND** font sizes SHALL be consistent across the filter name and match count text
+
+---
+
+### Requirement: Category export renamed to "Create Issue"
+The category export action SHALL be labeled "Create Issue" with a GitHub-style icon.
+
+#### Scenario: Create Issue label
+- **WHEN** category cards render with GitHub enabled
+- **THEN** the action SHALL read "Create Issue" (not "Export to GitHub") with a Git icon
+
+---
+
+### Requirement: User avatar in top bar
+The top bar SHALL include a user avatar with a dropdown menu on the right side, matching the reference template pattern.
+
+#### Scenario: User avatar dropdown
+- **WHEN** the top bar renders
+- **THEN** a user avatar (or initials fallback) SHALL appear on the right side
+- **AND** clicking it SHALL open a dropdown with "Account Settings" and "Sign Out"
 
 ---
 
