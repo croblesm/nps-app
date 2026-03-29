@@ -87,11 +87,34 @@ export function ScoreCards({
         <div className="text-2xl font-bold mt-1">{nps.detractors}</div>
         <div className="text-xs opacity-70">{nps.detractorPct}%</div>
       </button>
-      <div className="p-4 rounded-lg bg-purple-600 text-white">
+      <div
+        className={`p-4 rounded-lg text-white ${
+          nps.npsScore >= 70
+            ? "bg-emerald-600"
+            : nps.npsScore >= 30
+            ? "bg-green-500"
+            : nps.npsScore >= 0
+            ? "bg-orange-500"
+            : "bg-red-600"
+        }`}
+      >
         <div className="text-xs uppercase tracking-wide opacity-70">
           NPS Score
         </div>
-        <div className="text-2xl font-bold mt-1">{nps.npsScore}</div>
+        <div className="text-2xl font-bold mt-1">
+          {nps.npsScore}{" "}
+          <span>
+            {nps.npsScore >= 70
+              ? "🤩"
+              : nps.npsScore >= 50
+              ? "😀"
+              : nps.npsScore >= 30
+              ? "🙂"
+              : nps.npsScore >= 0
+              ? "😐"
+              : "😟"}
+          </span>
+        </div>
         <div className="text-xs opacity-70">{npsLabel}</div>
       </div>
     </div>

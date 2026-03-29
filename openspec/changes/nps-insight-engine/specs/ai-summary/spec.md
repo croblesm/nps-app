@@ -89,6 +89,16 @@ WHEN the AI Summary agent completes generation of a summary
 THEN the system SHALL store the summary markdown content in the database with a generation timestamp and a reference to the project
 AND the summary SHALL be retrievable when the user returns to the project.
 
+#### Scenario: Summary loads on page mount
+
+WHEN the user navigates to the AI Summary page of a project that has a previously generated summary
+THEN the system SHALL fetch and display the most recent summary from the database without requiring the user to click "Generate Summary" again.
+
+#### Scenario: Markdown renders with proper formatting
+
+WHEN a summary is displayed
+THEN headings, lists, blockquotes, bold text, and horizontal rules SHALL be visually styled — not rendered as plain text.
+
 ---
 
 ### Requirement: Regenerate summary while preserving previous versions

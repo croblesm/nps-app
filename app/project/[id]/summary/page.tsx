@@ -18,10 +18,17 @@ export default function SummaryPage() {
   const [summary, setSummary] = useState<SummaryData | null>(null);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
+  // Load existing summary from DB on mount
   useEffect(() => {
-    // Check for existing summary
-    fetch(`/api/projects/${projectId}/comments?limit=1`).catch(() => {});
+    fetch(`/api/projects/${projectId}/summary`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data) setSummary(data);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [projectId]);
 
   async function handleGenerate() {
@@ -104,7 +111,7 @@ export default function SummaryPage() {
       )}
 
       {summary && !generating && (
-        <div className="prose prose-invert max-w-none p-6 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
+        <div className="markdown-content max-w-none p-6 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-300">
           <ReactMarkdown>{summary.markdown}</ReactMarkdown>
         </div>
       )}

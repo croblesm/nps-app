@@ -48,6 +48,8 @@ interface NpsStats {
   passivePct: number;
   detractorPct: number;
   categoryBreakdown: CategoryBreakdownItem[];
+  noiseExcludedCount: number;
+  activeNoiseFilterCount: number;
 }
 
 export default function DashboardPage() {
@@ -202,6 +204,11 @@ export default function DashboardPage() {
         feedbackType={feedbackType}
         onFeedbackTypeChange={handleFeedbackType}
       />
+      {nps.activeNoiseFilterCount > 0 && (
+        <div className="mb-4 px-3 py-2 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 text-sm text-yellow-800 dark:text-yellow-300">
+          {nps.activeNoiseFilterCount} noise filter{nps.activeNoiseFilterCount > 1 ? "s" : ""} applied — {nps.noiseExcludedCount} comment{nps.noiseExcludedCount !== 1 ? "s" : ""} excluded from NPS score
+        </div>
+      )}
       <CategoryBreakdown
         categories={categoryBreakdown}
         activeCategory={categoryFilter}

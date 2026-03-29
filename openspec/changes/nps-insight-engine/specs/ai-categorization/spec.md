@@ -141,6 +141,18 @@ THEN the system shows a confirmation warning that current categories will be rep
 
 ---
 
+### Requirement: Categories page loads saved categories on navigation
+
+WHEN the user navigates to the categories page of a project that has previously confirmed categories
+THEN the system SHALL fetch and display the saved categories from the database in editable mode, without requiring the user to click "Discover Categories" again.
+
+#### Scenario: Returning to categories page
+
+WHEN the user navigates away from the categories page and then back
+THEN the previously confirmed categories SHALL be loaded and displayed.
+
+---
+
 ### Requirement: AI Classifier classifies all comments in batches
 
 After the user confirms categories, the AI Classifier agent SHALL classify ALL comments into the confirmed categories. Classification MUST be performed in batches. Each classification MUST include a confidence score between 0 and 1 and a brief reasoning string.

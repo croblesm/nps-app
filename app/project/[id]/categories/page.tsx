@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Spinner } from "@/components/ui/Spinner";
 
@@ -44,6 +44,29 @@ export default function CategoriesPage() {
 
   // Suggest more
   const [suggesting, setSuggesting] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Load existing categories from DB on mount
+  useEffect(() => {
+    fetch(`/api/projects/${projectId}/categories`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setCategories(
+            data.map((cat: { name: string; description: string | null; sampleComments: string | null; isFallback: boolean }) => ({
+              name: cat.name,
+              description: cat.description || "",
+              sampleComments: cat.sampleComments ? JSON.parse(cat.sampleComments) : [],
+              isFallback: cat.isFallback,
+              removed: false,
+            }))
+          );
+          setDiscovered(true);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [projectId]);
 
   async function handleDiscover() {
     setDiscovering(true);
@@ -242,6 +265,10 @@ export default function CategoriesPage() {
   }
 
   const activeCount = categories.filter((c) => !c.removed).length;
+
+  if (loading) {
+    return <div className="text-gray-400 p-8">Loading...</div>;
+  }
 
   return (
     <div className="max-w-3xl">

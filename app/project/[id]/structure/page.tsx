@@ -37,6 +37,41 @@ export default function StructurePage() {
   const [error, setError] = useState("");
   const [aiIssues, setAiIssues] = useState<string[]>([]);
   const [analyzed, setAnalyzed] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Load existing structure from DB on mount
+  useEffect(() => {
+    fetch(`/api/projects/${projectId}/structure`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.includedColumns) {
+          const included: string[] = JSON.parse(data.includedColumns);
+          const excluded: string[] = JSON.parse(data.excludedColumns || "[]");
+          const allCols = [
+            ...included.map((name) => ({
+              name,
+              include: true,
+              reason: "Previously confirmed",
+              type: "",
+              isNps: name.toLowerCase().includes("nps"),
+              isComment: name.toLowerCase().includes("comment"),
+            })),
+            ...excluded.map((name) => ({
+              name,
+              include: false,
+              reason: "Previously excluded",
+              type: "",
+              isNps: false,
+              isComment: false,
+            })),
+          ];
+          setColumns(allCols);
+          setAnalyzed(true);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [projectId]);
 
   async function handleAnalyze() {
     setAnalyzing(true);
@@ -103,6 +138,10 @@ export default function StructurePage() {
     } finally {
       setSaving(false);
     }
+  }
+
+  if (loading) {
+    return <div className="text-gray-400 p-8">Loading...</div>;
   }
 
   return (

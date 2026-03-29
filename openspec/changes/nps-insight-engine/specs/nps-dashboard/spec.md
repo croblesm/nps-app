@@ -13,20 +13,21 @@ The dashboard SHALL display score cards for: Total Responses, Promoters (scores 
 WHEN the user opens a project dashboard that has completed classification
 THEN the system SHALL display score cards showing Total Responses count, Promoters count and percentage (scores 9-10), Passives count and percentage (scores 7-8), Detractors count and percentage (scores 0-6), and the calculated NPS Score.
 
-#### Scenario: NPS Score emoji indicator for positive score
+#### Scenario: NPS Score card color reflects score (standard NPS scale)
 
-WHEN the calculated NPS Score is 50 or above
-THEN the NPS Score card SHALL display a positive emoji indicator.
+WHEN the NPS Score is displayed
+THEN the card background color SHALL reflect the standard NPS scale:
+- Score >= 70: emerald/dark green (Excellent) with 🤩
+- Score 50-69: green (Very Good) with 😀
+- Score 30-49: green (Good) with 🙂
+- Score 0-29: orange (Needs Improvement) with 😐
+- Score < 0: red (Critical) with 😟
 
-#### Scenario: NPS Score emoji indicator for neutral score
+#### Scenario: Noise filter indicator on dashboard
 
-WHEN the calculated NPS Score is between 0 and 49
-THEN the NPS Score card SHALL display a neutral emoji indicator.
-
-#### Scenario: NPS Score emoji indicator for negative score
-
-WHEN the calculated NPS Score is below 0
-THEN the NPS Score card SHALL display a negative emoji indicator.
+WHEN noise filters with "Exclude from NPS" are active
+THEN the dashboard SHALL display a banner showing "X noise filters applied — Y comments excluded from NPS score"
+AND the NPS calculation SHALL exclude comments flagged as noise.
 
 ---
 
