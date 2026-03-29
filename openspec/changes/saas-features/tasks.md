@@ -97,14 +97,30 @@
 
 ## 4. Contextual AI Assistant
 
-- [ ] 4.1 Create AssistantPanel component (components/ui/AssistantPanel.tsx) — floating, collapsible chat
-- [ ] 4.2 Create assistant prompt builder (lib/ai/assistant-prompts.ts) — context injection per page
-- [ ] 4.3 Create API route for assistant chat (app/api/ai/assistant/route.ts) — receives page context, returns guidance
-- [ ] 4.4 Add AssistantPanel to project layout (app/project/[id]/layout.tsx)
-- [ ] 4.5 Implement context collection per page: upload status, structure confirmation, category list, NPS stats, noise filters
-- [ ] 4.6 Add proactive recommendations: detect patterns and suggest actions
-- [ ] 4.7 Write tests for assistant prompt builders
-- [ ] 4.8 Update specs, README with assistant documentation
+### 4a. Core Components
+- [ ] 4.1 Create AssistantPanel component (components/ui/AssistantPanel.tsx) — floating button + expandable right-side panel with text input, scrollable messages, collapse toggle. Verify: renders in isolation, expand/collapse works
+- [ ] 4.2 Create assistant API route (app/api/ai/assistant/route.ts) — accepts projectId, page, message, pageContext object. Uses getActiveModel() + generateText(). Returns response text. Verify: returns 400 if no LLM configured with link to settings
+- [ ] 4.3 Create assistant prompt builder (lib/ai/assistant-prompts.ts) — buildAssistantSystemPrompt(page, context) returns a system prompt with page name, project metadata, and page-specific data injected. Verify: unit test for each page type
+
+### 4b. Layout Integration
+- [ ] 4.4 Add AssistantPanel to project layout (app/project/[id]/layout.tsx) — render below children, pass current page name via usePathname(). Verify: panel visible on all 6 project pages
+- [ ] 4.5 Persist assistant open/closed state across page navigation — use React state in layout (not per-page). Verify: open panel, navigate to another tab, panel stays open
+
+### 4c. Page Context Collection
+- [ ] 4.6 Upload page context — pass upload status (no file / file uploaded / structure confirmed) to assistant. Verify: assistant responds with CSV format guidance
+- [ ] 4.7 Structure page context — pass column list with included/excluded status. Verify: assistant responds with column selection advice
+- [ ] 4.8 Categories page context — pass discovered category names, counts, sample comments. Verify: assistant responds with category-specific advice
+- [ ] 4.9 Dashboard page context — pass NPS score, score distribution, category breakdown, active filters. Verify: assistant responds with data analysis
+- [ ] 4.10 Noise filters page context — pass active filters, excluded comment count. Verify: assistant suggests filters for common noise patterns
+- [ ] 4.11 Summary page context — pass whether summary has been generated. Verify: assistant explains summary features
+
+### 4d. Proactive Recommendations
+- [ ] 4.12 Detect unfiltered noise patterns (e.g., "N/A", "test", single-word comments) and suggest noise filters when user opens assistant on noise page. Verify: recommendation appears in response
+- [ ] 4.13 Detect high detractor categories on dashboard and suggest investigation. Verify: recommendation includes category name and detractor count
+
+### 4e. Tests and Documentation
+- [ ] 4.14 Write unit tests for buildAssistantSystemPrompt — test each page context type (upload, structure, categories, dashboard, noise, summary). Verify: npm test passes
+- [ ] 4.15 Update specs/ai-assistant/spec.md with implementation details. Update README and CLAUDE.md with assistant documentation. Verify: specs match code
 
 ## 5. Integration and Polish
 
