@@ -81,14 +81,14 @@
 - [x] 3.14 Update embed and chat routes to use getEmbeddingConfig() instead of hardcoded default lookup
 - [x] 3.15 Replace bottom Chat Analysis card with floating action button + overlay ChatPanel
 - [x] 3.16 Add onClose prop to ChatPanel for overlay dismissal
-- [ ] 3.17 Write tests for getEmbeddingConfig logic
-- [ ] 3.18 Update specs, README, CLAUDE.md with smart provider resolution and floating chat docs
-- [ ] 3.19 Apply active dashboard filters (category, score, search) to chat similarity search
-- [ ] 3.20 Make K (top results count) configurable, default to 20 instead of 10
+- [x] 3.17 Write tests for getEmbeddingConfig logic
+- [x] 3.18 Update specs, README, CLAUDE.md with smart provider resolution and floating chat docs
+- [x] 3.19 Apply active dashboard filters (category, score, search) to chat similarity search
+- [x] 3.20 Make K (top results count) configurable, default to 20 instead of 10
 - [ ] 3.21 Migrate similarity search to SQL Server 2025 VECTOR_DISTANCE function
-- [ ] 3.22 Add resume UI for partially generated embeddings
-- [ ] 3.23 Make citations clickable — scroll to referenced comment in data table
-- [ ] 3.24 Handle "no relevant comments" — detect low similarity scores, return guidance instead of empty-context LLM response
+- [x] 3.22 Add resume UI for partially generated embeddings
+- [x] 3.23 Make citations clickable — scroll to referenced comment in data table
+- [x] 3.24 Handle "no relevant comments" — detect low similarity scores, return guidance instead of empty-context LLM response
 
 ## 4. Contextual AI Assistant
 

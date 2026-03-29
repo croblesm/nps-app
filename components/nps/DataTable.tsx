@@ -127,6 +127,7 @@ export function DataTable<T extends DataTableComment>({
           <tbody>
             {comments.map((row) => (
               <tr
+                id={`comment-${row.id}`}
                 key={row.id}
                 className={`border-t border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900/50 ${
                   selected.has(row.id) ? "bg-blue-50/50 dark:bg-blue-900/10" : ""

@@ -100,20 +100,19 @@ THEN the system SHALL perform a vector similarity search using JavaScript cosine
 AND the LLM SHALL generate a response summarizing the findings
 AND the response SHALL include inline citations referencing specific comment text and NPS scores.
 
-#### Scenario: User asks a question with no relevant comments (NOT YET IMPLEMENTED)
+#### Scenario: User asks a question with no relevant comments
 
-WHEN the user submits a query that has no semantically similar comments in the dataset
-THEN the system SHALL detect that no comments have sufficient similarity (e.g., all scores below a threshold)
-AND respond with a message indicating no relevant feedback was found for that query
-AND suggest alternative questions based on the available categories.
+WHEN the user submits a query and all comments have cosine similarity below 0.3 (the threshold)
+THEN the system SHALL NOT call the LLM
+AND respond with a guidance message: "I couldn't find any comments closely related to your question. Try asking about specific themes like: [category names]."
+AND the message SHALL be saved to chat history.
 
-**Current implementation:** The LLM receives empty context and generates a response anyway, which may be inaccurate.
-
-#### Scenario: Citations are clickable (NOT YET IMPLEMENTED)
+#### Scenario: Citations are clickable
 
 WHEN the system displays a response with citations
-THEN each citation SHALL be clickable
-AND clicking a citation SHALL highlight or scroll to the referenced comment in the data table above.
+THEN each citation badge (both inline [N] and in the "Cited comments" section) SHALL be clickable
+AND clicking a citation SHALL scroll to the referenced comment row in the data table (via `comment-{id}` element ID)
+AND highlight the row with a blue ring for 3 seconds.
 
 ---
 
@@ -127,12 +126,13 @@ WHEN the system processes a user query for RAG retrieval
 THEN the system SHALL embed the query text using the same embedding model used for comments
 AND retrieve the top K comments ordered by descending similarity score.
 
-**Current implementation:** JavaScript cosine similarity (K=10 hardcoded). All comments with embeddings are loaded from the database, their stored embedding JSON is parsed, and cosine similarity is computed in application code.
+**Current implementation:** JavaScript cosine similarity with K defaulting to 20. The `topK` parameter in the chat API schema allows callers to override (range 1-50). All comments with embeddings are loaded from the database, parsed, and similarity computed in application code.
 
-#### Scenario: Active dashboard filters are respected in similarity search (NOT YET IMPLEMENTED)
+#### Scenario: Active dashboard filters are respected in similarity search
 
-WHEN the user has active filters (score card, category, dropdown, or search) on the dashboard and submits a chat query
-THEN the vector similarity search SHALL apply those filters as additional WHERE clauses
+WHEN the user has active filters (feedbackType, category, search, actionable) on the dashboard and submits a chat query
+THEN the ChatPanel SHALL pass the current filter state to the chat API via a `filters` object
+AND the chat route SHALL apply those filters to the comment set before computing cosine similarity
 AND the retrieved comments SHALL match both the semantic query and the active filters.
 
 #### Scenario: Migrate to SQL Server 2025 VECTOR_DISTANCE (NOT YET IMPLEMENTED)
@@ -171,11 +171,11 @@ THEN the FAB SHALL show a spinner and "Embedding..." label and be disabled
 AND the fixed blue banner SHALL display the current progress step
 AND the user cannot open the chat overlay until embedding completes.
 
-#### Scenario: Embeddings are partially generated due to previous failure (NOT YET IMPLEMENTED)
+#### Scenario: Embeddings are partially generated due to previous failure
 
-WHEN the user opens the dashboard and only some comments have embeddings (from a prior failed run)
-THEN the system SHALL display a message indicating incomplete embeddings with the count of embedded vs total comments
-AND offer a "Resume" button to continue embedding generation for the remaining comments.
+WHEN the user opens the dashboard and the project has an `embeddingProvider` set but `chatEnabled` is false (indicating a prior partial run)
+THEN the system SHALL display an orange banner: "Embeddings incomplete — some comments were not embedded in a previous run."
+AND offer a "Resume Embedding" button that triggers the embedding pipeline (which automatically skips already-embedded comments).
 
 ---
 

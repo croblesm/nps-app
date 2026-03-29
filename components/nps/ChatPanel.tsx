@@ -35,12 +35,21 @@ interface Citation {
   similarity: number;
 }
 
+interface ChatFilters {
+  feedbackType?: string;
+  category?: string;
+  search?: string;
+  actionable?: string;
+}
+
 interface ChatPanelProps {
   projectId: string;
   onClose?: () => void;
+  filters?: ChatFilters;
+  onCitationClick?: (commentId: string) => void;
 }
 
-export function ChatPanel({ projectId, onClose }: ChatPanelProps) {
+export function ChatPanel({ projectId, onClose, filters, onCitationClick }: ChatPanelProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -96,7 +105,7 @@ export function ChatPanel({ projectId, onClose }: ChatPanelProps) {
       const res = await fetch("/api/ai/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ projectId, message: userMessage }),
+        body: JSON.stringify({ projectId, message: userMessage, filters }),
       });
 
       const data = await res.json();
@@ -153,12 +162,15 @@ export function ChatPanel({ projectId, onClose }: ChatPanelProps) {
     return parts.map((part, i) => {
       const match = part.match(/^\[(\d+)\]$/);
       if (match) {
+        const citationIndex = parseInt(match[1], 10);
+        const cited = citations.find((c) => c.index === citationIndex);
         return (
           <Badge
             key={i}
             variant="secondary"
-            className="mx-0.5 cursor-pointer text-xs"
-            title="Cited comment"
+            className="mx-0.5 cursor-pointer text-xs hover:bg-accent"
+            title="Click to view cited comment"
+            onClick={() => cited && onCitationClick?.(cited.id)}
           >
             {part}
           </Badge>
@@ -288,7 +300,8 @@ export function ChatPanel({ projectId, onClose }: ChatPanelProps) {
               {citations.map((c) => (
                 <div
                   key={c.id}
-                  className="text-xs p-2 rounded border bg-muted/50 flex items-start gap-2"
+                  className={`text-xs p-2 rounded border bg-muted/50 flex items-start gap-2 ${onCitationClick ? "cursor-pointer hover:bg-muted" : ""}`}
+                  onClick={() => onCitationClick?.(c.id)}
                 >
                   <Badge variant="secondary" className="shrink-0">
                     [{c.index}]

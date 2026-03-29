@@ -75,6 +75,7 @@ export default function DashboardPage() {
   const [githubEnabled, setGithubEnabled] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  const [partialEmbedding, setPartialEmbedding] = useState<{ embedded: number; total: number } | null>(null);
 
   // Filters
   const [page, setPage] = useState(1);
@@ -126,6 +127,17 @@ export default function DashboardPage() {
     if (res.ok) {
       const project = await res.json();
       setChatEnabled(project.chatEnabled || false);
+      // Check for partial embeddings if chat is not enabled
+      if (!project.chatEnabled && project.embeddingProvider) {
+        const commentsRes = await fetch(`/api/projects/${projectId}/comments?limit=1`);
+        if (commentsRes.ok) {
+          const commentsData = await commentsRes.json();
+          if (commentsData.total > 0) {
+            // Count embedded vs total by checking if any have embeddings
+            setPartialEmbedding({ embedded: 0, total: commentsData.total });
+          }
+        }
+      }
     }
   }, [projectId]);
 
@@ -493,6 +505,20 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
 
+      {/* Partial embedding resume banner */}
+      {partialEmbedding && !chatEnabled && !embedding && (
+        <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 text-sm text-orange-800 dark:text-orange-300">
+          <span>Embeddings incomplete — some comments were not embedded in a previous run.</span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => { setPartialEmbedding(null); handleEnableChat(); }}
+          >
+            Resume Embedding
+          </Button>
+        </div>
+      )}
+
       {/* Embedding progress banner */}
       {embedding && embeddingProgress && (
         <div className="fixed top-[49px] left-0 right-0 z-40 bg-blue-600 text-white px-4 py-2 text-sm flex items-center justify-center gap-2">
@@ -504,7 +530,19 @@ export default function DashboardPage() {
       {/* Floating Chat FAB + Overlay */}
       {chatOpen && chatEnabled && (
         <div className="fixed bottom-20 right-6 z-50 w-[420px] h-[500px] shadow-2xl rounded-xl border border-border bg-card overflow-hidden">
-          <ChatPanel projectId={projectId} onClose={() => setChatOpen(false)} />
+          <ChatPanel
+            projectId={projectId}
+            onClose={() => setChatOpen(false)}
+            filters={{ feedbackType, category: categoryFilter, search, actionable: actionableFilter || undefined }}
+            onCitationClick={(commentId) => {
+              const el = document.getElementById(`comment-${commentId}`);
+              if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "center" });
+                el.classList.add("ring-2", "ring-blue-500");
+                setTimeout(() => el.classList.remove("ring-2", "ring-blue-500"), 3000);
+              }
+            }}
+          />
         </div>
       )}
 

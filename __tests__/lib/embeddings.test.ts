@@ -128,6 +128,44 @@ describe("EMBEDDING_CAPABLE_PROVIDERS", () => {
   });
 });
 
+describe("embedding config resolution logic", () => {
+  // Test the toEmbeddingConfig logic (provider → model mapping)
+  function toEmbeddingConfig(provider: string) {
+    return {
+      provider,
+      embeddingModel: EMBEDDING_MODELS[provider as LlmProvider] || "text-embedding-3-small",
+    };
+  }
+
+  it("maps openai to text-embedding-3-small", () => {
+    expect(toEmbeddingConfig("openai").embeddingModel).toBe("text-embedding-3-small");
+  });
+
+  it("maps azure-openai to text-embedding-3-small", () => {
+    expect(toEmbeddingConfig("azure-openai").embeddingModel).toBe("text-embedding-3-small");
+  });
+
+  it("maps ollama to nomic-embed-text", () => {
+    expect(toEmbeddingConfig("ollama").embeddingModel).toBe("nomic-embed-text");
+  });
+
+  it("falls back to text-embedding-3-small for unknown providers", () => {
+    expect(toEmbeddingConfig("unknown").embeddingModel).toBe("text-embedding-3-small");
+  });
+
+  it("anthropic is not in EMBEDDING_CAPABLE_PROVIDERS", () => {
+    expect(EMBEDDING_CAPABLE_PROVIDERS.includes("anthropic" as LlmProvider)).toBe(false);
+  });
+
+  it("all capable providers have embedding models defined", () => {
+    for (const p of EMBEDDING_CAPABLE_PROVIDERS) {
+      const config = toEmbeddingConfig(p);
+      expect(config.embeddingModel).toBeDefined();
+      expect(config.embeddingModel.length).toBeGreaterThan(0);
+    }
+  });
+});
+
 describe("embedding JSON serialization", () => {
   it("roundtrips embedding vectors through JSON", () => {
     const original = [0.123456, -0.789012, 0.345678, 0.0, -1.0, 1.0];

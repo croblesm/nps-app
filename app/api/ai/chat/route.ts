@@ -10,9 +10,18 @@ import {
 } from "@/lib/ai/get-embedding-config";
 import { parseBody } from "@/lib/api/schemas";
 
+const DEFAULT_K = 20;
+
 const chatSchema = z.object({
   projectId: z.string().uuid("Invalid project ID"),
   message: z.string().min(1, "Message is required").max(2000),
+  topK: z.number().int().min(1).max(50).optional(),
+  filters: z.object({
+    feedbackType: z.string().optional(),
+    category: z.string().optional(),
+    search: z.string().optional(),
+    actionable: z.string().optional(),
+  }).optional(),
 });
 
 export async function POST(request: Request) {
@@ -20,7 +29,8 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
-  const { projectId, message } = parsed.data;
+  const { projectId, message, filters, topK } = parsed.data;
+  const K = topK || DEFAULT_K;
 
   const db = await getDb();
 
@@ -73,19 +83,62 @@ export async function POST(request: Request) {
     order: { rowIndex: "ASC" },
   });
 
-  // Filter to comments with embeddings and compute cosine similarity
-  const scored = allComments
-    .filter((c) => c.embedding)
+  // Apply dashboard filters before similarity search
+  let filtered = allComments.filter((c) => c.embedding);
+  if (filters?.feedbackType) {
+    const NPS_THRESHOLDS = { PROMOTER_MIN: 9, PASSIVE_MIN: 7 };
+    if (filters.feedbackType === "promoter") filtered = filtered.filter((c) => c.npsScore !== null && c.npsScore >= NPS_THRESHOLDS.PROMOTER_MIN);
+    else if (filters.feedbackType === "passive") filtered = filtered.filter((c) => c.npsScore !== null && c.npsScore >= NPS_THRESHOLDS.PASSIVE_MIN && c.npsScore < NPS_THRESHOLDS.PROMOTER_MIN);
+    else if (filters.feedbackType === "detractor") filtered = filtered.filter((c) => c.npsScore !== null && c.npsScore < NPS_THRESHOLDS.PASSIVE_MIN);
+  }
+  if (filters?.category) {
+    filtered = filtered.filter((c) => {
+      const catName = c.category && typeof c.category === "object" && "name" in c.category ? (c.category as { name: string }).name : null;
+      return catName === filters.category;
+    });
+  }
+  if (filters?.search) {
+    const searchLower = filters.search.toLowerCase();
+    filtered = filtered.filter((c) => c.commentText?.toLowerCase().includes(searchLower));
+  }
+  if (filters?.actionable === "true") {
+    filtered = filtered.filter((c) => c.isActionable);
+  } else if (filters?.actionable === "false") {
+    filtered = filtered.filter((c) => !c.isActionable);
+  }
+
+  // Compute cosine similarity on filtered set
+  const scored = filtered
     .map((c) => {
       const emb = JSON.parse(c.embedding!) as number[];
       const similarity = cosineSimilarity(queryEmbedding, emb);
       return { comment: c, similarity };
     })
     .sort((a, b) => b.similarity - a.similarity)
-    .slice(0, 10);
+    .slice(0, K);
+
+  // Check if results are relevant (similarity threshold)
+  const SIMILARITY_THRESHOLD = 0.3;
+  const relevant = scored.filter((s) => s.similarity >= SIMILARITY_THRESHOLD);
+
+  if (relevant.length === 0) {
+    // No relevant comments — return guidance instead of hallucinated answer
+    const { Category } = await import("@/lib/db/entities/Category");
+    const categories = await db.getRepository(Category).find({ where: { projectId } });
+    const catNames = categories.map((c) => c.name).slice(0, 5).join(", ");
+
+    const noResultMsg = `I couldn't find any comments closely related to your question. Try asking about specific themes like: ${catNames || "performance, features, or usability"}.`;
+
+    const { ChatMessage } = await import("@/lib/db/entities/ChatMessage");
+    const chatRepo = db.getRepository(ChatMessage);
+    await chatRepo.save(chatRepo.create({ projectId, role: "user", content: message, citations: null }));
+    await chatRepo.save(chatRepo.create({ projectId, role: "assistant", content: noResultMsg, citations: null }));
+
+    return NextResponse.json({ response: noResultMsg, citations: [], messageId: null });
+  }
 
   // Build context for LLM
-  const contextLines = scored.map((s, i) => {
+  const contextLines = relevant.map((s, i) => {
     const c = s.comment;
     const catName =
       c.category && typeof c.category === "object" && "name" in c.category
@@ -111,7 +164,7 @@ ${contextLines.join("\n\n")}`;
   });
 
   // Extract cited comment IDs
-  const citedIds = scored
+  const citedIds = relevant
     .filter((_, i) => responseText.includes(`[${i + 1}]`))
     .map((s) => s.comment.id);
 
@@ -136,7 +189,7 @@ ${contextLines.join("\n\n")}`;
   await chatRepo.save(assistantMsg);
 
   // Build cited comments response
-  const citedComments = scored
+  const citedComments = relevant
     .filter((_, i) => responseText.includes(`[${i + 1}]`))
     .map((s, i) => ({
       index: i + 1,
