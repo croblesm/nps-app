@@ -301,10 +301,8 @@ export default function NoisePage() {
                       <Pencil className="size-4 text-muted-foreground hover:text-primary" />
                     </Button>
                   <AlertDialog>
-                    <AlertDialogTrigger>
-                      <Button variant="ghost" size="sm">
-                        <Trash2 className="size-4 text-muted-foreground hover:text-destructive" />
-                      </Button>
+                    <AlertDialogTrigger className="inline-flex items-center justify-center h-8 w-8 rounded-md text-muted-foreground hover:text-destructive hover:bg-muted transition-colors">
+                      <Trash2 className="size-4" />
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>

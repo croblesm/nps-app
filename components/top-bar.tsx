@@ -144,16 +144,18 @@ export function TopBar() {
           {breadcrumbs.map((crumb, index) => {
             const isLast = index === breadcrumbs.length - 1;
             return (
-              <BreadcrumbItem key={`${crumb.label}-${index}`}>
+              <span key={`${crumb.label}-${index}`} className="contents">
                 {index > 0 && <BreadcrumbSeparator />}
-                {isLast || !crumb.href ? (
-                  <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
-                ) : (
-                  <BreadcrumbLink render={<Link href={crumb.href} />}>
-                    {crumb.label}
-                  </BreadcrumbLink>
-                )}
-              </BreadcrumbItem>
+                <BreadcrumbItem>
+                  {isLast || !crumb.href ? (
+                    <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                  ) : (
+                    <BreadcrumbLink render={<Link href={crumb.href} />}>
+                      {crumb.label}
+                    </BreadcrumbLink>
+                  )}
+                </BreadcrumbItem>
+              </span>
             );
           })}
         </BreadcrumbList>
