@@ -47,6 +47,17 @@ The Dev Container SHALL include a pre-configured MSSQL connection profile so dev
 - **WHEN** a developer opens the MSSQL sidebar in VS Code
 - **THEN** a saved connection profile "NPS Insight Engine (Dev)" is available and connects without additional configuration
 
+### Requirement: SQL Server container has resource limits
+The Docker Compose configuration SHALL set memory and CPU limits on the SQL Server container to prevent it from consuming excessive host resources.
+
+#### Scenario: Container resource limits
+- **WHEN** a developer runs `docker compose up -d`
+- **THEN** the SQL Server container is limited to 2GB memory, 1 CPU core, and 512MB internal SQL Server memory (`MSSQL_MEMORY_LIMIT_MB`)
+
+#### Scenario: Default SQL Server memory behavior is overridden
+- **WHEN** the SQL Server container starts
+- **THEN** it does NOT consume 80% of host memory (the default), but instead stays within the configured 512MB internal limit
+
 ### Requirement: Database creation is managed by the application
 The Dev Container SHALL NOT use post-start or post-create hooks to create the database or schema. Database and table creation MUST be handled by the application (TypeORM synchronize or `npm run db:init`).
 
