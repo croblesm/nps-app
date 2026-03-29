@@ -3,7 +3,11 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import ReactMarkdown from "react-markdown";
+import { toast } from "sonner";
 import { Spinner } from "@/components/ui/Spinner";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardAction } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { FileText, Download, RefreshCw, Sparkles } from "lucide-react";
 
 interface SummaryData {
   id: string;
@@ -17,7 +21,6 @@ export default function SummaryPage() {
 
   const [summary, setSummary] = useState<SummaryData | null>(null);
   const [generating, setGenerating] = useState(false);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
   // Load existing summary from DB on mount
@@ -33,7 +36,6 @@ export default function SummaryPage() {
 
   async function handleGenerate() {
     setGenerating(true);
-    setError("");
 
     try {
       const res = await fetch("/api/ai/summarize", {
@@ -45,11 +47,12 @@ export default function SummaryPage() {
       const data = await res.json();
       if (res.ok) {
         setSummary(data);
+        toast.success("Summary generated successfully");
       } else {
-        setError(data.error || "Summary generation failed");
+        toast.error(data.error || "Summary generation failed");
       }
     } catch {
-      setError("Failed to generate summary. Check your LLM settings.");
+      toast.error("Failed to generate summary. Check your LLM settings.");
     } finally {
       setGenerating(false);
     }
@@ -66,55 +69,78 @@ export default function SummaryPage() {
     URL.revokeObjectURL(url);
   }
 
+  if (loading) {
+    return (
+      <div className="flex items-center gap-2 text-muted-foreground p-8">
+        <Spinner size="sm" />
+        <span>Loading summary...</span>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">AI Summary</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <FileText className="size-5 text-blue-500" />
+            <CardTitle className="text-2xl">AI Summary</CardTitle>
+          </div>
+          <CardDescription>
             Generate an AI-powered insight report
-          </p>
-        </div>
-        <div className="flex gap-2">
-          {summary && (
-            <button
-              onClick={handleDownload}
-              className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm"
-            >
-              Download .md
-            </button>
+          </CardDescription>
+          <CardAction>
+            <div className="flex gap-2">
+              {summary && (
+                <Button variant="outline" size="sm" onClick={handleDownload}>
+                  <Download className="size-4" />
+                  Download .md
+                </Button>
+              )}
+              <Button
+                size="sm"
+                onClick={handleGenerate}
+                disabled={generating}
+              >
+                {generating ? (
+                  <Spinner size="sm" label="Generating..." />
+                ) : summary ? (
+                  <>
+                    <RefreshCw className="size-4" />
+                    Regenerate
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="size-4" />
+                    Generate Summary
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardAction>
+        </CardHeader>
+
+        <CardContent>
+          {generating && (
+            <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 mb-4">
+              <Spinner size="sm" label="Generating AI-powered insight report..." />
+            </div>
           )}
-          <button
-            onClick={handleGenerate}
-            disabled={generating}
-            className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 text-sm font-medium"
-          >
-            {generating
-              ? <Spinner size="sm" label="Generating..." />
-              : summary
-              ? "Regenerate"
-              : "Generate Summary"}
-          </button>
-        </div>
-      </div>
 
-      {error && (
-        <div className="p-3 rounded-lg text-sm bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-300 mb-4">
-          {error}
-        </div>
-      )}
+          {summary && !generating && (
+            <div className="markdown-content max-w-none p-6 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-300">
+              <ReactMarkdown>{summary.markdown}</ReactMarkdown>
+            </div>
+          )}
 
-      {generating && (
-        <div className="p-3 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 mb-4">
-          <Spinner size="sm" label="Generating AI-powered insight report..." />
-        </div>
-      )}
-
-      {summary && !generating && (
-        <div className="markdown-content max-w-none p-6 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-300">
-          <ReactMarkdown>{summary.markdown}</ReactMarkdown>
-        </div>
-      )}
+          {!summary && !generating && (
+            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+              <Sparkles className="size-10 mb-3 opacity-40" />
+              <p className="text-sm">No summary generated yet. Click Generate Summary to get started.</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

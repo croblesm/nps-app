@@ -3,7 +3,20 @@
 import { useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Papa from "papaparse";
+import { toast } from "sonner";
+import {
+  Upload,
+  FileSpreadsheet,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  ArrowRight,
+} from "lucide-react";
 import { Spinner } from "@/components/ui/Spinner";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 
 interface ColumnInfo {
   name: string;
@@ -21,6 +34,24 @@ interface UploadResult {
   validation: { valid: boolean; issues: string[] };
 }
 
+function columnTypeBadgeVariant(type: string) {
+  switch (type.toLowerCase()) {
+    case "numeric":
+    case "number":
+    case "integer":
+    case "float":
+      return "default" as const;
+    case "text":
+    case "string":
+      return "secondary" as const;
+    case "date":
+    case "datetime":
+      return "outline" as const;
+    default:
+      return "secondary" as const;
+  }
+}
+
 export default function UploadPage() {
   const params = useParams();
   const router = useRouter();
@@ -31,13 +62,13 @@ export default function UploadPage() {
   const [preview, setPreview] = useState<Record<string, unknown>[]>([]);
   const [previewHeaders, setPreviewHeaders] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [result, setResult] = useState<UploadResult | null>(null);
-  const [error, setError] = useState("");
 
   const handleFile = useCallback((f: File) => {
     setFile(f);
     setResult(null);
-    setError("");
+    setUploadProgress(0);
 
     // Client-side preview: first 5 rows
     const reader = new FileReader();
@@ -58,8 +89,13 @@ export default function UploadPage() {
     e.preventDefault();
     setDragging(false);
     const f = e.dataTransfer.files[0];
-    if (f && f.name.endsWith(".csv")) handleFile(f);
-    else setError("Please upload a CSV file");
+    if (f && f.name.endsWith(".csv")) {
+      handleFile(f);
+    } else {
+      toast.error("Invalid file type", {
+        description: "Please upload a CSV file.",
+      });
+    }
   }
 
   function handleFileInput(e: React.ChangeEvent<HTMLInputElement>) {
@@ -70,26 +106,44 @@ export default function UploadPage() {
   async function handleUpload() {
     if (!file) return;
     setUploading(true);
-    setError("");
+    setUploadProgress(20);
 
     try {
       const formData = new FormData();
       formData.append("file", file);
       formData.append("projectId", projectId);
 
+      setUploadProgress(50);
+
       const res = await fetch("/api/upload", {
         method: "POST",
         body: formData,
       });
 
+      setUploadProgress(80);
+
       const data = await res.json();
       if (res.ok) {
+        setUploadProgress(100);
         setResult(data);
+        if (data.validation.valid) {
+          toast.success("Upload successful", {
+            description: `${data.filename} validated with ${data.rowCount} rows.`,
+          });
+        } else {
+          toast.warning("Validation issues found", {
+            description: `${data.validation.issues.length} issue(s) detected.`,
+          });
+        }
       } else {
-        setError(data.error || "Upload failed");
+        toast.error("Upload failed", {
+          description: data.error || "An unexpected error occurred.",
+        });
       }
     } catch {
-      setError("Upload failed");
+      toast.error("Upload failed", {
+        description: "Could not connect to the server.",
+      });
     } finally {
       setUploading(false);
     }
@@ -98,178 +152,220 @@ export default function UploadPage() {
   return (
     <div className="max-w-4xl">
       <h1 className="text-2xl font-bold mb-2">Upload Data</h1>
-      <p className="text-gray-500 dark:text-gray-400 mb-6">
+      <p className="text-muted-foreground mb-6">
         Upload your NPS survey data as a CSV file
       </p>
 
       {/* Drop zone */}
       {!result && (
-        <div
-          onDragOver={(e) => {
+        <Card
+          onDragOver={(e: React.DragEvent) => {
             e.preventDefault();
             setDragging(true);
           }}
           onDragLeave={() => setDragging(false)}
           onDrop={handleDrop}
-          className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${
+          className={`cursor-pointer transition-colors ${
             dragging
-              ? "border-blue-500 bg-blue-50 dark:bg-blue-900/10"
-              : "border-gray-300 dark:border-gray-700"
+              ? "border-primary ring-2 ring-primary/20"
+              : ""
           }`}
         >
-          <p className="text-gray-500 dark:text-gray-400 mb-4">
-            {file
-              ? `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`
-              : "Drag and drop a CSV file here, or click to browse"}
-          </p>
-          <label className="inline-block px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600 cursor-pointer text-sm">
-            Choose File
-            <input
-              type="file"
-              accept=".csv"
-              onChange={handleFileInput}
-              className="hidden"
-            />
-          </label>
-        </div>
+          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+            {file ? (
+              <>
+                <FileSpreadsheet className="size-10 text-primary mb-4" />
+                <p className="font-medium text-foreground">
+                  {file.name}
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {(file.size / 1024).toFixed(1)} KB
+                </p>
+              </>
+            ) : (
+              <>
+                <Upload className="size-10 text-muted-foreground mb-4" />
+                <p className="text-muted-foreground mb-4">
+                  Drag and drop a CSV file here, or click to browse
+                </p>
+              </>
+            )}
+            <Button
+              variant="outline"
+              className="mt-2"
+              render={
+                <label className="cursor-pointer" />
+              }
+            >
+              Choose File
+              <input
+                type="file"
+                accept=".csv"
+                onChange={handleFileInput}
+                className="hidden"
+              />
+            </Button>
+          </CardContent>
+        </Card>
       )}
 
       {/* Preview table */}
       {preview.length > 0 && !result && (
-        <div className="mt-6">
-          <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
-            Preview (first 5 rows)
-          </h2>
-          <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 dark:bg-gray-900">
-                <tr>
-                  {previewHeaders.map((h) => (
-                    <th
-                      key={h}
-                      className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300"
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {preview.map((row, i) => (
-                  <tr
-                    key={i}
-                    className="border-t border-gray-200 dark:border-gray-800"
-                  >
-                    {previewHeaders.map((h) => (
-                      <td
-                        key={h}
-                        className="px-3 py-2 text-gray-900 dark:text-gray-100 truncate max-w-[200px]"
+        <div className="mt-6 space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm uppercase tracking-wide text-muted-foreground">
+                Preview (first 5 rows)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto rounded-lg border border-border">
+                <table className="w-full text-sm">
+                  <thead className="bg-muted/50">
+                    <tr>
+                      {previewHeaders.map((h) => (
+                        <th
+                          key={h}
+                          className="px-3 py-2 text-left font-medium text-muted-foreground"
+                        >
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {preview.map((row, i) => (
+                      <tr
+                        key={i}
+                        className="border-t border-border"
                       >
-                        {String(row[h] ?? "")}
-                      </td>
+                        {previewHeaders.map((h) => (
+                          <td
+                            key={h}
+                            className="px-3 py-2 text-foreground truncate max-w-[200px]"
+                          >
+                            {String(row[h] ?? "")}
+                          </td>
+                        ))}
+                      </tr>
                     ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
 
           {uploading && (
-            <div className="mt-4 p-3 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-              <Spinner size="sm" label="Uploading and validating your CSV data..." />
+            <div className="space-y-2">
+              <Progress value={uploadProgress}>
+                <span className="text-sm text-muted-foreground">
+                  Uploading and validating...
+                </span>
+              </Progress>
             </div>
           )}
-          <button
+
+          <Button
             onClick={handleUpload}
             disabled={uploading}
-            className="mt-4 px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 font-medium"
+            size="lg"
           >
-            {uploading ? <Spinner size="sm" label="Uploading & Validating..." /> : "Upload & Validate"}
-          </button>
-        </div>
-      )}
-
-      {/* Error */}
-      {error && (
-        <div className="mt-4 p-3 rounded-lg text-sm bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-300">
-          {error}
+            {uploading ? (
+              <Spinner size="sm" label="Uploading & Validating..." />
+            ) : (
+              <>
+                <Upload className="size-4" />
+                Upload &amp; Validate
+              </>
+            )}
+          </Button>
         </div>
       )}
 
       {/* Validation results */}
       {result && (
         <div className="mt-6 space-y-6">
-          <div
-            className={`p-4 rounded-lg ${
-              result.validation.valid
-                ? "bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800"
-                : "bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800"
-            }`}
-          >
-            <h2
-              className={`font-semibold ${
-                result.validation.valid
-                  ? "text-green-800 dark:text-green-300"
-                  : "text-red-800 dark:text-red-300"
-              }`}
-            >
-              {result.validation.valid
-                ? "Validation Passed"
-                : "Validation Failed"}
-            </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              {result.filename} — {result.rowCount} rows,{" "}
-              {result.columns.length} columns
-            </p>
-            {result.validation.issues.length > 0 && (
-              <ul className="mt-2 text-sm space-y-1">
-                {result.validation.issues.map((issue, i) => (
-                  <li key={i} className="text-gray-600 dark:text-gray-400">
-                    &bull; {issue}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+          {/* Status card */}
+          <Card>
+            <CardContent className="flex items-start gap-3 pt-4">
+              {result.validation.valid ? (
+                <CheckCircle className="size-5 text-green-500 mt-0.5 shrink-0" />
+              ) : (
+                <XCircle className="size-5 text-destructive mt-0.5 shrink-0" />
+              )}
+              <div className="flex-1">
+                <p className="font-semibold text-foreground">
+                  {result.validation.valid
+                    ? "Validation Passed"
+                    : "Validation Failed"}
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {result.filename} — {result.rowCount} rows,{" "}
+                  {result.columns.length} columns
+                </p>
+                {result.validation.issues.length > 0 && (
+                  <ul className="mt-3 space-y-1.5">
+                    {result.validation.issues.map((issue, i) => (
+                      <li
+                        key={i}
+                        className="flex items-start gap-2 text-sm text-muted-foreground"
+                      >
+                        <AlertTriangle className="size-3.5 text-yellow-500 mt-0.5 shrink-0" />
+                        {issue}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Column summary */}
-          <div>
-            <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
-              Column Analysis
-            </h2>
-            <div className="grid gap-2">
-              {result.columns.map((col) => (
-                <div
-                  key={col.name}
-                  className="flex items-center justify-between p-3 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800"
-                >
-                  <div>
-                    <span className="font-medium text-gray-900 dark:text-gray-100">
-                      {col.name}
-                    </span>
-                    <span className="ml-2 px-2 py-0.5 text-xs rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
-                      {col.type}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm uppercase tracking-wide text-muted-foreground">
+                Column Analysis
+              </CardTitle>
+              <CardDescription>
+                Detected types and null percentages for each column
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-2">
+                {result.columns.map((col) => (
+                  <div
+                    key={col.name}
+                    className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-foreground">
+                        {col.name}
+                      </span>
+                      <Badge variant={columnTypeBadgeVariant(col.type)}>
+                        {col.type}
+                      </Badge>
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {col.nullPercentage > 0
+                        ? `${col.nullPercentage}% null`
+                        : "No nulls"}
                     </span>
                   </div>
-                  <div className="text-xs text-gray-400">
-                    {col.nullPercentage > 0
-                      ? `${col.nullPercentage}% null`
-                      : "No nulls"}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
           {result.validation.valid && (
-            <button
+            <Button
+              size="lg"
               onClick={() =>
                 router.push(`/project/${projectId}/structure`)
               }
-              className="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium"
             >
               Continue to Report Structure
-            </button>
+              <ArrowRight className="size-4" />
+            </Button>
           )}
         </div>
       )}

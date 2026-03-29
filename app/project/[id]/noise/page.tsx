@@ -2,7 +2,26 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import { toast } from "sonner";
+import { Filter, X, Plus, Trash2, Eye } from "lucide-react";
 import { Spinner } from "@/components/ui/Spinner";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface NoiseFilterData {
   id: string;
@@ -70,130 +89,243 @@ export default function NoisePage() {
         }),
       });
       if (res.ok) {
+        toast.success("Filter created", {
+          description: `"${name.trim()}" noise filter is now active.`,
+        });
         setName("");
         setDescription("");
         setKeywords("");
         setMatchPreview(null);
         await fetchFilters();
+      } else {
+        toast.error("Failed to create filter");
       }
+    } catch {
+      toast.error("Failed to create filter", {
+        description: "Could not connect to the server.",
+      });
     } finally {
       setSaving(false);
     }
   }
 
-  async function handleDelete(filterId: string) {
-    if (!confirm("Delete this noise filter?")) return;
-    await fetch(
-      `/api/projects/${projectId}/noise?filterId=${filterId}`,
-      { method: "DELETE" }
-    );
-    await fetchFilters();
+  async function handleDelete(filterId: string, filterName: string) {
+    try {
+      await fetch(
+        `/api/projects/${projectId}/noise?filterId=${filterId}`,
+        { method: "DELETE" }
+      );
+      toast.success("Filter deleted", {
+        description: `"${filterName}" has been removed.`,
+      });
+      await fetchFilters();
+    } catch {
+      toast.error("Failed to delete filter");
+    }
   }
 
   return (
     <div className="max-w-3xl">
       <h1 className="text-2xl font-bold mb-2">Noise Filters</h1>
-      <p className="text-gray-500 dark:text-gray-400 mb-6">
+      <p className="text-muted-foreground mb-6">
         Filter out noisy comments that skew your NPS score
       </p>
 
       {/* Existing filters */}
       {filters.length > 0 && (
-        <div className="mb-8 space-y-2">
+        <div className="mb-8 space-y-3">
           {filters.map((f) => {
             const kws: string[] = JSON.parse(f.filterKeywords || "[]");
             return (
-              <div
-                key={f.id}
-                className="flex items-center justify-between p-4 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800"
-              >
-                <div>
-                  <div className="font-medium text-gray-900 dark:text-gray-100">
-                    {f.name}
+              <Card key={f.id}>
+                <CardContent className="flex items-start justify-between gap-4 pt-4">
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Filter className="size-4 text-muted-foreground" />
+                      <span className="font-medium text-foreground">
+                        {f.name}
+                      </span>
+                      {f.excludeFromNps && (
+                        <Badge variant="destructive">
+                          Excluded from NPS
+                        </Badge>
+                      )}
+                    </div>
+                    {f.description && (
+                      <p className="text-sm text-muted-foreground">
+                        {f.description}
+                      </p>
+                    )}
+                    <div className="flex flex-wrap gap-1.5">
+                      {kws.map((kw) => (
+                        <Badge key={kw} variant="secondary">
+                          {kw}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
-                  <div className="text-xs text-gray-400 mt-1">
-                    Keywords: {kws.join(", ")}
-                  </div>
-                  {f.excludeFromNps && (
-                    <span className="text-xs text-red-400">
-                      Excluded from NPS score
-                    </span>
-                  )}
-                </div>
-                <button
-                  onClick={() => handleDelete(f.id)}
-                  className="text-sm text-gray-400 hover:text-red-500"
-                >
-                  Delete
-                </button>
-              </div>
+                  <AlertDialog>
+                    <AlertDialogTrigger
+                      render={
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                        />
+                      }
+                    >
+                      <Trash2 className="size-4 text-muted-foreground hover:text-destructive" />
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete noise filter?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will permanently remove the &quot;{f.name}&quot; filter.
+                          Comments previously excluded will be included in NPS
+                          calculations again.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          variant="destructive"
+                          onClick={() => handleDelete(f.id, f.name)}
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </CardContent>
+              </Card>
             );
           })}
         </div>
       )}
 
       {/* Create new filter */}
-      <div className="space-y-4 p-6 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-        <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-          New Noise Filter
-        </h2>
-
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Filter name (e.g., ADS/SSMS Comparisons)"
-          className="w-full p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm"
-        />
-        <input
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Description (optional)"
-          className="w-full p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm"
-        />
-        <div>
-          <input
-            value={keywords}
-            onChange={(e) => { setKeywords(e.target.value); setMatchPreview(null); }}
-            placeholder="Keywords, comma-separated (e.g., ADS, SSMS, Azure Data Studio)"
-            className="w-full p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm"
-          />
-          <button
-            onClick={previewMatches}
-            disabled={!keywords.trim()}
-            className="mt-1 text-xs text-blue-500 hover:text-blue-400 disabled:opacity-50"
-          >
-            Preview matches
-          </button>
-          {matchPreview !== null && (
-            <span className="ml-2 text-xs text-gray-400">
-              {matchPreview} comments match
-            </span>
-          )}
-        </div>
-
-        <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-          <input
-            type="checkbox"
-            checked={excludeFromNps}
-            onChange={(e) => setExcludeFromNps(e.target.checked)}
-            className="rounded"
-          />
-          Exclude matching comments from NPS score calculation
-        </label>
-
-        {saving && (
-          <div className="p-3 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-            <Spinner size="sm" label="Creating noise filter..." />
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Plus className="size-4" />
+            New Noise Filter
+          </CardTitle>
+          <CardDescription>
+            Define keywords to identify and exclude noisy comments
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="filter-name">Filter name</Label>
+            <Input
+              id="filter-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g., ADS/SSMS Comparisons"
+            />
           </div>
-        )}
-        <button
-          onClick={handleCreate}
-          disabled={saving || !name.trim() || !keywords.trim()}
-          className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 text-sm font-medium"
-        >
-          {saving ? <Spinner size="sm" label="Creating..." /> : "Create Filter"}
-        </button>
-      </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="filter-description">Description (optional)</Label>
+            <Input
+              id="filter-description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Brief description of what this filter catches"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="filter-keywords">Keywords (comma-separated)</Label>
+            <Input
+              id="filter-keywords"
+              value={keywords}
+              onChange={(e) => {
+                setKeywords(e.target.value);
+                setMatchPreview(null);
+              }}
+              placeholder="e.g., ADS, SSMS, Azure Data Studio"
+            />
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={previewMatches}
+                disabled={!keywords.trim()}
+              >
+                <Eye className="size-3.5" />
+                Preview matches
+              </Button>
+              {matchPreview !== null && (
+                <span className="text-xs text-muted-foreground">
+                  {matchPreview} comments match
+                </span>
+              )}
+            </div>
+            {/* Keyword pills preview */}
+            {keywords.trim() && (
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {keywords
+                  .split(",")
+                  .map((k) => k.trim())
+                  .filter(Boolean)
+                  .map((kw) => (
+                    <Badge key={kw} variant="outline" className="gap-1">
+                      {kw}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = keywords
+                            .split(",")
+                            .map((k) => k.trim())
+                            .filter((k) => k && k !== kw)
+                            .join(", ");
+                          setKeywords(updated);
+                          setMatchPreview(null);
+                        }}
+                        className="ml-0.5 rounded-full hover:bg-muted-foreground/20"
+                      >
+                        <X className="size-3" />
+                      </button>
+                    </Badge>
+                  ))}
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="exclude-nps"
+              checked={excludeFromNps}
+              onCheckedChange={(checked) =>
+                setExcludeFromNps(checked)
+              }
+            />
+            <Label htmlFor="exclude-nps" className="font-normal">
+              Exclude matching comments from NPS score calculation
+            </Label>
+          </div>
+
+          {saving && (
+            <div className="p-3 rounded-lg bg-muted/50 border border-border">
+              <Spinner size="sm" label="Creating noise filter..." />
+            </div>
+          )}
+
+          <Button
+            onClick={handleCreate}
+            disabled={saving || !name.trim() || !keywords.trim()}
+          >
+            {saving ? (
+              <Spinner size="sm" label="Creating..." />
+            ) : (
+              <>
+                <Plus className="size-4" />
+                Create Filter
+              </>
+            )}
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }

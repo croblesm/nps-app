@@ -6,18 +6,18 @@
 - [x] 0.4 Add theme provider with next-themes for light/dark toggle, persist preference
 - [x] 0.5 Add theme toggle button to Header component (sun/moon icon)
 - [x] 0.6 Redesign Header: use shadcn Button, Avatar, DropdownMenu for settings/user menu
-- [ ] 0.7 Redesign project sidebar: add Lucide icons to each step, use shadcn navigation patterns
-- [ ] 0.8 Redesign home page: project list as shadcn Cards with proper typography, hover effects, delete via AlertDialog
-- [ ] 0.9 Redesign new project form: shadcn Input, Textarea, Label, Button components
-- [ ] 0.10 Redesign settings page: shadcn Select, Input, Card, Badge for configured providers
-- [ ] 0.11 Redesign upload page: polished drag-and-drop zone with shadcn Card, Progress bar for upload
-- [ ] 0.12 Redesign structure review: shadcn Cards with Checkbox, Badge for column types
-- [ ] 0.13 Redesign categories page: shadcn Cards with Badge for sample counts, Dialog for AI scan results
-- [ ] 0.14 Redesign dashboard: shadcn Cards for score cards, Badge for sentiment, Tabs for sub-views
-- [ ] 0.15 Redesign noise filters: pill/tag input for keywords (Badge with X button), AlertDialog for delete
-- [ ] 0.16 Redesign summary page: proper markdown container, shadcn Button for actions
-- [ ] 0.17 Replace all browser confirm() with shadcn AlertDialog
-- [ ] 0.18 Replace all inline success/error messages with shadcn Toast (Sonner)
+- [x] 0.7 Redesign project sidebar: add Lucide icons to each step, use shadcn navigation patterns
+- [x] 0.8 Redesign home page: project list as shadcn Cards with proper typography, hover effects, delete via AlertDialog
+- [x] 0.9 Redesign new project form: shadcn Input, Textarea, Label, Button components
+- [x] 0.10 Redesign settings page: shadcn Select, Input, Card, Badge for configured providers
+- [x] 0.11 Redesign upload page: polished drag-and-drop zone with shadcn Card, Progress bar for upload
+- [x] 0.12 Redesign structure review: shadcn Cards with Checkbox, Badge for column types
+- [x] 0.13 Redesign categories page: shadcn Cards with Badge for sample counts, Dialog for AI scan results
+- [x] 0.14 Redesign dashboard: shadcn Cards for score cards, Badge for sentiment, Tabs for sub-views
+- [x] 0.15 Redesign noise filters: pill/tag input for keywords (Badge with X button), AlertDialog for delete
+- [x] 0.16 Redesign summary page: proper markdown container, shadcn Button for actions
+- [x] 0.17 Replace all browser confirm() with shadcn AlertDialog
+- [x] 0.18 Replace all inline success/error messages with shadcn Toast (Sonner)
 - [ ] 0.19 Add loading skeletons using shadcn Skeleton component for page load states
 - [ ] 0.20 Verify light mode and dark mode look polished on all pages
 - [ ] 0.21 Write tests for theme toggle, verify component rendering

@@ -3,6 +3,18 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
+import {
+  Upload,
+  Columns3,
+  Tags,
+  LayoutDashboard,
+  Filter,
+  FileText,
+  ArrowLeft,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
 interface ProjectInfo {
   id: string;
@@ -11,12 +23,12 @@ interface ProjectInfo {
 }
 
 const NAV_ITEMS = [
-  { href: "upload", label: "Upload Data", step: 1 },
-  { href: "structure", label: "Report Structure", step: 2 },
-  { href: "categories", label: "Categories", step: 3 },
-  { href: "dashboard", label: "Dashboard", step: 4 },
-  { href: "noise", label: "Noise Filters", step: 5 },
-  { href: "summary", label: "AI Summary", step: 6 },
+  { href: "upload", label: "Upload Data", icon: Upload },
+  { href: "structure", label: "Report Structure", icon: Columns3 },
+  { href: "categories", label: "Categories", icon: Tags },
+  { href: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "noise", label: "Noise Filters", icon: Filter },
+  { href: "summary", label: "AI Summary", icon: FileText },
 ];
 
 export default function ProjectLayout({
@@ -40,46 +52,52 @@ export default function ProjectLayout({
 
   return (
     <div className="flex min-h-[calc(100vh-49px)]">
-      {/* Sidebar */}
-      <aside className="w-56 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 flex-shrink-0">
-        <div className="mb-6">
-          <Link
-            href="/"
-            className="text-xs text-blue-500 hover:text-blue-400"
-          >
-            &larr; All Projects
+      <aside className="w-56 border-r border-border bg-card p-4 flex-shrink-0">
+        <div className="mb-4">
+          <Link href="/">
+            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-muted-foreground">
+              <ArrowLeft className="h-3 w-3 mr-1" />
+              All Projects
+            </Button>
           </Link>
           {project && (
-            <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mt-2 truncate">
+            <h2 className="text-sm font-semibold text-foreground mt-2 truncate px-2">
               {project.name}
             </h2>
           )}
         </div>
 
+        <Separator className="mb-3" />
+
         <nav className="space-y-1">
-          {NAV_ITEMS.map((item) => {
+          {NAV_ITEMS.map((item, idx) => {
             const isActive = currentPage === item.href;
+            const Icon = item.icon;
             return (
               <Link
                 key={item.href}
                 href={`/project/${projectId}/${item.href}`}
-                className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
+                className={cn(
+                  "flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors",
                   isActive
-                    ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 font-medium"
-                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-                }`}
+                    ? "bg-primary/10 text-primary font-medium"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                )}
               >
-                <span className="w-5 h-5 flex items-center justify-center rounded-full text-xs border border-current flex-shrink-0">
-                  {item.step}
+                <Icon className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate">{item.label}</span>
+                <span className={cn(
+                  "ml-auto text-[10px] font-medium w-4 h-4 flex items-center justify-center rounded-full",
+                  isActive ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                )}>
+                  {idx + 1}
                 </span>
-                {item.label}
               </Link>
             );
           })}
         </nav>
       </aside>
 
-      {/* Main content */}
       <main className="flex-1 p-8">{children}</main>
     </div>
   );

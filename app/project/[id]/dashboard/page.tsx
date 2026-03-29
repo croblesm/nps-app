@@ -2,13 +2,18 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
+import { toast } from "sonner";
 import { npsLabel } from "@/lib/nps/calculator";
 import { Spinner } from "@/components/ui/Spinner";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { ScoreCards } from "@/components/nps/ScoreCards";
 import { CategoryBreakdown } from "@/components/nps/CategoryBreakdown";
 import { SearchBar } from "@/components/nps/SearchBar";
 import { FilterPanel } from "@/components/nps/FilterPanel";
 import { DataTable } from "@/components/nps/DataTable";
+import { Filter, Sparkles, LayoutDashboard } from "lucide-react";
 
 interface CommentRow {
   id: string;
@@ -62,7 +67,6 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [needsClassification, setNeedsClassification] = useState(false);
   const [classifying, setClassifying] = useState(false);
-  const [classifyResult, setClassifyResult] = useState("");
 
   // Filters
   const [page, setPage] = useState(1);
@@ -121,12 +125,12 @@ export default function DashboardPage() {
     });
     const result = await res.json();
     if (res.ok) {
-      setClassifyResult(`Classified ${result.classified} comments`);
+      toast.success(`Classified ${result.classified} comments`);
       setNeedsClassification(false);
       await fetchComments();
       await fetchStats();
     } else {
-      setClassifyResult(result.error || "Classification failed");
+      toast.error(result.error || "Classification failed");
     }
     setClassifying(false);
   }
@@ -167,70 +171,105 @@ export default function DashboardPage() {
   }
 
   if (loading || !nps) {
-    return <div className="text-gray-400 p-8">Loading dashboard...</div>;
-  }
-
-  if (needsClassification) {
     return (
-      <div className="max-w-2xl">
-        <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-        <p className="text-gray-500 dark:text-gray-400 mb-4">
-          Comments need to be classified before viewing the dashboard.
-        </p>
-        {classifying && (
-          <div className="mb-4 p-3 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-            <Spinner size="sm" label="Classifying comments in batches of 25..." />
-          </div>
-        )}
-        <button
-          onClick={handleClassify}
-          disabled={classifying}
-          className="px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 font-medium"
-        >
-          {classifying ? <Spinner size="sm" label="Classifying..." /> : "Classify All Comments"}
-        </button>
-        {classifyResult && (
-          <p className="mt-3 text-sm text-gray-400">{classifyResult}</p>
-        )}
+      <div className="flex items-center gap-2 text-muted-foreground p-8">
+        <Spinner size="sm" />
+        <span>Loading dashboard...</span>
       </div>
     );
   }
 
+  if (needsClassification) {
+    return (
+      <Card className="max-w-2xl">
+        <CardContent className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Sparkles className="size-5 text-blue-500" />
+            <h1 className="text-2xl font-bold">Dashboard</h1>
+          </div>
+          <p className="text-muted-foreground">
+            Comments need to be classified before viewing the dashboard.
+          </p>
+          {classifying && (
+            <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+              <Spinner size="sm" label="Classifying comments in batches of 25..." />
+            </div>
+          )}
+          <Button
+            onClick={handleClassify}
+            disabled={classifying}
+            size="lg"
+          >
+            {classifying ? (
+              <Spinner size="sm" label="Classifying..." />
+            ) : (
+              <>
+                <Sparkles className="size-4" />
+                Classify All Comments
+              </>
+            )}
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <div>
+    <div className="space-y-4">
       <ScoreCards
         nps={nps}
         npsLabel={npsLabel(nps.npsScore)}
         feedbackType={feedbackType}
         onFeedbackTypeChange={handleFeedbackType}
       />
+
       {nps.activeNoiseFilterCount > 0 && (
-        <div className="mb-4 px-3 py-2 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 text-sm text-yellow-800 dark:text-yellow-300">
-          {nps.activeNoiseFilterCount} noise filter{nps.activeNoiseFilterCount > 1 ? "s" : ""} applied — {nps.noiseExcludedCount} comment{nps.noiseExcludedCount !== 1 ? "s" : ""} excluded from NPS score
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 text-sm text-yellow-800 dark:text-yellow-300">
+          <Filter className="size-4 shrink-0" />
+          <Badge variant="outline" className="border-yellow-400 text-yellow-700 dark:text-yellow-300">
+            {nps.activeNoiseFilterCount} noise filter{nps.activeNoiseFilterCount > 1 ? "s" : ""}
+          </Badge>
+          <span>
+            {nps.noiseExcludedCount} comment{nps.noiseExcludedCount !== 1 ? "s" : ""} excluded from NPS score
+          </span>
         </div>
       )}
-      <CategoryBreakdown
-        categories={categoryBreakdown}
-        activeCategory={categoryFilter}
-        onCategoryChange={handleCategoryFilter}
-      />
-      <SearchBar value={search} onChange={handleSearch} />
-      <FilterPanel
-        actionableFilter={actionableFilter}
-        onActionableChange={handleActionableFilter}
-        limit={limit}
-        onLimitChange={handleLimitChange}
-        totalResults={data?.total || 0}
-      />
-      <DataTable
-        comments={data?.comments || []}
-        sortBy={sortBy}
-        sortDir={sortDir}
-        onSort={handleSort}
-        page={page}
-        totalPages={data?.totalPages || 1}
-        onPageChange={setPage}
-      />
+
+      <Card>
+        <CardContent className="space-y-4">
+          <div className="flex items-center gap-2 text-base font-medium">
+            <LayoutDashboard className="size-4" />
+            Category Breakdown
+          </div>
+          <CategoryBreakdown
+            categories={categoryBreakdown}
+            activeCategory={categoryFilter}
+            onCategoryChange={handleCategoryFilter}
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="space-y-4">
+          <SearchBar value={search} onChange={handleSearch} />
+          <FilterPanel
+            actionableFilter={actionableFilter}
+            onActionableChange={handleActionableFilter}
+            limit={limit}
+            onLimitChange={handleLimitChange}
+            totalResults={data?.total || 0}
+          />
+          <DataTable
+            comments={data?.comments || []}
+            sortBy={sortBy}
+            sortDir={sortDir}
+            onSort={handleSort}
+            page={page}
+            totalPages={data?.totalPages || 1}
+            onPageChange={setPage}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }
