@@ -1,8 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { NPS_THRESHOLDS } from "@/lib/nps/calculator";
+import { GitFork } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-interface CommentRow {
+export interface DataTableComment {
   id: string;
   npsScore: number | null;
   commentText: string | null;
@@ -12,14 +15,16 @@ interface CommentRow {
   aiConfidence: number | null;
 }
 
-interface DataTableProps {
-  comments: CommentRow[];
+interface DataTableProps<T extends DataTableComment> {
+  comments: T[];
   sortBy: string;
   sortDir: "ASC" | "DESC";
   onSort: (column: string) => void;
   page: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  githubEnabled?: boolean;
+  onExportSelected?: (comments: T[]) => void;
 }
 
 const COLUMNS = [
@@ -29,7 +34,7 @@ const COLUMNS = [
   { key: "aiConfidence", label: "Confidence" },
 ];
 
-export function DataTable({
+export function DataTable<T extends DataTableComment>({
   comments,
   sortBy,
   sortDir,
@@ -37,13 +42,72 @@ export function DataTable({
   page,
   totalPages,
   onPageChange,
-}: DataTableProps) {
+  githubEnabled,
+  onExportSelected,
+}: DataTableProps<T>) {
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  const toggleSelect = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleAll = () => {
+    if (selected.size === comments.length) {
+      setSelected(new Set());
+    } else {
+      setSelected(new Set(comments.map((c) => c.id)));
+    }
+  };
+
+  const selectedComments = comments.filter((c) => selected.has(c.id));
+
   return (
     <>
+      {githubEnabled && selected.size > 0 && onExportSelected && (
+        <div className="flex items-center gap-3 p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+          <span className="text-sm text-blue-700 dark:text-blue-300">
+            {selected.size} comment{selected.size !== 1 ? "s" : ""} selected
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              onExportSelected(selectedComments);
+              setSelected(new Set());
+            }}
+          >
+            <GitFork className="size-3.5 mr-1.5" />
+            Export to GitHub
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSelected(new Set())}
+          >
+            Clear
+          </Button>
+        </div>
+      )}
+
       <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 dark:bg-gray-900">
             <tr>
+              {githubEnabled && (
+                <th className="px-3 py-2 w-8">
+                  <input
+                    type="checkbox"
+                    checked={comments.length > 0 && selected.size === comments.length}
+                    onChange={toggleAll}
+                    className="rounded border-gray-300 dark:border-gray-600"
+                  />
+                </th>
+              )}
               {COLUMNS.map((col) => (
                 <th
                   key={col.key}
@@ -64,8 +128,20 @@ export function DataTable({
             {comments.map((row) => (
               <tr
                 key={row.id}
-                className="border-t border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900/50"
+                className={`border-t border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900/50 ${
+                  selected.has(row.id) ? "bg-blue-50/50 dark:bg-blue-900/10" : ""
+                }`}
               >
+                {githubEnabled && (
+                  <td className="px-3 py-2">
+                    <input
+                      type="checkbox"
+                      checked={selected.has(row.id)}
+                      onChange={() => toggleSelect(row.id)}
+                      className="rounded border-gray-300 dark:border-gray-600"
+                    />
+                  </td>
+                )}
                 <td className="px-3 py-2">
                   {row.npsScore !== null && (
                     <span

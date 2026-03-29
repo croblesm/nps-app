@@ -34,41 +34,51 @@ AND the configuration SHALL NOT be saved.
 
 ### Requirement: Category-level export to GitHub issues
 
-The system SHALL allow the user to export an entire category as a single GitHub issue from the dashboard. The issue MUST be created using the issue template and include aggregated data from all comments in that category.
+The system SHALL allow the user to export an entire category as a single GitHub issue from the dashboard. The CategoryBreakdown component (components/nps/CategoryBreakdown.tsx) accepts a githubEnabled prop that controls visibility of the "Export to GitHub" button on each category card. The dashboard page (app/project/[id]/dashboard/page.tsx) wires this by checking the GitHub config via fetchGitHubConfig and passing the githubEnabled boolean and handleExportCategory callback.
+
+#### Scenario: Dashboard checks GitHub configuration
+
+WHEN the dashboard page loads
+THEN the system SHALL call fetchGitHubConfig to check if a valid GitHub config exists for the project
+AND set the githubEnabled state accordingly
+AND pass githubEnabled as a prop to CategoryBreakdown and DataTable components.
 
 #### Scenario: User exports a category to GitHub
 
-WHEN the user clicks "Export to GitHub" on a category card
-THEN the system SHALL create a GitHub issue with the category name as the title
+WHEN the user clicks "Export to GitHub" on a category card (visible only when githubEnabled is true)
+THEN the dashboard SHALL call handleExportCategory(categoryName, commentCount)
+AND the system SHALL create a GitHub issue with the category name as the title
 AND the issue body SHALL follow the issue template including NPS impact, representative quotes, and recommendations
 AND the issue SHALL be labeled with "nps-feedback" and the category name.
 
 #### Scenario: User exports a category with no GitHub configuration
 
-WHEN the user clicks "Export to GitHub" on a category card and no GitHub configuration exists for the project
-THEN the system SHALL display a prompt directing the user to configure a GitHub repository in project settings.
+WHEN githubEnabled is false (no valid GitHub config for the project)
+THEN the "Export to GitHub" button SHALL NOT be rendered on category cards.
 
 ---
 
 ### Requirement: Individual comment selection and batch export
 
-The system SHALL allow the user to select individual comments from the data table and export them as GitHub issues. The user MUST be able to select multiple comments and batch export them as a single issue or as individual issues.
+The system SHALL allow the user to select individual comments from the data table (components/nps/DataTable.tsx) and export them as GitHub issues. The DataTable component accepts githubEnabled and onExportSelected props from the dashboard page. When githubEnabled is true, the table renders checkbox columns for row selection using internal selected state (Set of IDs). The dashboard wires handleExportSelected as the callback.
 
-#### Scenario: User selects comments and exports as a single issue
+#### Scenario: Checkbox selection in data table
 
-WHEN the user selects 5 comments from the data table and clicks "Export as Single Issue"
-THEN the system SHALL create one GitHub issue containing all 5 comments in the body
-AND the issue title SHALL reflect the common category or "Multiple NPS Comments" if categories differ.
+WHEN githubEnabled is true
+THEN the DataTable SHALL render a checkbox column with a header "select all" checkbox and per-row checkboxes
+AND selected rows SHALL be visually highlighted with a blue tint background
+AND a selection toolbar SHALL appear above the table showing "{N} comment(s) selected" with "Export to GitHub" and "Clear" buttons.
 
-#### Scenario: User selects comments and exports as individual issues
+#### Scenario: User selects comments and exports to GitHub
 
-WHEN the user selects 3 comments from the data table and clicks "Export as Individual Issues"
-THEN the system SHALL create 3 separate GitHub issues, one per comment
-AND each issue SHALL follow the issue template with the individual comment's data.
+WHEN the user selects comments via checkboxes and clicks "Export to GitHub" in the selection toolbar
+THEN the DataTable SHALL call onExportSelected(selectedComments) with the filtered comment objects
+AND the dashboard handleExportSelected function SHALL create a GitHub issue containing the selected comments
+AND the selection SHALL be cleared after export.
 
 #### Scenario: User selects comments across multiple categories
 
-WHEN the user selects comments from different categories and exports as individual issues
+WHEN the user selects comments from different categories and exports
 THEN each issue SHALL be labeled with its respective category name alongside the "nps-feedback" label.
 
 ---

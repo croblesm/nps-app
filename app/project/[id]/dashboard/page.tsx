@@ -73,6 +73,8 @@ export default function DashboardPage() {
   const [chatEnabled, setChatEnabled] = useState(false);
   const [embedding, setEmbedding] = useState(false);
   const [embeddingProgress, setEmbeddingProgress] = useState("");
+  const [githubEnabled, setGithubEnabled] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   // Filters
   const [page, setPage] = useState(1);
@@ -127,9 +129,18 @@ export default function DashboardPage() {
     }
   }, [projectId]);
 
+  const fetchGitHubConfig = useCallback(async () => {
+    const res = await fetch(`/api/projects/${projectId}/github`);
+    if (res.ok) {
+      const config = await res.json();
+      setGithubEnabled(!!config?.id);
+    }
+  }, [projectId]);
+
   useEffect(() => { fetchComments(); }, [fetchComments]);
   useEffect(() => { fetchStats(); }, [fetchStats]);
   useEffect(() => { fetchProject(); }, [fetchProject]);
+  useEffect(() => { fetchGitHubConfig(); }, [fetchGitHubConfig]);
 
   async function handleClassify() {
     setClassifying(true);
@@ -177,6 +188,97 @@ export default function DashboardPage() {
     } finally {
       setEmbedding(false);
       setEmbeddingProgress("");
+    }
+  }
+
+  async function handleExportCategory(categoryName: string, commentCount: number) {
+    if (exporting) return;
+    setExporting(true);
+    try {
+      // Fetch top comments for this category
+      const commentsRes = await fetch(
+        `/api/projects/${projectId}/comments?category=${encodeURIComponent(categoryName)}&limit=5&sortBy=npsScore&sortDir=ASC`
+      );
+      const commentsData = await commentsRes.json();
+      const topComments = (commentsData.comments || [])
+        .filter((c: CommentRow) => c.commentText)
+        .slice(0, 5)
+        .map((c: CommentRow) => ({ text: c.commentText!, nps: c.npsScore ?? 0 }));
+
+      if (topComments.length === 0) {
+        toast.error("No comments with text to export in this category");
+        return;
+      }
+
+      const npsImpact = nps
+        ? `NPS Score: ${nps.npsScore} (${nps.promoterPct}% promoters, ${nps.detractorPct}% detractors)`
+        : "NPS data unavailable";
+
+      const res = await fetch(`/api/projects/${projectId}/github/issues`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          categoryName,
+          commentCount,
+          npsImpact,
+          topComments,
+          recommendation: `Review the ${commentCount} comments in the "${categoryName}" category and address the underlying feedback.`,
+        }),
+      });
+      const result = await res.json();
+      if (res.ok) {
+        toast.success(`Created GitHub issue #${result.githubIssueNumber}`);
+      } else {
+        toast.error(result.error || "Failed to create issue");
+      }
+    } catch {
+      toast.error("Failed to export to GitHub");
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  async function handleExportSelected(comments: CommentRow[]) {
+    if (exporting) return;
+    setExporting(true);
+    try {
+      const withText = comments.filter((c) => c.commentText);
+      if (withText.length === 0) {
+        toast.error("No comments with text to export");
+        return;
+      }
+
+      const categoryName = withText[0].categoryName || "Selected Comments";
+      const topComments = withText.slice(0, 10).map((c) => ({
+        text: c.commentText!,
+        nps: c.npsScore ?? 0,
+      }));
+
+      const npsImpact = nps
+        ? `NPS Score: ${nps.npsScore} (${nps.promoterPct}% promoters, ${nps.detractorPct}% detractors)`
+        : "NPS data unavailable";
+
+      const res = await fetch(`/api/projects/${projectId}/github/issues`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          categoryName: comments.length === 1 ? categoryName : "Selected Feedback",
+          commentCount: comments.length,
+          npsImpact,
+          topComments,
+          recommendation: `Review these ${comments.length} selected NPS comments and address the feedback.`,
+        }),
+      });
+      const result = await res.json();
+      if (res.ok) {
+        toast.success(`Created GitHub issue #${result.githubIssueNumber}`);
+      } else {
+        toast.error(result.error || "Failed to create issue");
+      }
+    } catch {
+      toast.error("Failed to export to GitHub");
+    } finally {
+      setExporting(false);
     }
   }
 
@@ -296,6 +398,8 @@ export default function DashboardPage() {
             categories={categoryBreakdown}
             activeCategory={categoryFilter}
             onCategoryChange={handleCategoryFilter}
+            githubEnabled={githubEnabled}
+            onExportToGitHub={handleExportCategory}
           />
         </CardContent>
       </Card>
@@ -318,6 +422,8 @@ export default function DashboardPage() {
             page={page}
             totalPages={data?.totalPages || 1}
             onPageChange={setPage}
+            githubEnabled={githubEnabled}
+            onExportSelected={handleExportSelected}
           />
         </CardContent>
       </Card>
