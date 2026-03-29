@@ -1,3 +1,28 @@
+## 0. UI Redesign — shadcn/ui Migration
+
+- [ ] 0.1 Initialize shadcn/ui: npx shadcn@latest init (new-york style, slate color, CSS variables)
+- [ ] 0.2 Install core shadcn/ui components: button, card, input, label, select, textarea, checkbox, badge, dialog, alert-dialog, tabs, progress, toast, dropdown-menu, separator, tooltip, avatar, sheet
+- [ ] 0.3 Install lucide-react for icons
+- [ ] 0.4 Add theme provider with next-themes for light/dark toggle, persist preference
+- [ ] 0.5 Add theme toggle button to Header component (sun/moon icon)
+- [ ] 0.6 Redesign Header: use shadcn Button, Avatar, DropdownMenu for settings/user menu
+- [ ] 0.7 Redesign project sidebar: add Lucide icons to each step, use shadcn navigation patterns
+- [ ] 0.8 Redesign home page: project list as shadcn Cards with proper typography, hover effects, delete via AlertDialog
+- [ ] 0.9 Redesign new project form: shadcn Input, Textarea, Label, Button components
+- [ ] 0.10 Redesign settings page: shadcn Select, Input, Card, Badge for configured providers
+- [ ] 0.11 Redesign upload page: polished drag-and-drop zone with shadcn Card, Progress bar for upload
+- [ ] 0.12 Redesign structure review: shadcn Cards with Checkbox, Badge for column types
+- [ ] 0.13 Redesign categories page: shadcn Cards with Badge for sample counts, Dialog for AI scan results
+- [ ] 0.14 Redesign dashboard: shadcn Cards for score cards, Badge for sentiment, Tabs for sub-views
+- [ ] 0.15 Redesign noise filters: pill/tag input for keywords (Badge with X button), AlertDialog for delete
+- [ ] 0.16 Redesign summary page: proper markdown container, shadcn Button for actions
+- [ ] 0.17 Replace all browser confirm() with shadcn AlertDialog
+- [ ] 0.18 Replace all inline success/error messages with shadcn Toast (Sonner)
+- [ ] 0.19 Add loading skeletons using shadcn Skeleton component for page load states
+- [ ] 0.20 Verify light mode and dark mode look polished on all pages
+- [ ] 0.21 Write tests for theme toggle, verify component rendering
+- [ ] 0.22 Update specs, README, CLAUDE.md with shadcn/ui documentation
+
 ## 1. Authentication Foundation
 
 - [ ] 1.1 Install next-auth@5, @auth/typeorm-adapter, bcryptjs

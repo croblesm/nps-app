@@ -6,6 +6,7 @@ No open-source tool combines AI-powered NPS analysis with RAG chat, feedback-to-
 
 ## What Changes
 
+- **New**: UI redesign — migrate to shadcn/ui component library with Lucide icons, proper light/dark mode theme, polished cards/badges/dialogs/tabs matching modern SaaS design standards
 - **New**: Chat-based analysis (RAG) — embed comments using SQL Server 2025 VECTOR type, enable natural language Q&A over NPS data via vector similarity search
 - **New**: GitHub issue creation — configure a repo, export category themes or individual comments as GitHub issues with templates, labels, and NPS impact scores
 - **New**: Contextual AI assistant — collapsible chat panel on every page that knows the user's current step and can answer questions or make recommendations
@@ -32,6 +33,7 @@ No open-source tool combines AI-powered NPS analysis with RAG chat, feedback-to-
 ## Capabilities
 
 ### New Capabilities
+- `ui-redesign`: shadcn/ui component library, Lucide icons, light/dark theme with proper color palette, polished cards/badges/dialogs/tabs/progress bars
 - `chat-analysis`: RAG-based Q&A over NPS comments using SQL Server 2025 VECTOR type and vector similarity search
 - `github-integration`: Configure GitHub repos, create issues from categories/comments, track created issues
 - `ai-assistant`: Contextual AI chat panel available on all project pages with step-aware recommendations

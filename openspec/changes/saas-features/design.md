@@ -27,6 +27,28 @@ No open-source tool combines AI-powered NPS analysis with RAG chat, feedback-to-
 
 ## Decisions
 
+### 0. UI Redesign — shadcn/ui
+
+The current UI uses raw Tailwind utilities for all components. While functional, it lacks the polish of modern SaaS apps (no proper modals, no toast notifications, inconsistent card styling, no icons, browser `confirm()` for deletions).
+
+**Component library:** shadcn/ui — the de facto standard for Next.js + Tailwind projects. It provides copy-paste, customizable components (not a black-box library). Components are installed into `components/ui/` and fully owned by the project.
+
+**Icons:** Lucide React — the icon library that ships with shadcn/ui. Consistent, clean, extensive.
+
+**Theme:** next-themes for light/dark mode toggle with persistent preference. shadcn/ui components automatically adapt to both themes via CSS variables.
+
+**Style variant:** "new-york" (shadcn's more refined variant) with slate color scale.
+
+**Key components to adopt:** Button, Card, Input, Label, Select, Textarea, Checkbox, Badge, Dialog, AlertDialog, Tabs, Progress, Toast (Sonner), DropdownMenu, Separator, Tooltip, Avatar, Sheet, Skeleton.
+
+**Migration approach:** Incremental — replace raw HTML elements page by page. shadcn/ui components coexist with existing Tailwind utilities during migration.
+
+**Alternatives considered:**
+- **Radix UI directly:** shadcn/ui is built on Radix — using shadcn gives us pre-styled Radix components
+- **Material UI:** Heavy bundle, different design language, not idiomatic for Tailwind projects
+- **Headless UI:** Fewer components, less maintained than Radix/shadcn
+- **Chakra UI:** Brings its own styling system that conflicts with Tailwind
+
 ### 1. RAG Chat Architecture
 
 Comments are embedded at the user's request ("Enable Chat Analysis") rather than automatically after classification. This avoids unnecessary embedding costs for users who only need the dashboard.
