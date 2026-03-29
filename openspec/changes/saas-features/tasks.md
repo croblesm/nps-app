@@ -98,9 +98,9 @@
 ## 4. Contextual AI Assistant
 
 ### 4a. Core Components
-- [ ] 4.1 Create AssistantPanel component (components/ui/AssistantPanel.tsx) — floating button + expandable right-side panel with text input, scrollable messages, collapse toggle. Verify: renders in isolation, expand/collapse works
-- [ ] 4.2 Create assistant API route (app/api/ai/assistant/route.ts) — accepts projectId, page, message, pageContext object. Uses getActiveModel() + generateText(). Returns response text. Verify: returns 400 if no LLM configured with link to settings
-- [ ] 4.3 Create assistant prompt builder (lib/ai/assistant-prompts.ts) — buildAssistantSystemPrompt(page, context) returns a system prompt with page name, project metadata, and page-specific data injected. Verify: unit test for each page type
+- [x] 4.1 Create AssistantPanel component (components/ui/AssistantPanel.tsx) — floating button + expandable right-side panel with text input, scrollable messages, collapse toggle. Verify: renders in isolation, expand/collapse works
+- [x] 4.2 Create assistant API route (app/api/ai/assistant/route.ts) — accepts projectId, page, message, pageContext object. Uses getActiveModel() + generateText(). Returns response text. Verify: returns 400 if no LLM configured with link to settings
+- [x] 4.3 Create assistant prompt builder (lib/ai/assistant-prompts.ts) — buildAssistantSystemPrompt(page, context) returns a system prompt with page name, project metadata, and page-specific data injected. Verify: unit test for each page type
 
 ### 4b. Layout Integration
 - [ ] 4.4 Add AssistantPanel to project layout (app/project/[id]/layout.tsx) — render below children, pass current page name via usePathname(). Verify: panel visible on all 6 project pages
