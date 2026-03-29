@@ -28,6 +28,9 @@ export class GitHubIssue {
   @Column({ type: "nvarchar", length: "MAX", nullable: true })
   labels!: string | null;
 
+  @Column({ type: "nvarchar", length: 20, default: "'open'" })
+  status!: string;
+
   @CreateDateColumn({ type: "datetime2" })
   createdAt!: Date;
 }

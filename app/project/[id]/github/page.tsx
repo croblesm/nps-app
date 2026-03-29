@@ -9,6 +9,7 @@ import {
   AlertCircle,
   Loader2,
   Shield,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,6 +40,7 @@ interface GitHubIssueData {
   githubUrl: string;
   title: string;
   labels: string | null;
+  status: string;
   createdAt: string;
 }
 
@@ -52,6 +54,7 @@ export default function GitHubPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   const [repoOwner, setRepoOwner] = useState("");
   const [repoName, setRepoName] = useState("");
@@ -110,6 +113,22 @@ export default function GitHubPage() {
       setError("Failed to save configuration");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleRefreshStatuses() {
+    setRefreshing(true);
+    try {
+      const res = await fetch(`/api/projects/${projectId}/github/issues`, {
+        method: "PATCH",
+      });
+      if (res.ok) {
+        await loadData();
+      }
+    } catch {
+      // Silently fail
+    } finally {
+      setRefreshing(false);
     }
   }
 
@@ -226,15 +245,35 @@ export default function GitHubPage() {
       </Card>
 
       {/* Created Issues */}
+      {issues.length === 0 && config && (
+        <Card>
+          <CardContent className="py-8 text-center">
+            <p className="text-sm text-muted-foreground">
+              No issues created yet. Go to the <strong>Dashboard</strong> tab to export categories or selected comments as GitHub issues.
+            </p>
+          </CardContent>
+        </Card>
+      )}
       {issues.length > 0 && (
         <>
           <Separator />
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                Created Issues
-                <Badge variant="secondary">{issues.length}</Badge>
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  Created Issues
+                  <Badge variant="secondary">{issues.length}</Badge>
+                </CardTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRefreshStatuses}
+                  disabled={refreshing}
+                >
+                  <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${refreshing ? "animate-spin" : ""}`} />
+                  {refreshing ? "Refreshing..." : "Refresh Status"}
+                </Button>
+              </div>
               <CardDescription>
                 Issues created from NPS feedback in this project.
               </CardDescription>
@@ -254,6 +293,12 @@ export default function GitHubPage() {
                         <span className="text-sm font-mono text-muted-foreground">
                           #{issue.githubIssueNumber}
                         </span>
+                        <Badge
+                          variant={issue.status === "open" ? "default" : "secondary"}
+                          className={`text-xs ${issue.status === "open" ? "bg-green-600 hover:bg-green-700" : "bg-purple-600 hover:bg-purple-700 text-white"}`}
+                        >
+                          {issue.status}
+                        </Badge>
                         <span className="text-sm font-medium truncate">
                           {issue.title}
                         </span>

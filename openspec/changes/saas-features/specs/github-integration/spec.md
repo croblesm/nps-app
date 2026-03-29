@@ -77,16 +77,13 @@ AND the dashboard handleExportSelected function SHALL create ONE GitHub issue co
 
 #### Scenario: User selects comments across multiple categories
 
-WHEN the user selects comments from different categories and exports
-THEN the system SHALL create a single issue titled "[NPS Feedback] Selected Feedback"
-AND the issue SHALL include up to 10 representative comments in the body
-AND the labels SHALL be `"nps-feedback"` and `"selected-feedback"`.
-
-#### Scenario: Per-category batch export (NOT YET IMPLEMENTED)
+#### Scenario: User selects comments across multiple categories
 
 WHEN the user selects comments from different categories and exports
-THEN the system SHALL create one issue PER category, each labeled with its respective category name alongside "nps-feedback"
-AND each issue SHALL contain only the comments from that category.
+THEN the system SHALL group the selected comments by category
+AND create one issue PER category, each titled with its category name
+AND each issue SHALL contain only the comments from that category
+AND a toast SHALL confirm how many issues were created (e.g., "Created 3 GitHub issues (one per category)").
 
 #### Scenario: User selects a single comment and exports
 
@@ -131,59 +128,49 @@ WHEN the system attempts to apply a label that does not exist in the target repo
 THEN the system SHALL attempt to create the label in the repository before applying it to the issue
 AND if label creation fails (e.g., insufficient permissions), the system SHALL continue with issue creation anyway.
 
-#### Scenario: LLM-based bug/feature-request labels (NOT YET IMPLEMENTED)
+#### Scenario: LLM-based bug/feature-request labels
 
 WHEN a category or comment is exported as a GitHub issue
-THEN the system SHALL use the LLM to analyze the comment sentiment and content
-AND add a `"bug"` or `"feature-request"` label based on the analysis
-AND the label SHALL be created in the repository if it does not exist.
+THEN the system SHALL use the active LLM (via `generateObject`) to classify the comments as "bug", "feature-request", or "feedback"
+AND if the type is "bug" or "feature-request", add it as an additional label (red for bug, teal for feature-request)
+AND the label SHALL be created in the repository if it does not exist
+AND if the LLM is unavailable, the system SHALL fall back to "feedback" (no extra label).
 
 ---
 
 ### Requirement: GitHub Issues tracker on the GitHub page
 
-The GitHub page (`app/project/[id]/github/page.tsx`) SHALL display all issues created from the project below the configuration card. The GitHubIssue entity (`lib/db/entities/GitHubIssue.ts`) stores: `id`, `projectId`, `categoryId` (nullable), `githubIssueNumber`, `githubUrl`, `title`, `labels` (JSON string, nullable), and `createdAt`.
+The GitHub page (`app/project/[id]/github/page.tsx`) SHALL display all issues created from the project below the configuration card. The GitHubIssue entity stores: `id`, `projectId`, `categoryId` (nullable), `githubIssueNumber`, `githubUrl`, `title`, `labels` (JSON string, nullable), `status` (nvarchar 20, defaults to "open"), and `createdAt`.
 
 #### Scenario: User views the GitHub Issues tracker
 
 WHEN the user navigates to the GitHub page for a project with created issues
-THEN the system SHALL display a list of issues showing issue number, title, labels (as Badge components), and a link icon to open the issue on GitHub.
-
-**Current implementation:** No `status` field exists and no GitHub API refresh of issue status is performed.
+THEN the system SHALL display a list of issues showing issue number, status badge (green for open, purple for closed), title, labels (as Badge components), and a link icon to open the issue on GitHub.
 
 #### Scenario: No issues have been created yet
 
-WHEN the user navigates to the GitHub page and no issues have been created
-THEN the issues section SHALL NOT be rendered.
+#### Scenario: No issues created yet — empty state with guidance
 
-**Current implementation:** No empty state message is shown.
+WHEN the user navigates to the GitHub page, has a valid config, and no issues have been created
+THEN the system SHALL display an empty state message: "No issues created yet. Go to the Dashboard tab to export categories or selected comments as GitHub issues."
 
-#### Scenario: Empty state with guidance (NOT YET IMPLEMENTED)
+#### Scenario: User refreshes issue statuses
 
-WHEN the user navigates to the GitHub page and no issues have been created
-THEN the system SHALL display an empty state message explaining how to export categories or comments as GitHub issues from the dashboard.
-
-#### Scenario: Issue status tracking (NOT YET IMPLEMENTED)
-
-WHEN the user opens the GitHub Issues tracker tab
-THEN the system SHALL fetch the current status (open/closed) of each tracked issue from the GitHub API
-AND update the local status if it has changed
-AND display the status alongside the issue title with a colored indicator (green for open, purple for closed).
-
-This requires adding a `status` field to the GitHubIssue entity.
+WHEN the user clicks the "Refresh Status" button on the issues tracker
+THEN the system SHALL call PATCH `/api/projects/[id]/github/issues`
+AND the API SHALL fetch each issue's current status from the GitHub API via Octokit
+AND update the local `status` field if it has changed (e.g., from "open" to "closed")
+AND the issue list SHALL reload to reflect updated statuses.
 
 ---
 
 ### Requirement: Link back from issue to NPS repository
 
-Every GitHub issue created by the system SHALL include a footer in the issue body with an italicized attribution line: `*Generated by [NPS Insight Engine](https://github.com/croblesm/nps-app)*`. This links to the NPS Insight Engine GitHub repository.
+Every GitHub issue created by the system SHALL include a footer with an attribution line linking to the NPS Insight Engine repository, and when a projectId is available, a "View in Dashboard" link with the category as a query parameter.
 
 #### Scenario: User views a created GitHub issue
 
 WHEN a user views a GitHub issue that was created from the NPS Insight Engine
-THEN the issue body SHALL contain a footer with a link to the NPS Insight Engine GitHub repository (`https://github.com/croblesm/nps-app`).
-
-#### Scenario: Deep link to project dashboard (NOT YET IMPLEMENTED)
-
-WHEN a user views a created GitHub issue
-THEN the footer link SHALL include query parameters to navigate back to the specific project dashboard and highlight the relevant category or comments.
+THEN the issue body SHALL contain a footer with:
+- A link to the NPS Insight Engine GitHub repository
+- A "View in Dashboard" link pointing to the project dashboard with `?category=<categoryName>` query parameter to highlight the relevant category.

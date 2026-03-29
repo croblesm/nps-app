@@ -57,11 +57,11 @@
 - [x] 2.11 Add "GitHub" step to project sidebar navigation
 - [x] 2.12 Write tests for issue template builder (markdown output, NPS impact section), GitHub config schema validation (owner, repo, PAT fields)
 - [x] 2.13 Update specs, README with GitHub integration documentation
-- [ ] 2.14 Add issue status tracking (open/closed) — status field in GitHubIssue entity, refresh from GitHub API
-- [ ] 2.15 Add empty state message on GitHub page when no issues created
-- [ ] 2.16 Add LLM-based bug/feature-request labels on issue creation
-- [ ] 2.17 Per-category batch export — create one issue per category when selecting across categories
-- [ ] 2.18 Deep link in issue footer — link back to project dashboard with category/comment query params
+- [x] 2.14 Add issue status tracking (open/closed) — status field in GitHubIssue entity, refresh from GitHub API
+- [x] 2.15 Add empty state message on GitHub page when no issues created
+- [x] 2.16 Add LLM-based bug/feature-request labels on issue creation
+- [x] 2.17 Per-category batch export — create one issue per category when selecting across categories
+- [x] 2.18 Deep link in issue footer — link back to project dashboard with category/comment query params
 
 ## 3. RAG Chat Analysis
 

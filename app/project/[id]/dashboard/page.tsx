@@ -302,32 +302,43 @@ export default function DashboardPage() {
         return;
       }
 
-      const categoryName = withText[0].categoryName || "Selected Comments";
-      const topComments = withText.slice(0, 10).map((c) => ({
-        text: c.commentText!,
-        nps: c.npsScore ?? 0,
-      }));
-
       const npsImpact = nps
         ? `NPS Score: ${nps.npsScore} (${nps.promoterPct}% promoters, ${nps.detractorPct}% detractors)`
         : "NPS data unavailable";
 
-      const res = await fetch(`/api/projects/${projectId}/github/issues`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          categoryName: comments.length === 1 ? categoryName : "Selected Feedback",
-          commentCount: comments.length,
-          npsImpact,
-          topComments,
-          recommendation: `Review these ${comments.length} selected NPS comments and address the feedback.`,
-        }),
-      });
-      const result = await res.json();
-      if (res.ok) {
-        toast.success(`Created GitHub issue #${result.githubIssueNumber}`);
+      // Group by category for per-category issues
+      const byCategory = new Map<string, CommentRow[]>();
+      for (const c of withText) {
+        const cat = c.categoryName || "Uncategorized";
+        if (!byCategory.has(cat)) byCategory.set(cat, []);
+        byCategory.get(cat)!.push(c);
+      }
+
+      let created = 0;
+      for (const [catName, catComments] of byCategory) {
+        const topComments = catComments.slice(0, 10).map((c) => ({
+          text: c.commentText!,
+          nps: c.npsScore ?? 0,
+        }));
+
+        const res = await fetch(`/api/projects/${projectId}/github/issues`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            categoryName: catName,
+            commentCount: catComments.length,
+            npsImpact,
+            topComments,
+            recommendation: `Review the ${catComments.length} selected comments in "${catName}" and address the feedback.`,
+          }),
+        });
+        if (res.ok) created++;
+      }
+
+      if (created > 0) {
+        toast.success(`Created ${created} GitHub issue${created > 1 ? "s" : ""} (one per category)`);
       } else {
-        toast.error(result.error || "Failed to create issue");
+        toast.error("Failed to create issues");
       }
     } catch {
       toast.error("Failed to export to GitHub");
