@@ -147,3 +147,28 @@ AND the chat input SHALL be disabled with a message "Embeddings are being genera
 WHEN the user opens the dashboard and only some comments have embeddings
 THEN the system SHALL display a message indicating incomplete embeddings
 AND offer a button to resume embedding generation for the remaining comments.
+
+---
+
+### Requirement: Anthropic provider detection for embeddings
+
+The system SHALL detect when the configured LLM provider is Anthropic and return a clear error message, since Anthropic does not support embedding generation. This detection is implemented in both the embed and chat API routes.
+
+#### Scenario: User triggers embedding with Anthropic provider configured
+
+WHEN the user clicks "Enable Chat Analysis" and the configured LLM provider is "anthropic"
+THEN the embed API route (app/api/ai/embed/route.ts) SHALL check config.provider === "anthropic"
+AND return a 400 error with the message: "Anthropic does not support embeddings. To use Chat Analysis, configure an additional provider with embedding support (OpenAI, Azure OpenAI, or Ollama) in Settings."
+AND the embedding pipeline SHALL NOT proceed.
+
+#### Scenario: User sends a chat message with Anthropic provider and no prior embedding provider
+
+WHEN the user sends a chat query and the LLM provider is "anthropic" and project.embeddingProvider is not set
+THEN the chat API route (app/api/ai/chat/route.ts) SHALL check config.provider === "anthropic" && !project.embeddingProvider
+AND return a 400 error with the message: "Anthropic does not support embeddings. Configure OpenAI, Azure OpenAI, or Ollama in Settings to use Chat Analysis."
+
+#### Scenario: Anthropic provider with existing embedding provider
+
+WHEN the user sends a chat query and the LLM provider is "anthropic" but project.embeddingProvider is already set (from a previous successful embedding run with a different provider)
+THEN the chat API route SHALL proceed using the stored embeddingProvider and embeddingModel for query embedding
+AND SHALL NOT block the request.

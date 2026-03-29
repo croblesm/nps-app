@@ -47,6 +47,17 @@ export async function POST(request: Request) {
     );
   }
 
+  // Anthropic doesn't support embeddings — need an embedding-capable provider for the query
+  if (config.provider === "anthropic" && !project.embeddingProvider) {
+    return NextResponse.json(
+      {
+        error:
+          "Anthropic does not support embeddings. Configure OpenAI, Azure OpenAI, or Ollama in Settings to use Chat Analysis.",
+      },
+      { status: 400 }
+    );
+  }
+
   const apiKey = config.apiKeyEncrypted
     ? decrypt(config.apiKeyEncrypted)
     : undefined;
