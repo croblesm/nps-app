@@ -24,8 +24,8 @@ export function CategoryBreakdown({
           key={cat.name}
           className={`p-3 rounded-lg text-left text-sm transition-colors ${
             activeCategory === cat.name
-              ? "bg-blue-100 dark:bg-blue-900/30 border-blue-500 border"
-              : "bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-blue-400"
+              ? "bg-accent ring-1 ring-primary"
+              : "bg-card ring-1 ring-foreground/10 hover:ring-foreground/20"
           }`}
         >
           <button
@@ -34,10 +34,10 @@ export function CategoryBreakdown({
             }
             className="w-full text-left"
           >
-            <div className="font-medium text-gray-900 dark:text-gray-100 truncate">
+            <div className="font-medium text-foreground truncate">
               {cat.name}
             </div>
-            <div className="text-gray-500 dark:text-gray-400 text-xs mt-1">
+            <div className="text-muted-foreground text-xs mt-1">
               {cat.count} ({cat.percentage}%)
             </div>
           </button>

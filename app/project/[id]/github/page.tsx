@@ -165,9 +165,9 @@ export default function GitHubPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {config && (
-            <div className="flex items-center gap-2 p-3 rounded-md bg-green-500/10 border border-green-500/20">
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
-              <span className="text-sm text-green-600 dark:text-green-400">
+            <div className="flex items-center gap-2 p-3 rounded-md bg-primary/10 border border-primary/20">
+              <CheckCircle2 className="h-4 w-4 text-primary" />
+              <span className="text-sm text-primary">
                 Connected to{" "}
                 <span className="font-medium">
                   {config.repoOwner}/{config.repoName}
@@ -184,9 +184,9 @@ export default function GitHubPage() {
           )}
 
           {success && (
-            <div className="flex items-center gap-2 p-3 rounded-md bg-green-500/10 border border-green-500/20">
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
-              <span className="text-sm text-green-600 dark:text-green-400">
+            <div className="flex items-center gap-2 p-3 rounded-md bg-primary/10 border border-primary/20">
+              <CheckCircle2 className="h-4 w-4 text-primary" />
+              <span className="text-sm text-primary">
                 {success}
               </span>
             </div>
@@ -295,7 +295,7 @@ export default function GitHubPage() {
                         </span>
                         <Badge
                           variant={issue.status === "open" ? "default" : "secondary"}
-                          className={`text-xs ${issue.status === "open" ? "bg-green-600 hover:bg-green-700" : "bg-purple-600 hover:bg-purple-700 text-white"}`}
+                          className={`text-xs ${issue.status === "open" ? "bg-[hsl(var(--nps-promoter))]" : "bg-secondary text-secondary-foreground"}`}
                         >
                           {issue.status}
                         </Badge>

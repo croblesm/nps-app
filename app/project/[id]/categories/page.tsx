@@ -282,7 +282,7 @@ export default function CategoriesPage() {
   return (
     <div className="max-w-3xl">
       <h1 className="text-2xl font-bold mb-2">Categories</h1>
-      <p className="text-gray-500 dark:text-gray-400 mb-6">
+      <p className="text-muted-foreground mb-6">
         AI will analyze your comments and propose thematic categories
       </p>
 
@@ -290,7 +290,7 @@ export default function CategoriesPage() {
       {!discovered ? (
         <>
           {discovering && (
-            <div className="mb-4 p-3 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+            <div className="mb-4 p-3 rounded bg-muted border border-border">
               <Spinner
                 size="sm"
                 label="Discovering thematic categories from your comments with AI..."
@@ -300,7 +300,7 @@ export default function CategoriesPage() {
           <button
             onClick={handleDiscover}
             disabled={discovering}
-            className="px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 font-medium"
+            className="px-6 py-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 font-medium"
           >
             {discovering ? (
               <Spinner size="sm" label="Discovering..." />
@@ -311,7 +311,7 @@ export default function CategoriesPage() {
         </>
       ) : (
         <div className="flex items-center gap-4 mb-4">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             Analyzed {stats.sampleSize} of {stats.totalComments} comments.{" "}
             {activeCount} categories active.
           </p>
@@ -327,7 +327,7 @@ export default function CategoriesPage() {
                 handleDiscover();
               }
             }}
-            className="text-xs text-blue-500 hover:text-blue-400"
+            className="text-xs text-primary hover:text-primary/80"
           >
             Re-discover
           </button>
@@ -335,7 +335,7 @@ export default function CategoriesPage() {
       )}
 
       {error && (
-        <div className="mt-4 p-3 rounded-lg text-sm bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-300">
+        <div className="mt-4 p-3 rounded-lg text-sm bg-destructive/10 text-destructive border border-destructive/20">
           {error}
         </div>
       )}
@@ -348,10 +348,10 @@ export default function CategoriesPage() {
               key={idx}
               className={`p-4 rounded-lg border transition-opacity ${
                 cat.removed
-                  ? "opacity-40 border-gray-300 dark:border-gray-700"
+                  ? "opacity-40 border-border"
                   : cat.isFallback
-                  ? "border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900"
-                  : "border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900"
+                  ? "border-border bg-muted"
+                  : "border-border bg-card"
               }`}
             >
               <div className="flex items-start justify-between">
@@ -365,13 +365,13 @@ export default function CategoriesPage() {
                       onKeyDown={(e) =>
                         e.key === "Enter" && setEditingIdx(null)
                       }
-                      className="text-lg font-semibold bg-transparent border-b border-blue-500 outline-none text-gray-900 dark:text-gray-100 w-full"
+                      className="text-lg font-semibold bg-transparent border-b border-primary outline-none text-foreground w-full"
                     />
                   ) : (
                     <h3
-                      className={`text-lg font-semibold text-gray-900 dark:text-gray-100 ${
+                      className={`text-lg font-semibold text-foreground ${
                         !cat.isFallback
-                          ? "cursor-pointer hover:text-blue-500 group"
+                          ? "cursor-pointer hover:text-primary group"
                           : ""
                       }`}
                       onClick={() =>
@@ -380,17 +380,17 @@ export default function CategoriesPage() {
                     >
                       {cat.name}
                       {cat.isFallback ? (
-                        <span className="ml-2 text-xs font-normal text-gray-400">
+                        <span className="ml-2 text-xs font-normal text-muted-foreground">
                           (required fallback)
                         </span>
                       ) : (
-                        <span className="ml-2 text-xs font-normal text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="ml-2 text-xs font-normal text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
                           click to rename
                         </span>
                       )}
                     </h3>
                   )}
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  <p className="text-sm text-muted-foreground mt-1">
                     {cat.description}
                   </p>
                 </div>
@@ -402,7 +402,7 @@ export default function CategoriesPage() {
                         ? handleRestore(idx)
                         : handleRemove(idx)
                     }
-                    className="ml-3 text-sm text-gray-400 hover:text-red-500"
+                    className="ml-3 text-sm text-muted-foreground hover:text-destructive"
                   >
                     {cat.removed ? "Restore" : "Remove"}
                   </button>
@@ -411,15 +411,15 @@ export default function CategoriesPage() {
 
               {cat.sampleComments.length > 0 && !cat.removed && (
                 <div className="mt-3 space-y-1">
-                  <p className="text-xs text-gray-400 uppercase tracking-wide">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">
                     Sample comments
                   </p>
                   {cat.sampleComments.slice(0, 3).map((sc, i) => (
                     <div
                       key={i}
-                      className="text-sm text-gray-600 dark:text-gray-400 pl-3 border-l-2 border-gray-200 dark:border-gray-700"
+                      className="text-sm text-muted-foreground pl-3 border-l-2 border-border"
                     >
-                      <span className="text-xs text-gray-400 mr-1">
+                      <span className="text-xs text-muted-foreground mr-1">
                         NPS {sc.nps ?? "?"}
                       </span>
                       {sc.text.length > 150
@@ -440,7 +440,7 @@ export default function CategoriesPage() {
             {!suggesting && (
               <button
                 onClick={handleSuggestMore}
-                className="text-sm text-blue-500 hover:text-blue-400"
+                className="text-sm text-primary hover:text-primary/80"
               >
                 Suggest More Categories
               </button>
@@ -448,8 +448,8 @@ export default function CategoriesPage() {
           </div>
 
           {/* Add Custom Category — Enhanced */}
-          <div className="p-4 rounded-lg border border-dashed border-gray-300 dark:border-gray-700 space-y-3">
-            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+          <div className="p-4 rounded-lg border border-dashed border-border space-y-3">
+            <p className="text-sm font-medium text-muted-foreground">
               Add Custom Category
             </p>
             <input
@@ -459,19 +459,19 @@ export default function CategoriesPage() {
                 setScanResult(null);
               }}
               placeholder="Category name (e.g., Competitor Comparisons)"
-              className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm"
+              className="w-full p-2 rounded-lg border border-border bg-card text-foreground text-sm"
             />
             <input
               value={newCatDesc}
               onChange={(e) => setNewCatDesc(e.target.value)}
               placeholder="Description (e.g., Comments comparing to SSMS or Azure Data Studio)"
-              className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm"
+              className="w-full p-2 rounded-lg border border-border bg-card text-foreground text-sm"
             />
             <div className="flex gap-2">
               <button
                 onClick={handleScanTheme}
                 disabled={scanning || !newCatName.trim()}
-                className="px-3 py-1.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 text-sm"
+                className="px-3 py-1.5 rounded bg-muted text-foreground hover:bg-muted/80 disabled:opacity-50 text-sm"
               >
                 {scanning ? (
                   <Spinner size="sm" label="Scanning..." />
@@ -482,7 +482,7 @@ export default function CategoriesPage() {
               <button
                 onClick={handleAddCustom}
                 disabled={!newCatName.trim()}
-                className="px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 text-sm"
+                className="px-3 py-1.5 rounded bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 text-sm"
               >
                 Add Category
               </button>
@@ -493,8 +493,8 @@ export default function CategoriesPage() {
               <div
                 className={`p-3 rounded text-sm ${
                   scanResult.isValid
-                    ? "bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300"
-                    : "bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300"
+                    ? "bg-muted border border-border text-foreground"
+                    : "bg-muted text-muted-foreground"
                 }`}
               >
                 <p className="font-medium">
@@ -524,14 +524,14 @@ export default function CategoriesPage() {
 
           {/* Confirm */}
           {saving && (
-            <div className="p-3 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+            <div className="p-3 rounded bg-muted border border-border">
               <Spinner size="sm" label="Saving categories..." />
             </div>
           )}
           <button
             onClick={handleConfirm}
             disabled={saving || activeCount < 2}
-            className="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 font-medium"
+            className="px-6 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 font-medium"
           >
             {saving ? (
               <Spinner size="sm" label="Saving..." />

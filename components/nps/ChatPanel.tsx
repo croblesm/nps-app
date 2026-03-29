@@ -257,7 +257,7 @@ export function ChatPanel({ projectId, onClose, filters, onCitationClick }: Chat
               >
                 {msg.role === "assistant" && (
                   <div className="shrink-0 mt-1">
-                    <Bot className="size-4 text-blue-500" />
+                    <Bot className="size-4 text-primary" />
                   </div>
                 )}
                 <div
@@ -281,7 +281,7 @@ export function ChatPanel({ projectId, onClose, filters, onCitationClick }: Chat
           )}
           {sending && (
             <div className="flex gap-2">
-              <Bot className="size-4 text-blue-500 mt-1 shrink-0" />
+              <Bot className="size-4 text-primary mt-1 shrink-0" />
               <div className="rounded-lg px-3 py-2 text-sm bg-card border">
                 <Spinner size="sm" label="Thinking..." />
               </div>

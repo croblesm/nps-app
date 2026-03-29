@@ -69,8 +69,8 @@ export function DataTable<T extends DataTableComment>({
   return (
     <>
       {githubEnabled && selected.size > 0 && onExportSelected && (
-        <div className="flex items-center gap-3 p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-          <span className="text-sm text-blue-700 dark:text-blue-300">
+        <div className="flex items-center gap-3 p-2 rounded-lg bg-muted border border-border">
+          <span className="text-sm text-foreground">
             {selected.size} comment{selected.size !== 1 ? "s" : ""} selected
           </span>
           <Button
@@ -94,9 +94,9 @@ export function DataTable<T extends DataTableComment>({
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800">
+      <div className="overflow-x-auto rounded-lg border border-border">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 dark:bg-gray-900">
+          <thead className="bg-muted/50">
             <tr>
               {githubEnabled && (
                 <th className="px-3 py-2 w-8">
@@ -104,7 +104,7 @@ export function DataTable<T extends DataTableComment>({
                     type="checkbox"
                     checked={comments.length > 0 && selected.size === comments.length}
                     onChange={toggleAll}
-                    className="rounded border-gray-300 dark:border-gray-600"
+                    className="rounded border-border"
                   />
                 </th>
               )}
@@ -112,7 +112,7 @@ export function DataTable<T extends DataTableComment>({
                 <th
                   key={col.key}
                   onClick={() => onSort(col.key)}
-                  className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300 cursor-pointer hover:text-blue-500 select-none"
+                  className="px-3 py-2 text-left font-medium text-muted-foreground cursor-pointer hover:text-foreground select-none"
                 >
                   {col.label}
                   {sortBy === col.key && (
@@ -129,8 +129,8 @@ export function DataTable<T extends DataTableComment>({
               <tr
                 id={`comment-${row.id}`}
                 key={row.id}
-                className={`border-t border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900/50 ${
-                  selected.has(row.id) ? "bg-blue-50/50 dark:bg-blue-900/10" : ""
+                className={`border-t border-border hover:bg-muted/50 ${
+                  selected.has(row.id) ? "bg-accent/50" : ""
                 }`}
               >
                 {githubEnabled && (
@@ -139,7 +139,7 @@ export function DataTable<T extends DataTableComment>({
                       type="checkbox"
                       checked={selected.has(row.id)}
                       onChange={() => toggleSelect(row.id)}
-                      className="rounded border-gray-300 dark:border-gray-600"
+                      className="rounded border-border"
                     />
                   </td>
                 )}
@@ -148,37 +148,37 @@ export function DataTable<T extends DataTableComment>({
                     <span
                       className={`inline-flex items-center justify-center w-7 h-7 rounded text-xs font-bold text-white ${
                         row.npsScore >= NPS_THRESHOLDS.PROMOTER_MIN
-                          ? "bg-green-600"
+                          ? "bg-[var(--nps-promoter)]"
                           : row.npsScore >= NPS_THRESHOLDS.PASSIVE_MIN
-                          ? "bg-yellow-500"
-                          : "bg-red-600"
+                          ? "bg-[var(--nps-passive)]"
+                          : "bg-[var(--nps-detractor)]"
                       }`}
                     >
                       {row.npsScore}
                     </span>
                   )}
                 </td>
-                <td className="px-3 py-2 text-gray-700 dark:text-gray-300">
+                <td className="px-3 py-2 text-muted-foreground">
                   <span className="truncate block max-w-[150px]">
                     {row.categoryName || "\u2014"}
                   </span>
                   {!row.isActionable && row.hasComment && (
-                    <span className="text-xs text-red-400">
+                    <span className="text-xs text-destructive">
                       Non-actionable
                     </span>
                   )}
                 </td>
-                <td className="px-3 py-2 text-gray-900 dark:text-gray-100 max-w-md">
+                <td className="px-3 py-2 text-foreground max-w-md">
                   <span
                     className="block truncate"
                     title={row.commentText || ""}
                   >
                     {row.commentText || (
-                      <span className="text-gray-400 italic">No comment</span>
+                      <span className="text-muted-foreground italic">No comment</span>
                     )}
                   </span>
                 </td>
-                <td className="px-3 py-2 text-gray-400 text-xs">
+                <td className="px-3 py-2 text-muted-foreground text-xs">
                   {row.aiConfidence !== null
                     ? `${Math.round(row.aiConfidence * 100)}%`
                     : "\u2014"}
@@ -194,17 +194,17 @@ export function DataTable<T extends DataTableComment>({
           <button
             onClick={() => onPageChange(Math.max(1, page - 1))}
             disabled={page <= 1}
-            className="px-3 py-1 rounded text-sm bg-gray-200 dark:bg-gray-700 disabled:opacity-50"
+            className="px-3 py-1 rounded text-sm bg-muted hover:bg-muted/80 disabled:opacity-50"
           >
             Previous
           </button>
-          <span className="text-sm text-gray-400">
+          <span className="text-sm text-muted-foreground">
             Page {page} of {totalPages}
           </span>
           <button
             onClick={() => onPageChange(Math.min(totalPages, page + 1))}
             disabled={page >= totalPages}
-            className="px-3 py-1 rounded text-sm bg-gray-200 dark:bg-gray-700 disabled:opacity-50"
+            className="px-3 py-1 rounded text-sm bg-muted hover:bg-muted/80 disabled:opacity-50"
           >
             Next
           </button>

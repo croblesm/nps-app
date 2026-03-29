@@ -414,14 +414,14 @@ export default function DashboardPage() {
       <Card className="max-w-2xl">
         <CardContent className="space-y-4">
           <div className="flex items-center gap-2">
-            <Sparkles className="size-5 text-blue-500" />
+            <Sparkles className="size-5 text-primary" />
             <h1 className="text-2xl font-bold">Dashboard</h1>
           </div>
           <p className="text-muted-foreground">
             Comments need to be classified before viewing the dashboard.
           </p>
           {classifying && (
-            <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+            <div className="p-3 rounded-lg bg-muted border border-border">
               <Spinner size="sm" label="Classifying comments in batches of 25..." />
             </div>
           )}
@@ -454,9 +454,9 @@ export default function DashboardPage() {
       />
 
       {nps.activeNoiseFilterCount > 0 && (
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 text-sm text-yellow-800 dark:text-yellow-300">
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted border border-border text-sm text-muted-foreground">
           <Filter className="size-4 shrink-0" />
-          <Badge variant="outline" className="border-yellow-400 text-yellow-700 dark:text-yellow-300">
+          <Badge variant="outline">
             {nps.activeNoiseFilterCount} noise filter{nps.activeNoiseFilterCount > 1 ? "s" : ""}
           </Badge>
           <span>
@@ -507,7 +507,7 @@ export default function DashboardPage() {
 
       {/* Partial embedding resume banner */}
       {partialEmbedding && !chatEnabled && !embedding && (
-        <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 text-sm text-orange-800 dark:text-orange-300">
+        <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-muted border border-border text-sm text-muted-foreground">
           <span>Embeddings incomplete — some comments were not embedded in a previous run.</span>
           <Button
             variant="outline"
@@ -521,7 +521,7 @@ export default function DashboardPage() {
 
       {/* Embedding progress banner */}
       {embedding && embeddingProgress && (
-        <div className="fixed top-[49px] left-0 right-0 z-40 bg-blue-600 text-white px-4 py-2 text-sm flex items-center justify-center gap-2">
+        <div className="fixed top-[49px] left-0 right-0 z-40 bg-primary text-primary-foreground px-4 py-2 text-sm flex items-center justify-center gap-2">
           <Loader2 className="size-4 animate-spin" />
           {embeddingProgress}
         </div>
@@ -538,8 +538,8 @@ export default function DashboardPage() {
               const el = document.getElementById(`comment-${commentId}`);
               if (el) {
                 el.scrollIntoView({ behavior: "smooth", block: "center" });
-                el.classList.add("ring-2", "ring-blue-500");
-                setTimeout(() => el.classList.remove("ring-2", "ring-blue-500"), 3000);
+                el.classList.add("ring-2", "ring-primary");
+                setTimeout(() => el.classList.remove("ring-2", "ring-primary"), 3000);
               }
             }}
           />

@@ -156,21 +156,21 @@ export default function StructurePage() {
   return (
     <div className="max-w-3xl">
       <h1 className="text-2xl font-bold mb-2">Report Structure</h1>
-      <p className="text-gray-500 dark:text-gray-400 mb-6">
+      <p className="text-muted-foreground mb-6">
         AI will analyze your data and recommend which columns to include
       </p>
 
       {!analyzed && (
         <>
           {analyzing && (
-            <div className="mb-4 p-3 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+            <div className="mb-4 p-3 rounded bg-muted border border-border">
               <Spinner size="sm" label="Analyzing data structure with AI..." />
             </div>
           )}
           <button
             onClick={handleAnalyze}
             disabled={analyzing}
-            className="px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 font-medium"
+            className="px-6 py-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 font-medium"
           >
             {analyzing ? <Spinner size="sm" label="Analyzing with AI..." /> : "Analyze Data Structure"}
           </button>
@@ -178,17 +178,17 @@ export default function StructurePage() {
       )}
 
       {error && (
-        <div className="mt-4 p-3 rounded-lg text-sm bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-300">
+        <div className="mt-4 p-3 rounded-lg text-sm bg-destructive/10 text-destructive">
           {error}
         </div>
       )}
 
       {aiIssues.length > 0 && (
-        <div className="mt-4 p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
-          <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
+        <div className="mt-4 p-3 rounded-lg bg-muted border border-border">
+          <h3 className="text-sm font-medium text-muted-foreground">
             Data Quality Notes
           </h3>
-          <ul className="mt-1 text-sm text-yellow-700 dark:text-yellow-400 space-y-1">
+          <ul className="mt-1 text-sm text-muted-foreground space-y-1">
             {aiIssues.map((issue, i) => (
               <li key={i}>&bull; {issue}</li>
             ))}
@@ -198,7 +198,7 @@ export default function StructurePage() {
 
       {columns.length > 0 && (
         <div className="mt-6 space-y-3">
-          <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
             Column Recommendations
           </h2>
 
@@ -207,8 +207,8 @@ export default function StructurePage() {
               key={col.name}
               className={`flex items-start gap-3 p-4 rounded-lg border transition-colors cursor-pointer ${
                 col.include
-                  ? "bg-white dark:bg-gray-900 border-green-300 dark:border-green-800"
-                  : "bg-gray-50 dark:bg-gray-950 border-gray-200 dark:border-gray-800 opacity-60"
+                  ? "bg-card ring-1 ring-primary/30"
+                  : "bg-muted border-border opacity-60"
               }`}
               onClick={() => toggleColumn(col.name)}
             >
@@ -216,25 +216,25 @@ export default function StructurePage() {
                 type="checkbox"
                 checked={col.include}
                 onChange={() => toggleColumn(col.name)}
-                className="mt-1 rounded"
+                className="mt-1 rounded cursor-pointer accent-primary"
               />
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-gray-900 dark:text-gray-100">
+                  <span className="font-medium text-foreground">
                     {col.name}
                   </span>
                   {col.isNps && (
-                    <span className="px-2 py-0.5 text-xs rounded bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                    <span className="px-2 py-0.5 text-xs rounded bg-primary/10 text-primary">
                       NPS Score
                     </span>
                   )}
                   {col.isComment && (
-                    <span className="px-2 py-0.5 text-xs rounded bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                    <span className="px-2 py-0.5 text-xs rounded bg-secondary text-secondary-foreground">
                       Comments
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   {col.reason}
                 </p>
               </div>
@@ -242,14 +242,14 @@ export default function StructurePage() {
           ))}
 
           {saving && (
-            <div className="mt-4 p-3 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+            <div className="mt-4 p-3 rounded bg-muted border border-border">
               <Spinner size="sm" label="Saving column structure..." />
             </div>
           )}
           <button
             onClick={handleConfirm}
             disabled={saving}
-            className="mt-4 px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 font-medium"
+            className="mt-4 px-6 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 font-medium"
           >
             {saving ? <Spinner size="sm" label="Saving..." /> : "Confirm Structure & Continue"}
           </button>

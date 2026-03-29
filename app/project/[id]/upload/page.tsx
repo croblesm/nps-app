@@ -286,7 +286,7 @@ export default function UploadPage() {
           <Card>
             <CardContent className="flex items-start gap-3 pt-4">
               {result.validation.valid ? (
-                <CheckCircle className="size-5 text-green-500 mt-0.5 shrink-0" />
+                <CheckCircle className="size-5 text-primary mt-0.5 shrink-0" />
               ) : (
                 <XCircle className="size-5 text-destructive mt-0.5 shrink-0" />
               )}
@@ -307,7 +307,7 @@ export default function UploadPage() {
                         key={i}
                         className="flex items-start gap-2 text-sm text-muted-foreground"
                       >
-                        <AlertTriangle className="size-3.5 text-yellow-500 mt-0.5 shrink-0" />
+                        <AlertTriangle className="size-3.5 text-destructive mt-0.5 shrink-0" />
                         {issue}
                       </li>
                     ))}

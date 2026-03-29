@@ -36,11 +36,11 @@ export function ScoreCards({
         onClick={() => onFeedbackTypeChange("")}
         className={`p-4 rounded-lg text-left transition-colors ${
           !feedbackType
-            ? "bg-blue-600 text-white"
-            : "bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-blue-500"
+            ? "bg-primary text-primary-foreground"
+            : "bg-card ring-1 ring-foreground/10 hover:ring-primary/30"
         }`}
       >
-        <div className="text-xs uppercase tracking-wide opacity-70">
+        <div className={`text-xs uppercase tracking-wide ${!feedbackType ? "text-white/70" : "text-muted-foreground"}`}>
           Total Responses
         </div>
         <div className="text-2xl font-bold mt-1">{nps.total}</div>
@@ -49,53 +49,53 @@ export function ScoreCards({
         onClick={() => toggle("promoter")}
         className={`p-4 rounded-lg text-left transition-colors ${
           feedbackType === "promoter"
-            ? "bg-green-600 text-white"
-            : "bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-green-500"
+            ? "bg-[var(--nps-promoter)] text-white"
+            : "bg-card ring-1 ring-foreground/10 hover:ring-foreground/20"
         }`}
       >
-        <div className="text-xs uppercase tracking-wide opacity-70">
+        <div className={`text-xs uppercase tracking-wide ${feedbackType === "promoter" ? "text-white/70" : "text-muted-foreground"}`}>
           Promoters ({NPS_THRESHOLDS.PROMOTER_MIN}-10)
         </div>
         <div className="text-2xl font-bold mt-1">{nps.promoters}</div>
-        <div className="text-xs opacity-70">{nps.promoterPct}%</div>
+        <div className={`text-xs ${feedbackType === "promoter" ? "text-white/70" : "text-muted-foreground"}`}>{nps.promoterPct}%</div>
       </button>
       <button
         onClick={() => toggle("passive")}
         className={`p-4 rounded-lg text-left transition-colors ${
           feedbackType === "passive"
-            ? "bg-yellow-600 text-white"
-            : "bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-yellow-500"
+            ? "bg-[var(--nps-passive)] text-white"
+            : "bg-card ring-1 ring-foreground/10 hover:ring-foreground/20"
         }`}
       >
-        <div className="text-xs uppercase tracking-wide opacity-70">
+        <div className={`text-xs uppercase tracking-wide ${feedbackType === "passive" ? "text-white/70" : "text-muted-foreground"}`}>
           Passives ({NPS_THRESHOLDS.PASSIVE_MIN}-{NPS_THRESHOLDS.PASSIVE_MAX})
         </div>
         <div className="text-2xl font-bold mt-1">{nps.passives}</div>
-        <div className="text-xs opacity-70">{nps.passivePct}%</div>
+        <div className={`text-xs ${feedbackType === "passive" ? "text-white/70" : "text-muted-foreground"}`}>{nps.passivePct}%</div>
       </button>
       <button
         onClick={() => toggle("detractor")}
         className={`p-4 rounded-lg text-left transition-colors ${
           feedbackType === "detractor"
-            ? "bg-red-600 text-white"
-            : "bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-red-500"
+            ? "bg-[var(--nps-detractor)] text-white"
+            : "bg-card ring-1 ring-foreground/10 hover:ring-foreground/20"
         }`}
       >
-        <div className="text-xs uppercase tracking-wide opacity-70">
+        <div className={`text-xs uppercase tracking-wide ${feedbackType === "detractor" ? "text-white/70" : "text-muted-foreground"}`}>
           Detractors (0-{NPS_THRESHOLDS.DETRACTOR_MAX})
         </div>
         <div className="text-2xl font-bold mt-1">{nps.detractors}</div>
-        <div className="text-xs opacity-70">{nps.detractorPct}%</div>
+        <div className={`text-xs ${feedbackType === "detractor" ? "text-white/70" : "text-muted-foreground"}`}>{nps.detractorPct}%</div>
       </button>
       <div
         className={`p-4 rounded-lg text-white ${
           nps.npsScore >= 70
-            ? "bg-emerald-600"
+            ? "bg-[var(--nps-excellent)]"
             : nps.npsScore >= 30
-            ? "bg-green-500"
+            ? "bg-[var(--nps-promoter)]"
             : nps.npsScore >= 0
-            ? "bg-orange-500"
-            : "bg-red-600"
+            ? "bg-[var(--nps-passive)]"
+            : "bg-[var(--nps-detractor)]"
         }`}
       >
         <div className="text-xs uppercase tracking-wide opacity-70">

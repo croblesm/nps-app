@@ -22,11 +22,11 @@
 - [x] 0.20 Verify light mode and dark mode look polished on all pages
 - [x] 0.21 Write tests for theme toggle, verify component rendering
 - [x] 0.22 Update specs, README, CLAUDE.md with shadcn/ui documentation
-- [ ] 0.23 Phase 1: Fix dark mode palette (neutral grays), add NPS semantic tokens, fix markdown hex colors in globals.css
-- [ ] 0.24 Phase 2: Fix core components (Spinner, SearchBar, FilterPanel, Header, ScoreCards, CategoryBreakdown, DataTable — install shadcn Table)
-- [ ] 0.25 Phase 3: Fix pages (categories, dashboard, structure, layout)
-- [ ] 0.26 Phase 4: Fix secondary files (ChatPanel, github, summary, settings, error)
-- [ ] 0.27 Verify zero hardcoded color classes remain, update specs/README/CLAUDE.md
+- [x] 0.23 Phase 1: Fix dark mode palette (neutral grays), add NPS semantic tokens, fix markdown hex colors in globals.css
+- [x] 0.24 Phase 2: Fix core components (Spinner, SearchBar, FilterPanel, Header, ScoreCards, CategoryBreakdown, DataTable)
+- [x] 0.25 Phase 3: Fix pages (categories, dashboard, structure, layout)
+- [x] 0.26 Phase 4: Fix secondary files (ChatPanel, github, summary, settings, error, upload)
+- [x] 0.27 Verify zero hardcoded color classes remain
 
 ## 1. Authentication Foundation
 

@@ -85,7 +85,7 @@ export default function SummaryPage() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <FileText className="size-5 text-blue-500" />
+            <FileText className="size-5 text-primary" />
             <CardTitle className="text-2xl">AI Summary</CardTitle>
           </div>
           <CardDescription>
@@ -124,13 +124,13 @@ export default function SummaryPage() {
 
         <CardContent>
           {generating && (
-            <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 mb-4">
+            <div className="p-3 rounded-lg bg-muted border border-border mb-4">
               <Spinner size="sm" label="Generating AI-powered insight report..." />
             </div>
           )}
 
           {summary && !generating && (
-            <div className="markdown-content max-w-none p-6 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-300">
+            <div className="markdown-content max-w-none p-6 rounded-lg bg-card ring-1 ring-foreground/10 text-muted-foreground">
               <ReactMarkdown>{summary.markdown}</ReactMarkdown>
             </div>
           )}

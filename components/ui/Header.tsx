@@ -66,11 +66,11 @@ export function Header() {
         <div className="flex items-center gap-3">
           {active ? (
             <span className="text-xs text-muted-foreground">
-              <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-1" />
+              <span className="inline-block w-2 h-2 rounded-full bg-[var(--nps-promoter)] mr-1" />
               {active.provider} / {active.modelName}
             </span>
           ) : (
-            <span className="text-xs text-yellow-600 dark:text-yellow-400">
+            <span className="text-xs text-muted-foreground">
               No LLM configured
             </span>
           )}

@@ -1,5 +1,13 @@
 "use client";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 interface FilterPanelProps {
   actionableFilter: string;
   onActionableChange: (value: string) => void;
@@ -17,27 +25,35 @@ export function FilterPanel({
 }: FilterPanelProps) {
   return (
     <div className="flex gap-3 mb-4 flex-wrap">
-      <select
+      <Select
         value={actionableFilter}
-        onChange={(e) => onActionableChange(e.target.value)}
-        className="p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm"
+        onValueChange={(val) => onActionableChange(val ?? "")}
       >
-        <option value="">All Comments</option>
-        <option value="true">Actionable</option>
-        <option value="false">Non-Actionable</option>
-      </select>
-      <select
-        value={limit}
-        onChange={(e) => onLimitChange(Number(e.target.value))}
-        className="p-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm"
+        <SelectTrigger>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="">All Comments</SelectItem>
+          <SelectItem value="true">Actionable</SelectItem>
+          <SelectItem value="false">Non-Actionable</SelectItem>
+        </SelectContent>
+      </Select>
+      <Select
+        value={String(limit)}
+        onValueChange={(val) => onLimitChange(Number(val))}
       >
-        {[10, 25, 50, 100].map((n) => (
-          <option key={n} value={n}>
-            {n} per page
-          </option>
-        ))}
-      </select>
-      <span className="text-sm text-gray-400 self-center">
+        <SelectTrigger>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {[10, 25, 50, 100].map((n) => (
+            <SelectItem key={n} value={String(n)}>
+              {n} per page
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <span className="text-sm text-muted-foreground self-center">
         {totalResults} results
       </span>
     </div>

@@ -161,7 +161,7 @@ export default function SettingsPage() {
   const needsApiKey = provider !== "ollama";
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 p-8">
+    <div className="min-h-screen bg-background p-8">
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -365,13 +365,13 @@ export default function SettingsPage() {
 
             {/* Loading indicators */}
             {testing && (
-              <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-900/20">
+              <div className="rounded-lg border border-border bg-muted p-3">
                 <Spinner size="sm" label="Testing connection... This may take a few seconds with local models." />
               </div>
             )}
 
             {saving && (
-              <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-900/20">
+              <div className="rounded-lg border border-border bg-muted p-3">
                 <Spinner size="sm" label="Saving configuration..." />
               </div>
             )}

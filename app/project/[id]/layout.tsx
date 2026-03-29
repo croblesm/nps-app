@@ -55,7 +55,7 @@ export default function ProjectLayout({
     <div className="min-h-[calc(100vh-49px)]">
       {/* Project header */}
       <div className="border-b border-border bg-card">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-4">
           <div className="flex items-start justify-between">
             <div>
               <Link
@@ -94,7 +94,7 @@ export default function ProjectLayout({
 
       {/* Tab navigation */}
       <div className="border-b border-border bg-card">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
           <nav className="flex gap-1 -mb-px">
             {NAV_ITEMS.map((item) => {
               const isActive =
@@ -122,7 +122,7 @@ export default function ProjectLayout({
       </div>
 
       {/* Page content */}
-      <div className="max-w-7xl mx-auto px-6 py-6">{children}</div>
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">{children}</div>
     </div>
   );
 }

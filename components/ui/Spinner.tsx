@@ -16,10 +16,10 @@ export function Spinner({ size = "sm", label, className = "" }: SpinnerProps) {
   return (
     <span className={`inline-flex items-center gap-2 ${className}`}>
       <span
-        className={`${sizes[size]} border-blue-500 border-t-transparent rounded-full animate-spin`}
+        className={`${sizes[size]} border-primary border-t-transparent rounded-full animate-spin`}
       />
       {label && (
-        <span className="text-sm text-gray-500 dark:text-gray-400">
+        <span className="text-sm text-muted-foreground">
           {label}
         </span>
       )}
