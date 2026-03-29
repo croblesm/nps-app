@@ -84,3 +84,16 @@ This is enforced by Claude Code hooks in `.claude/settings.json`:
 - **Post-edit hook** (`remind-spec-update.sh`): Prints a reminder after editing code files
 
 Exceptions: commits prefixed with `docs:` or `chore:` skip the check.
+
+## Installed Skills (auto-loaded, guide code quality)
+
+These Claude Code skills from [skills.sh](https://skills.sh/) are installed globally and influence implementation patterns:
+
+- `clean-code` — SOLID principles, naming, structure
+- `optimized-nextjs-typescript` — Next.js 15 App Router + TypeScript best practices
+- `shadcn-ui` — shadcn/ui component patterns and customization
+- `security-patterns` — PII protection, input sanitization, secure defaults
+- `rag-architect` + `rag-implementation` — RAG architecture, embeddings, vector retrieval
+- `typescript-unit-testing` — Vitest patterns and test structure
+- `typescript-e2e-testing` — E2E testing with Playwright
+- `api-design-patterns` — REST API design, error handling, validation
