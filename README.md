@@ -91,8 +91,7 @@ This starts SQL Server 2025 on port 1433 with:
 - Username: `sa`
 - Password: `NpsEngine@2025`
 - Database: `nps_insight_engine` (created automatically)
-- Memory limit: 2GB container / 512MB SQL Server internal (`MSSQL_MEMORY_LIMIT_MB`)
-- CPU limit: 1 core
+- Memory limit: 2GB (matches existing local SQL Server containers)
 
 Wait ~30 seconds for the container to be healthy:
 ```bash

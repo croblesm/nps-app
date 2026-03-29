@@ -52,11 +52,11 @@ The Docker Compose configuration SHALL set memory and CPU limits on the SQL Serv
 
 #### Scenario: Container resource limits
 - **WHEN** a developer runs `docker compose up -d`
-- **THEN** the SQL Server container is limited to 2GB memory, 1 CPU core, and 512MB internal SQL Server memory (`MSSQL_MEMORY_LIMIT_MB`)
+- **THEN** the SQL Server container is limited to 2GB memory, letting SQL Server manage its own memory within that cap
 
-#### Scenario: Default SQL Server memory behavior is overridden
+#### Scenario: Default SQL Server memory behavior is constrained
 - **WHEN** the SQL Server container starts
-- **THEN** it does NOT consume 80% of host memory (the default), but instead stays within the configured 512MB internal limit
+- **THEN** it does NOT consume 80% of host memory (the default), but instead stays within the 2GB container limit
 
 ### Requirement: Database creation is managed by the application
 The Dev Container SHALL NOT use post-start or post-create hooks to create the database or schema. Database and table creation MUST be handled by the application (TypeORM synchronize or `npm run db:init`).
