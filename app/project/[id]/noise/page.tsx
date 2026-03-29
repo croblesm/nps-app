@@ -165,15 +165,10 @@ export default function NoisePage() {
                     </div>
                   </div>
                   <AlertDialog>
-                    <AlertDialogTrigger
-                      render={
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                        />
-                      }
-                    >
-                      <Trash2 className="size-4 text-muted-foreground hover:text-destructive" />
+                    <AlertDialogTrigger>
+                      <Button variant="ghost" size="sm">
+                        <Trash2 className="size-4 text-muted-foreground hover:text-destructive" />
+                      </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>

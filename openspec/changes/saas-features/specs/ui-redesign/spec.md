@@ -39,7 +39,7 @@ The application SHALL support both light and dark modes with a cohesive color pa
 
 #### Scenario: Dark mode appearance
 - **WHEN** dark mode is active
-- **THEN** the application uses a dark gray/slate background with light text, blue accents, and colored badges that are readable on dark backgrounds
+- **THEN** the application uses a deep blue-gray background (not pure black) with light text, blue primary accents, and colored badges that are readable on dark backgrounds. The dark theme SHALL use HSL-based blue-tinted grays for cards, borders, and muted elements to avoid the flat black appearance.
 
 ---
 

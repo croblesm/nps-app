@@ -171,10 +171,12 @@ export default function SettingsPage() {
               LLM Settings
             </h1>
           </div>
-          <Button variant="ghost" size="sm" render={<Link href="/" />}>
-            <ArrowLeft className="size-4" />
-            Back to Projects
-          </Button>
+          <Link href="/">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="size-4" />
+              Back to Projects
+            </Button>
+          </Link>
         </div>
 
         {/* Configured Providers */}

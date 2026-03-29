@@ -190,21 +190,18 @@ export default function UploadPage() {
                 </p>
               </>
             )}
-            <Button
-              variant="outline"
-              className="mt-2"
-              render={
-                <label className="cursor-pointer" />
-              }
-            >
-              Choose File
+            <label className="cursor-pointer mt-2">
+              <Button variant="outline" type="button" onClick={() => document.getElementById('csv-input')?.click()}>
+                Choose File
+              </Button>
               <input
+                id="csv-input"
                 type="file"
                 accept=".csv"
                 onChange={handleFileInput}
                 className="hidden"
               />
-            </Button>
+            </label>
           </CardContent>
         </Card>
       )}
