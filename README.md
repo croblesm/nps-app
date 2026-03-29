@@ -418,9 +418,53 @@ npx skills add bobmatnyc/claude-mpm-skills@api-design-patterns -g -y
 - **Cloud deployment** — Azure App Service or Vercel, migrate to Azure SQL
 - **Multi-tenancy** — User/org-scoped data isolation
 
-## OpenSpec
+## OpenSpec — Spec-Driven Development Workflow
 
-This project uses [OpenSpec](https://github.com/Fission-AI/openspec) for spec-driven development. See `openspec/OPENSPEC-WORKFLOW.md` for the full workflow guide, and `openspec/changes/nps-insight-engine/` for all spec artifacts (proposal, design, specs, tasks).
+This project uses [OpenSpec](https://github.com/Fission-AI/openspec) for spec-driven development. Every feature goes through a structured process:
+
+### Workflow
+
+```
+1. /opsx:propose "feature name"    → Creates proposal, design, specs, tasks
+2. /opsx:apply <change-name>       → Implements tasks one by one (checkboxes in tasks.md)
+3. /opsx:archive <change-name>     → Finalizes and merges specs to openspec/specs/
+```
+
+### Active Changes
+
+| Change | Branch | Status |
+|--------|--------|--------|
+| `nps-insight-engine` | `nps-insight-engine` | Complete (113/113 tasks) |
+| `saas-features` | `nps-saas-features` | In progress (0/70 tasks) |
+
+### Directory Structure
+
+```
+openspec/
+  config.yaml                           # Project context and rules
+  OPENSPEC-WORKFLOW.md                   # Full workflow guide
+  specs/                                # Archived specs (after /opsx:archive)
+  changes/
+    nps-insight-engine/                  # v1 core features (complete)
+      proposal.md                       # WHY
+      design.md                         # HOW
+      specs/                            # WHAT (10 capability specs)
+      tasks.md                          # DO (113 tasks, all done)
+    saas-features/                      # SaaS features (in progress)
+      proposal.md                       # WHY
+      design.md                         # HOW
+      specs/                            # WHAT (5 capability specs)
+      tasks.md                          # DO (70 tasks)
+```
+
+### For Contributors
+
+1. Read the relevant `proposal.md` to understand WHY a change exists
+2. Read `specs/` to understand WHAT the requirements are (with testable WHEN/THEN scenarios)
+3. Read `design.md` to understand HOW the architecture works
+4. Check `tasks.md` for progress — checkboxes track what's done and what's remaining
+
+Every code change must include spec updates (enforced by Claude Code hooks).
 
 ## License
 
