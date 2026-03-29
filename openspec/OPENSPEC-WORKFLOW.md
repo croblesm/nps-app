@@ -264,3 +264,29 @@ openspec/
 4. Implement    →  /opsx:apply (works through tasks.md checkboxes)
 5. Archive      →  /opsx:archive (finalizes, merges specs to openspec/specs/)
 ```
+
+## Enforcement
+
+Claude Code hooks enforce the spec-first workflow:
+
+| Hook | Trigger | Script | Behavior |
+|------|---------|--------|----------|
+| Pre-commit | Before `git commit` | `enforce-spec-update.sh` | **Blocks** commit if code files changed without spec/doc files staged |
+| Post-edit | After `Edit` or `Write` | `remind-spec-update.sh` | **Reminds** to update specs (non-blocking) |
+
+**What's enforced:**
+- Every commit with code changes (`app/`, `lib/`, `components/`) must include at least one spec/doc file (`openspec/`, `README.md`, `CLAUDE.md`)
+- Exceptions: commits prefixed with `docs:` or `chore:`
+
+**What's NOT enforced (discipline required):**
+- Writing specs BEFORE code (hooks only check at commit time)
+- Granular task breakdown (must use `openspec instructions tasks` properly)
+- Running `/opsx:apply` instead of manually editing tasks.md
+- Never removing spec features without user approval
+
+## Task Rules (from config.yaml)
+
+- Break tasks into chunks of max 4 hours
+- Each task should be independently testable
+- Include verification steps in each task
+- Commit changes after completing each task group (## heading) for rollback capability

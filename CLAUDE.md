@@ -103,18 +103,36 @@ openspec/                     # Spec-driven development artifacts
 - `AUTH_REQUIRED=false` disables auth for local development (all projects accessible)
 - **No hardcoded Tailwind colors** in `.tsx` files — use CSS variables only (`text-foreground`, `bg-card`, `bg-muted`, `border-border`, `bg-primary`, `text-destructive`, etc.). NPS domain colors use custom properties (`--nps-promoter`, `--nps-passive`, `--nps-detractor`, `--nps-excellent`) defined in `globals.css`
 
-## Workflow Rules (MANDATORY)
+## OpenSpec Workflow (MANDATORY)
 
-**EVERY code change MUST include:**
-1. Update the relevant OpenSpec spec (`openspec/changes/nps-insight-engine/specs/`)
-2. Update `README.md` if the change affects setup, usage, features, or configuration
-3. Commit code + spec/doc updates together in one commit
+This project uses **OpenSpec** with the `spec-driven` schema. All development follows this sequential workflow:
 
-This is enforced by Claude Code hooks in `.claude/settings.json`:
+```
+1. Proposal   → WHY (problem, capabilities)         openspec instructions proposal
+2. Specs      → WHAT (requirements + scenarios)      openspec instructions specs
+3. Design     → HOW (architecture, decisions)        openspec instructions design
+4. Tasks      → DO (checklist from specs + design)   openspec instructions tasks
+5. Apply      → Execute tasks one by one             /opsx:apply
+6. Archive    → Merge specs to openspec/specs/       /opsx:archive
+```
+
+**Rules:**
+- **Specs first, then code** — never write code before updating/creating the relevant spec
+- **Tasks derived from specs** — use `openspec instructions tasks` to generate granular tasks (max 4 hours each, independently testable)
+- **Execute via `/opsx:apply`** — reads tasks.md, tracks progress, walks through each task
+- **Never remove spec features** — if not implemented, mark as "NOT YET IMPLEMENTED"
+- **Commit per task group** — each commit includes spec + code + tests + docs
+
+**Enforcement** via Claude Code hooks in `.claude/settings.json`:
 - **Pre-commit hook** (`enforce-spec-update.sh`): Blocks `git commit` if code files (`app/`, `lib/`, `components/`) are staged without any spec/doc files (`openspec/`, `README.md`, `CLAUDE.md`)
 - **Post-edit hook** (`remind-spec-update.sh`): Prints a reminder after editing code files
 
 Exceptions: commits prefixed with `docs:` or `chore:` skip the check.
+
+**Key commands:**
+- `openspec status --change "<name>" --json` — check artifact progress
+- `openspec instructions <artifact> --change "<name>"` — get creation guidelines
+- `openspec list` — list active changes
 
 ## Installed Skills (auto-loaded, guide code quality)
 

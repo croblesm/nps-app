@@ -512,29 +512,45 @@ Natural language Q&A over NPS data using retrieval-augmented generation:
 
 ## OpenSpec — Spec-Driven Development Workflow
 
-This project uses [OpenSpec](https://github.com/Fission-AI/openspec) for spec-driven development. Every feature goes through a structured process:
+This project uses [OpenSpec](https://github.com/Fission-AI/openspec) with the `spec-driven` schema. Every feature follows a strict sequential workflow — specs are the source of truth.
 
 ### Workflow
 
 ```
-1. /opsx:propose "feature name"    → Creates proposal, design, specs, tasks
-2. /opsx:apply <change-name>       → Implements tasks one by one (checkboxes in tasks.md)
-3. /opsx:archive <change-name>     → Finalizes and merges specs to openspec/specs/
+Step  Artifact     Purpose                         Command
+────  ──────────   ─────────────────────────────    ──────────────────────────────────────
+1.    Proposal     WHY — problem, capabilities      openspec instructions proposal
+2.    Specs        WHAT — requirements + scenarios   openspec instructions specs
+3.    Design       HOW — architecture, decisions     openspec instructions design
+4.    Tasks        DO — checklist from specs          openspec instructions tasks
+5.    Apply        Execute tasks one by one           /opsx:apply
+6.    Archive      Merge specs to openspec/specs/     /opsx:archive
 ```
+
+**Rules:**
+- Specs first, then code — never write code before the spec exists
+- Tasks are derived from specs — each spec scenario becomes one or more testable tasks
+- Tasks are max 4 hours each, independently testable
+- Commit per task group — each commit includes spec + code + tests + docs
+- Never remove spec features — mark unimplemented ones as "NOT YET IMPLEMENTED"
+
+**Enforcement** (Claude Code hooks):
+- **Pre-commit**: Blocks `git commit` if code files changed without spec/doc files staged
+- **Post-edit**: Reminds to update specs after editing code files
 
 ### Active Changes
 
 | Change | Branch | Status |
 |--------|--------|--------|
 | `nps-insight-engine` | `nps-insight-engine` | Complete (113/113 tasks) |
-| `saas-features` | `nps-saas-features` | In progress (0/70 tasks) |
+| `saas-features` | `nps-saas-features` | In progress |
 
 ### Directory Structure
 
 ```
 openspec/
-  config.yaml                           # Project context and rules
-  OPENSPEC-WORKFLOW.md                   # Full workflow guide
+  config.yaml                           # Project context, schema, rules
+  OPENSPEC-WORKFLOW.md                   # Full workflow guide with enforcement docs
   specs/                                # Archived specs (after /opsx:archive)
   changes/
     nps-insight-engine/                  # v1 core features (complete)
@@ -546,17 +562,17 @@ openspec/
       proposal.md                       # WHY
       design.md                         # HOW
       specs/                            # WHAT (5 capability specs)
-      tasks.md                          # DO (70 tasks)
+      tasks.md                          # DO (grouped tasks with checkboxes)
 ```
 
 ### For Contributors
 
-1. Read the relevant `proposal.md` to understand WHY a change exists
-2. Read `specs/` to understand WHAT the requirements are (with testable WHEN/THEN scenarios)
-3. Read `design.md` to understand HOW the architecture works
-4. Check `tasks.md` for progress — checkboxes track what's done and what's remaining
-
-Every code change must include spec updates (enforced by Claude Code hooks).
+1. Read `proposal.md` → understand WHY a change exists
+2. Read `specs/` → understand WHAT the requirements are (WHEN/THEN scenarios)
+3. Read `design.md` → understand HOW the architecture works
+4. Read `tasks.md` → see progress (checkboxes track done/remaining)
+5. Use `openspec instructions <artifact> --change "<name>"` → get creation guidelines for any artifact
+6. Use `/opsx:apply` → execute tasks with progress tracking
 
 ## License
 
