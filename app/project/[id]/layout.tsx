@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AssistantPanel } from "@/components/ui/AssistantPanel";
+import { AssistantContextProvider, useAssistantContext } from "@/lib/assistant-context";
 
 interface ProjectInfo {
   id: string;
@@ -50,6 +51,28 @@ export default function ProjectLayout({
   }, [projectId]);
 
   const currentPage = pathname.split("/").pop();
+
+  return (
+    <AssistantContextProvider>
+    <ProjectLayoutInner projectId={projectId} project={project} currentPage={currentPage}>
+      {children}
+    </ProjectLayoutInner>
+    </AssistantContextProvider>
+  );
+}
+
+function ProjectLayoutInner({
+  projectId,
+  project,
+  currentPage,
+  children,
+}: {
+  projectId: string;
+  project: ProjectInfo | null;
+  currentPage: string | undefined;
+  children: React.ReactNode;
+}) {
+  const { pageContext } = useAssistantContext();
 
   return (
     <div className="min-h-[calc(100vh-49px)]">
@@ -131,6 +154,7 @@ export default function ProjectLayout({
         pageContext={{
           projectName: project?.name || "",
           projectDescription: project?.description || "",
+          ...pageContext,
         }}
       />
     </div>

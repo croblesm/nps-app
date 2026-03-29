@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Spinner } from "@/components/ui/Spinner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAssistantContext } from "@/lib/assistant-context";
 
 interface ColumnRecommendation {
   column: string;
@@ -39,6 +40,13 @@ export default function StructurePage() {
   const [aiIssues, setAiIssues] = useState<string[]>([]);
   const [analyzed, setAnalyzed] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { setPageContext } = useAssistantContext();
+
+  useEffect(() => {
+    setPageContext({
+      columns: columns.map(c => ({ name: c.name, included: c.include })),
+    });
+  }, [columns, setPageContext]);
 
   // Load existing structure from DB on mount
   useEffect(() => {

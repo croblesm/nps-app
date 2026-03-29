@@ -16,6 +16,7 @@ import { FilterPanel } from "@/components/nps/FilterPanel";
 import { DataTable } from "@/components/nps/DataTable";
 import { ChatPanel } from "@/components/nps/ChatPanel";
 import { Filter, Sparkles, LayoutDashboard, MessageSquare, X, Loader2 } from "lucide-react";
+import { useAssistantContext } from "@/lib/assistant-context";
 
 interface CommentRow {
   id: string;
@@ -149,10 +150,24 @@ export default function DashboardPage() {
     }
   }, [projectId]);
 
+  const { setPageContext } = useAssistantContext();
+
   useEffect(() => { fetchComments(); }, [fetchComments]);
   useEffect(() => { fetchStats(); }, [fetchStats]);
   useEffect(() => { fetchProject(); }, [fetchProject]);
   useEffect(() => { fetchGitHubConfig(); }, [fetchGitHubConfig]);
+
+  useEffect(() => {
+    setPageContext({
+      npsScore: nps?.npsScore,
+      totalResponses: nps?.total,
+      promoterPct: nps?.promoterPct,
+      passivePct: nps?.passivePct,
+      detractorPct: nps?.detractorPct,
+      categoryBreakdown: categoryBreakdown,
+      activeFilters: { feedbackType, category: categoryFilter, search },
+    });
+  }, [nps, categoryBreakdown, feedbackType, categoryFilter, search, setPageContext]);
 
   async function handleClassify() {
     setClassifying(true);

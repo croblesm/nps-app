@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Papa from "papaparse";
 import { toast } from "sonner";
@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { useAssistantContext } from "@/lib/assistant-context";
 
 interface ColumnInfo {
   name: string;
@@ -64,6 +65,14 @@ export default function UploadPage() {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [result, setResult] = useState<UploadResult | null>(null);
+  const { setPageContext } = useAssistantContext();
+
+  useEffect(() => {
+    setPageContext({
+      uploadStatus: result ? "uploaded" : "no file",
+      fileName: result?.filename || null,
+    });
+  }, [result, setPageContext]);
 
   const handleFile = useCallback((f: File) => {
     setFile(f);

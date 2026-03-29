@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardAction } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileText, Download, RefreshCw, Sparkles } from "lucide-react";
+import { useAssistantContext } from "@/lib/assistant-context";
 
 interface SummaryData {
   id: string;
@@ -23,6 +24,13 @@ export default function SummaryPage() {
   const [summary, setSummary] = useState<SummaryData | null>(null);
   const [generating, setGenerating] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { setPageContext } = useAssistantContext();
+
+  useEffect(() => {
+    setPageContext({
+      summaryGenerated: !!summary,
+    });
+  }, [summary, setPageContext]);
 
   // Load existing summary from DB on mount
   useEffect(() => {

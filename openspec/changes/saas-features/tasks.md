@@ -107,12 +107,12 @@
 - [x] 4.5 Persist assistant open/closed state across page navigation — use React state in layout (not per-page). Verify: open panel, navigate to another tab, panel stays open
 
 ### 4c. Page Context Collection
-- [ ] 4.6 Upload page context — pass upload status (no file / file uploaded / structure confirmed) to assistant. Verify: assistant responds with CSV format guidance
-- [ ] 4.7 Structure page context — pass column list with included/excluded status. Verify: assistant responds with column selection advice
-- [ ] 4.8 Categories page context — pass discovered category names, counts, sample comments. Verify: assistant responds with category-specific advice
-- [ ] 4.9 Dashboard page context — pass NPS score, score distribution, category breakdown, active filters. Verify: assistant responds with data analysis
-- [ ] 4.10 Noise filters page context — pass active filters, excluded comment count. Verify: assistant suggests filters for common noise patterns
-- [ ] 4.11 Summary page context — pass whether summary has been generated. Verify: assistant explains summary features
+- [x] 4.6 Upload page context — pass upload status (no file / file uploaded / structure confirmed) to assistant. Verify: assistant responds with CSV format guidance
+- [x] 4.7 Structure page context — pass column list with included/excluded status. Verify: assistant responds with column selection advice
+- [x] 4.8 Categories page context — pass discovered category names, counts, sample comments. Verify: assistant responds with category-specific advice
+- [x] 4.9 Dashboard page context — pass NPS score, score distribution, category breakdown, active filters. Verify: assistant responds with data analysis
+- [x] 4.10 Noise filters page context — pass active filters, excluded comment count. Verify: assistant suggests filters for common noise patterns
+- [x] 4.11 Summary page context — pass whether summary has been generated. Verify: assistant explains summary features
 
 ### 4d. Proactive Recommendations
 - [ ] 4.12 Detect unfiltered noise patterns (e.g., "N/A", "test", single-word comments) and suggest noise filters when user opens assistant on noise page. Verify: recommendation appears in response

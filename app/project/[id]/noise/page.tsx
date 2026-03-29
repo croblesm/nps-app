@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useAssistantContext } from "@/lib/assistant-context";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,9 +45,21 @@ export default function NoisePage() {
   const [saving, setSaving] = useState(false);
   const [matchPreview, setMatchPreview] = useState<number | null>(null);
 
+  const { setPageContext } = useAssistantContext();
+
   useEffect(() => {
     fetchFilters();
   }, [projectId]);
+
+  useEffect(() => {
+    setPageContext({
+      noiseFilters: filters.map(f => ({
+        name: f.name,
+        keywords: JSON.parse(f.filterKeywords || "[]"),
+      })),
+      excludedCount: filters.length,
+    });
+  }, [filters, setPageContext]);
 
   async function fetchFilters() {
     const res = await fetch(`/api/projects/${projectId}/noise`);
