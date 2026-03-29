@@ -379,13 +379,44 @@ This is enforced by Claude Code hooks (`.claude/settings.json`):
 - **Pre-commit hook**: Blocks commits with code changes but no spec/doc updates
 - **Post-edit hook**: Reminds to update specs after editing code files
 
-## Deferred Features (SaaS Phase)
+## Development Skills
 
+The following [Claude Code skills](https://skills.sh/) are installed to enforce best practices:
+
+| Skill | What it enforces |
+|-------|-----------------|
+| `optimized-nextjs-typescript` | Next.js 15 App Router patterns, TypeScript conventions |
+| `shadcn-ui` | shadcn/ui component usage and customization |
+| `security-patterns` | PII protection, input sanitization, secure defaults |
+| `rag-architect` | RAG architecture design, embedding strategies |
+| `rag-implementation` | Vector store implementation, chunking, retrieval |
+| `clean-code` | Code quality, naming, SOLID principles |
+| `typescript-unit-testing` | Vitest patterns, test structure |
+| `typescript-e2e-testing` | E2E testing with Playwright |
+| `api-design-patterns` | REST API design, error handling, validation |
+
+Install all skills:
+```bash
+npx skills add mindrally/skills@optimized-nextjs-typescript -g -y
+npx skills add existential-birds/beagle@shadcn-ui -g -y
+npx skills add yonatangross/orchestkit@security-patterns -g -y
+npx skills add jeffallan/claude-skills@rag-architect -g -y
+npx skills add sickn33/antigravity-awesome-skills@rag-implementation -g -y
+npx skills add sickn33/antigravity-awesome-skills@clean-code -g -y
+npx skills add bmad-labs/skills@typescript-unit-testing -g -y
+npx skills add bmad-labs/skills@typescript-e2e-testing -g -y
+npx skills add bobmatnyc/claude-mpm-skills@api-design-patterns -g -y
+```
+
+## SaaS Features (In Progress — `nps-saas-features` branch)
+
+- **UI Redesign** — shadcn/ui components, Lucide icons, light/dark theme toggle
 - **Authentication** — NextAuth.js v5 with GitHub, Google, email/password
+- **GitHub Integration** — Create issues from NPS categories/comments with templates and labels (Octokit)
+- **Chat Analysis (RAG)** — Natural language Q&A over NPS data using SQL Server 2025 VECTOR type
+- **AI Assistant** — Contextual helper panel on every project page
 - **Cloud deployment** — Azure App Service or Vercel, migrate to Azure SQL
-- **Vector/RAG** — Semantic search using SQL Server 2025 native VECTOR type
 - **Multi-tenancy** — User/org-scoped data isolation
-- **Metadata import** — Upload previously exported JSON to pre-configure new projects
 
 ## OpenSpec
 

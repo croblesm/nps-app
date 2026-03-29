@@ -43,11 +43,29 @@ The current UI uses raw Tailwind utilities for all components. While functional,
 
 **Migration approach:** Incremental — replace raw HTML elements page by page. shadcn/ui components coexist with existing Tailwind utilities during migration.
 
+**UI reference:** The "Log Analyzer" app (built with GitHub Copilot SDK) demonstrates the UX patterns we're targeting: multi-stage progress bars with step labels ("Analyzing 30%", "Aggregating 75%"), tab-based results (Overview, Findings, GitHub Issues), GitHub issue cards with open/closed status badges, and a "Powered by" badge. These patterns map directly to shadcn/ui components (Progress, Tabs, Badge, Card).
+
 **Alternatives considered:**
 - **Radix UI directly:** shadcn/ui is built on Radix — using shadcn gives us pre-styled Radix components
 - **Material UI:** Heavy bundle, different design language, not idiomatic for Tailwind projects
 - **Headless UI:** Fewer components, less maintained than Radix/shadcn
 - **Chakra UI:** Brings its own styling system that conflicts with Tailwind
+
+### Development Skills
+
+The following Claude Code skills are installed globally to enforce best practices:
+
+| Skill | Purpose |
+|-------|---------|
+| `optimized-nextjs-typescript` | Next.js 15 + TypeScript patterns, App Router conventions |
+| `shadcn-ui` | shadcn/ui component usage, proper installation and customization |
+| `security-patterns` | Security best practices, PII protection, input sanitization |
+| `rag-architect` | RAG architecture design, embedding strategies, retrieval patterns |
+| `rag-implementation` | Hands-on RAG implementation, vector stores, chunking strategies |
+| `clean-code` | Code quality, naming, structure, SOLID principles |
+| `typescript-unit-testing` | TypeScript unit test patterns with Vitest |
+| `typescript-e2e-testing` | E2E testing with Playwright |
+| `api-design-patterns` | REST API design, error handling, validation conventions |
 
 ### 1. RAG Chat Architecture
 
