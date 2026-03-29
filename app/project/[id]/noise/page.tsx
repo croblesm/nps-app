@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
-import { Filter, X, Plus, Trash2, Eye, Pencil } from "lucide-react";
+import { Filter, X, Plus, Trash2, Eye, Pencil, ChevronRight } from "lucide-react";
 import { Spinner } from "@/components/ui/Spinner";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -59,6 +59,9 @@ export default function NoisePage() {
   const [editKeywords, setEditKeywords] = useState("");
   const [editExcludeFromNps, setEditExcludeFromNps] = useState(true);
   const [editSaving, setEditSaving] = useState(false);
+
+  // Expand/collapse state for each filter
+  const [expandedFilters, setExpandedFilters] = useState<Set<string>>(new Set());
 
   // Match counts per filter
   const [matchCounts, setMatchCounts] = useState<Record<string, number>>({});
@@ -237,38 +240,57 @@ export default function NoisePage() {
         <div className="mb-8 space-y-3">
           {filters.map((f) => {
             const kws: string[] = JSON.parse(f.filterKeywords || "[]");
+            const expanded = expandedFilters.has(f.id);
+            const toggleExpand = () => {
+              setExpandedFilters((prev) => {
+                const next = new Set(prev);
+                if (next.has(f.id)) {
+                  next.delete(f.id);
+                } else {
+                  next.add(f.id);
+                }
+                return next;
+              });
+            };
             return (
               <Card key={f.id}>
                 <CardContent className="flex items-start justify-between gap-4 pt-4">
                   <div className="flex-1 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Filter className="size-4 text-muted-foreground" />
-                      <span className="font-medium text-foreground">
+                    <button
+                      onClick={toggleExpand}
+                      className="flex items-center gap-2 w-full text-left"
+                    >
+                      <ChevronRight className={`size-4 text-muted-foreground transition-transform ${expanded ? "rotate-90" : ""}`} />
+                      <h3 className="text-base font-semibold text-foreground">
                         {f.name}
-                      </span>
+                      </h3>
                       {matchCounts[f.id] !== undefined && (
-                        <Badge variant="secondary">
+                        <span className="text-sm text-muted-foreground">
                           {matchCounts[f.id]} matches
-                        </Badge>
+                        </span>
                       )}
                       {f.excludeFromNps && (
                         <Badge variant="destructive">
                           Excluded from NPS
                         </Badge>
                       )}
-                    </div>
-                    {f.description && (
-                      <p className="text-sm text-muted-foreground">
-                        {f.description}
-                      </p>
+                    </button>
+                    {expanded && (
+                      <div className="mt-2">
+                        {f.description && (
+                          <p className="text-sm text-muted-foreground mb-2">
+                            {f.description}
+                          </p>
+                        )}
+                        <div className="flex flex-wrap gap-1.5">
+                          {kws.map((kw) => (
+                            <Badge key={kw} variant="secondary">
+                              {kw}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
                     )}
-                    <div className="flex flex-wrap gap-1.5">
-                      {kws.map((kw) => (
-                        <Badge key={kw} variant="secondary">
-                          {kw}
-                        </Badge>
-                      ))}
-                    </div>
                   </div>
                   <div className="flex items-center gap-1">
                     <Button

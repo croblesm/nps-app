@@ -48,10 +48,10 @@ export function CategoryBreakdown({
                 onExportToGitHub(cat.name, cat.count);
               }}
               className="mt-2 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-              title={`Export "${cat.name}" to GitHub`}
+              title={`Create GitHub issue for "${cat.name}"`}
             >
               <GitFork className="size-3" />
-              Export to GitHub
+              Create Issue
             </button>
           )}
         </div>

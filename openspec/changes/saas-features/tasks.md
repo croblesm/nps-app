@@ -53,17 +53,17 @@
 
 ### 0c. UI Polish — 12 Fixes
 
-- [ ] 0.48 Dashboard: remove CategoryBarChart + NpsDonutChart card. Verify: no bar chart, no separate donut
-- [ ] 0.49 ScoreCards: add emoji back to NPS score card. Verify: emoji shows next to score
-- [ ] 0.50 Dashboard: add dismissible category filter chip above grid when filtered. Verify: chip appears, X clears
-- [ ] 0.51 Categories page: improve Confirm button — consistent Button styling, sticky or top position. Verify: button matches page style
-- [ ] 0.52 Summary: add promoter/detractor quote columns next to donut in NpsVisualCards. Fetch top comments. Verify: quotes render
-- [ ] 0.53 Summary: add "Charts shown in-app only" note near download button. Verify: note visible
-- [ ] 0.54 GitHub: use GitHub colors for issue status — green #238636 open, purple #8957e5 closed. Verify: visible in light+dark
-- [ ] 0.55 Noise: make filter cards expandable/collapsible, fix font consistency. Verify: click toggles keywords
-- [ ] 0.56 CategoryBreakdown: rename "Export to GitHub" to "Create Issue" with Git icon. Verify: label changed
-- [ ] 0.57 TopBar: add user avatar + dropdown on right side. Verify: avatar shows, dropdown has Account/SignOut
-- [ ] 0.58 Update specs with polish fixes. Verify: specs match code
+- [x] 0.48 Dashboard: remove CategoryBarChart + NpsDonutChart card
+- [x] 0.49 ScoreCards: add emoji back to NPS score card
+- [x] 0.50 Dashboard: add dismissible category filter chip above grid when filtered
+- [x] 0.51 Categories page: improve Confirm button — consistent Button styling, sticky bottom
+- [x] 0.52 Summary: add promoter/detractor quote columns next to donut in NpsVisualCards
+- [x] 0.53 Summary: add "Charts shown in-app only" note near download button
+- [x] 0.54 GitHub: use GitHub colors for issue status — green #238636 open, purple #8957e5 closed
+- [x] 0.55 Noise: make filter cards expandable/collapsible, fix font consistency
+- [x] 0.56 CategoryBreakdown: rename "Export to GitHub" to "Create Issue"
+- [x] 0.57 TopBar: add user avatar + dropdown on right side
+- [x] 0.58 Update specs with polish fixes
 
 ## 1. Authentication Foundation
 

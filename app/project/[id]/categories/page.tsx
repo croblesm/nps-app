@@ -579,17 +579,19 @@ export default function CategoriesPage() {
               <Spinner size="sm" label="Saving categories..." />
             </div>
           )}
-          <button
-            onClick={handleConfirm}
-            disabled={saving || activeCount < 2}
-            className="px-6 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 font-medium"
-          >
-            {saving ? (
-              <Spinner size="sm" label="Saving..." />
-            ) : (
-              `Confirm ${activeCount} Categories & Continue`
-            )}
-          </button>
+          <div className="sticky bottom-0 bg-background py-4 border-t border-border -mx-4 px-4 md:-mx-6 md:px-6">
+            <Button
+              onClick={handleConfirm}
+              disabled={saving || activeCount < 2}
+              size="lg"
+            >
+              {saving ? (
+                <Spinner size="sm" label="Saving..." />
+              ) : (
+                `Confirm ${activeCount} Categories & Continue`
+              )}
+            </Button>
+          </div>
         </div>
       )}
     </div>

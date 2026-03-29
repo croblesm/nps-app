@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
-import { Sun, Moon, Settings } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
+import { Sun, Moon, Settings, LogOut, UserCircle } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -16,6 +17,14 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ActiveProvider {
   provider: string;
@@ -44,6 +53,7 @@ export function TopBar() {
   const pathname = usePathname();
   const params = useParams();
   const { theme, setTheme } = useTheme();
+  const { data: session } = useSession();
   const [mounted, setMounted] = useState(false);
 
   const projectId = params.id as string | undefined;
@@ -178,6 +188,34 @@ export function TopBar() {
             <Settings className="h-4 w-4" />
           </Button>
         </Link>
+
+        {session?.user && (
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex items-center gap-2 rounded-full hover:bg-muted px-2 py-1">
+              <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">
+                {session.user.name?.[0]?.toUpperCase() || "U"}
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium">{session.user.name || "User"}</p>
+                  <p className="text-xs text-muted-foreground">{session.user.email}</p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem render={<Link href="/admin" />}>
+                <UserCircle className="mr-2 h-4 w-4" />
+                Account Settings
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/login" })}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
     </header>
   );

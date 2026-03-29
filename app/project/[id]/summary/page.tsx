@@ -37,6 +37,8 @@ export default function SummaryPage() {
   const [npsStats, setNpsStats] = useState<NpsStats | null>(null);
   const [generating, setGenerating] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [promoterQuotes, setPromoterQuotes] = useState<{ text: string; nps: number }[]>([]);
+  const [detractorQuotes, setDetractorQuotes] = useState<{ text: string; nps: number }[]>([]);
   const { setPageContext } = useAssistantContext();
 
   useEffect(() => {
@@ -66,6 +68,18 @@ export default function SummaryPage() {
       .then((data) => {
         if (data && data.total > 0) setNpsStats(data);
       })
+      .catch(() => {});
+  }, [projectId]);
+
+  // Fetch promoter and detractor quotes
+  useEffect(() => {
+    fetch(`/api/projects/${projectId}/comments?feedbackType=promoter&limit=3&sortBy=npsScore&sortDir=DESC`)
+      .then(res => res.json())
+      .then(data => setPromoterQuotes(data.comments?.filter((c: { commentText: string | null }) => c.commentText).map((c: { commentText: string; npsScore: number }) => ({ text: c.commentText, nps: c.npsScore })) || []))
+      .catch(() => {});
+    fetch(`/api/projects/${projectId}/comments?feedbackType=detractor&limit=3&sortBy=npsScore&sortDir=ASC`)
+      .then(res => res.json())
+      .then(data => setDetractorQuotes(data.comments?.filter((c: { commentText: string | null }) => c.commentText).map((c: { commentText: string; npsScore: number }) => ({ text: c.commentText, nps: c.npsScore })) || []))
       .catch(() => {});
   }, [projectId]);
 
@@ -125,6 +139,8 @@ export default function SummaryPage() {
           promoterPct={npsStats.promoterPct}
           passivePct={npsStats.passivePct}
           detractorPct={npsStats.detractorPct}
+          promoterQuotes={promoterQuotes}
+          detractorQuotes={detractorQuotes}
         />
       )}
 
@@ -138,12 +154,15 @@ export default function SummaryPage() {
             Generate an AI-powered insight report
           </CardDescription>
           <CardAction>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
               {summary && (
-                <Button variant="outline" size="sm" onClick={handleDownload}>
-                  <Download className="size-4" />
-                  Download .md
-                </Button>
+                <>
+                  <Button variant="outline" size="sm" onClick={handleDownload}>
+                    <Download className="size-4" />
+                    Download .md
+                  </Button>
+                  <span className="text-xs text-muted-foreground">Charts are shown in-app only</span>
+                </>
               )}
               <Button
                 size="sm"

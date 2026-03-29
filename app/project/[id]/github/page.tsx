@@ -310,8 +310,13 @@ export default function GitHubPage() {
                             #{issue.githubIssueNumber}
                           </span>
                           <Badge
-                            variant={issue.status === "open" ? "default" : "secondary"}
-                            className={`text-xs ${issue.status === "open" ? "bg-[hsl(var(--nps-promoter))]" : "bg-secondary text-secondary-foreground"}`}
+                            variant="secondary"
+                            className="text-xs"
+                            style={
+                              issue.status === "open"
+                                ? { backgroundColor: "#238636", color: "white" }
+                                : { backgroundColor: "#8957e5", color: "white" }
+                            }
                           >
                             {issue.status}
                           </Badge>

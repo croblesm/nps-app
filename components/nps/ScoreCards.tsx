@@ -102,7 +102,10 @@ export function ScoreCards({
           NPS Score
         </div>
         <div className="text-2xl font-bold mt-1">
-          {nps.npsScore}
+          {nps.npsScore}{" "}
+          <span>
+            {nps.npsScore >= 70 ? "🤩" : nps.npsScore >= 50 ? "😀" : nps.npsScore >= 30 ? "🙂" : nps.npsScore >= 0 ? "😐" : "😟"}
+          </span>
         </div>
         <div className="text-xs opacity-70">{npsLabel}</div>
       </div>
