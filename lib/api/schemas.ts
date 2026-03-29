@@ -3,6 +3,7 @@ import { z } from "zod";
 export const createProjectSchema = z.object({
   name: z.string().min(1, "Project name is required").max(255),
   description: z.string().max(2000).nullable().optional(),
+  analysisHints: z.string().max(2000).nullable().optional(),
 });
 
 export const updateProjectSchema = z.object({
@@ -27,6 +28,14 @@ export const testLlmSchema = z.object({
 
 export const projectIdBodySchema = z.object({
   projectId: z.string().uuid("Invalid project ID"),
+});
+
+export const categorizeActionSchema = z.object({
+  projectId: z.string().uuid("Invalid project ID"),
+  action: z.enum(["discover", "suggest-more", "scan-for-theme"]).default("discover"),
+  existingCategories: z.array(z.string()).optional(),
+  themeName: z.string().max(255).optional(),
+  themeDescription: z.string().max(2000).optional(),
 });
 
 export const saveCategoriesSchema = z.object({

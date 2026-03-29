@@ -60,7 +60,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
 
-  const { name, description } = parsed.data;
+  const { name, description, analysisHints } = parsed.data;
 
   const db = await getDb();
   const { Project } = await import("@/lib/db/entities/Project");
@@ -69,6 +69,7 @@ export async function POST(request: Request) {
   const project = repo.create({
     name: name.trim(),
     description: description || null,
+    analysisHints: analysisHints || null,
   });
 
   await repo.save(project);

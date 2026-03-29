@@ -9,6 +9,7 @@ export default function NewProjectPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [analysisHints, setAnalysisHints] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -29,6 +30,7 @@ export default function NewProjectPage() {
         body: JSON.stringify({
           name: name.trim(),
           description: description.trim() || null,
+          analysisHints: analysisHints.trim() || null,
         }),
       });
 
@@ -98,6 +100,27 @@ export default function NewProjectPage() {
             rows={3}
             className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
+        </div>
+
+        <div>
+          <label
+            htmlFor="analysisHints"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+          >
+            Analysis Focus{" "}
+            <span className="text-gray-400 font-normal">(optional)</span>
+          </label>
+          <textarea
+            id="analysisHints"
+            value={analysisHints}
+            onChange={(e) => setAnalysisHints(e.target.value)}
+            placeholder="Tell the AI what themes to look for, e.g.: Focus on competitor comparisons (SSMS, Azure Data Studio), performance issues, and missing features..."
+            rows={3}
+            className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <p className="text-xs text-gray-400 mt-1">
+            Guides the AI when discovering categories from your NPS comments
+          </p>
         </div>
 
         {error && (

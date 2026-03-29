@@ -18,6 +18,9 @@ export class Project {
   @Column({ type: "nvarchar", length: "MAX", nullable: true })
   description!: string | null;
 
+  @Column({ type: "nvarchar", length: "MAX", nullable: true })
+  analysisHints!: string | null;
+
   @Column({ type: "nvarchar", length: 50, nullable: true })
   llmProvider!: string | null;
 

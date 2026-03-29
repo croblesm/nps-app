@@ -77,6 +77,70 @@ THEN a "click to rename" hint SHALL appear next to the name to indicate editabil
 
 ---
 
+### Requirement: AI theme discovery uses PM analysis hints
+
+The AI Theme Discovery agent SHALL incorporate the PM's analysis hints (from the project's "Analysis Focus" field) into its prompt when discovering categories.
+
+#### Scenario: Analysis hints guide discovery
+
+WHEN the project has analysis hints set (e.g., "Focus on competitor comparisons with SSMS")
+THEN the AI SHALL prioritize discovering categories that match those hints, if the data supports them.
+
+#### Scenario: No analysis hints
+
+WHEN the project has no analysis hints
+THEN the AI SHALL discover categories based solely on comment content without additional guidance.
+
+---
+
+### Requirement: User can ask AI to suggest more categories
+
+After initial discovery, the user SHALL be able to click "Suggest More Categories" to ask the AI to propose 2-3 additional themes that are missing from the current list.
+
+#### Scenario: Suggest more returns new categories
+
+WHEN the user clicks "Suggest More Categories"
+THEN the AI receives the current category names and a fresh sample of comments, and proposes 2-3 categories NOT already in the list.
+
+#### Scenario: Suggested categories are added to the list
+
+WHEN the AI returns suggested categories
+THEN they are inserted into the list above "General Feedback" with descriptions and sample comments.
+
+---
+
+### Requirement: User can add custom category with AI scan
+
+The "Add Custom Category" form SHALL include a name field, a description field, and an "AI Scan" button that validates the theme against actual comments.
+
+#### Scenario: AI scan confirms valid theme
+
+WHEN the user enters a category name and description and clicks "AI Scan"
+THEN the AI scans sample comments and returns: whether the theme is valid (3+ matches), match count, matching sample comments, and a refined description.
+
+#### Scenario: AI scan shows weak theme
+
+WHEN the AI scan finds fewer than 3 matching comments
+THEN the result is shown with a warning that the theme may not be strong enough, but the user can still add it.
+
+#### Scenario: Custom category added without scan
+
+WHEN the user enters a name and clicks "Add Category" without scanning
+THEN the category is added with the user's description and no sample comments.
+
+---
+
+### Requirement: User can re-discover categories
+
+The categories page SHALL provide a "Re-discover" option that re-runs AI theme discovery, replacing all current categories.
+
+#### Scenario: Re-discover with confirmation
+
+WHEN the user clicks "Re-discover"
+THEN the system shows a confirmation warning that current categories will be replaced, and re-runs discovery if confirmed.
+
+---
+
 ### Requirement: AI Classifier classifies all comments in batches
 
 After the user confirms categories, the AI Classifier agent SHALL classify ALL comments into the confirmed categories. Classification MUST be performed in batches. Each classification MUST include a confidence score between 0 and 1 and a brief reasoning string.

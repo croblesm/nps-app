@@ -2,30 +2,35 @@ import { NextResponse } from "next/server";
 import { generateObject } from "ai";
 import { getDb } from "@/lib/db";
 import { getActiveModel } from "@/lib/ai/get-model";
-import { parseBody, projectIdBodySchema } from "@/lib/api/schemas";
+import { parseBody, categorizeActionSchema } from "@/lib/api/schemas";
 import {
   themeDiscoverySchema,
   buildThemeDiscoveryPrompt,
+  suggestMoreSchema,
+  buildSuggestMorePrompt,
+  themeScanSchema,
+  buildThemeScanPrompt,
 } from "@/lib/ai/prompts";
 import { stratifiedSample } from "@/lib/csv/sampler";
 
 export async function POST(request: Request) {
-  const parsed = await parseBody(request, projectIdBodySchema);
+  const parsed = await parseBody(request, categorizeActionSchema);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
-  const { projectId } = parsed.data;
+  const { projectId, action, existingCategories, themeName, themeDescription } =
+    parsed.data;
 
   const db = await getDb();
 
-  // Get project info
   const { Project } = await import("@/lib/db/entities/Project");
-  const project = await db.getRepository(Project).findOneBy({ id: projectId });
+  const project = await db
+    .getRepository(Project)
+    .findOneBy({ id: projectId });
   if (!project) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
 
-  // Get all comments with text
   const { Comment } = await import("@/lib/db/entities/Comment");
   const allComments = await db.getRepository(Comment).find({
     where: { projectId },
@@ -47,16 +52,81 @@ export async function POST(request: Request) {
     );
   }
 
-  // Stratified sample
   const sample = stratifiedSample(commentsWithText, 75);
 
   try {
     const model = await getActiveModel();
 
+    if (action === "suggest-more") {
+      const prompt = buildSuggestMorePrompt(
+        project.name,
+        existingCategories || [],
+        sample,
+        project.analysisHints
+      );
+
+      const { object } = await generateObject({
+        model,
+        schema: suggestMoreSchema,
+        prompt,
+      });
+
+      const categoriesWithSamples = object.categories.map((cat) => ({
+        ...cat,
+        sampleComments: cat.sampleIndices
+          .map((idx) => {
+            const comment = sample.find((s) => s.index === idx);
+            return comment
+              ? { index: idx, text: comment.text, nps: comment.nps }
+              : null;
+          })
+          .filter(Boolean),
+      }));
+
+      return NextResponse.json({ categories: categoriesWithSamples });
+    }
+
+    if (action === "scan-for-theme") {
+      if (!themeName) {
+        return NextResponse.json(
+          { error: "themeName is required for scan-for-theme" },
+          { status: 400 }
+        );
+      }
+
+      const prompt = buildThemeScanPrompt(
+        themeName,
+        themeDescription || themeName,
+        sample
+      );
+
+      const { object } = await generateObject({
+        model,
+        schema: themeScanSchema,
+        prompt,
+      });
+
+      const sampleComments = object.sampleIndices
+        .map((idx) => {
+          const comment = sample.find((s) => s.index === idx);
+          return comment
+            ? { index: idx, text: comment.text, nps: comment.nps }
+            : null;
+        })
+        .filter(Boolean);
+
+      return NextResponse.json({
+        ...object,
+        sampleComments,
+      });
+    }
+
+    // Default: discover
     const prompt = buildThemeDiscoveryPrompt(
       project.name,
       project.description,
-      sample
+      sample,
+      project.analysisHints
     );
 
     const { object } = await generateObject({
@@ -65,13 +135,14 @@ export async function POST(request: Request) {
       prompt,
     });
 
-    // Map sample indices back to actual comments for display
     const categoriesWithSamples = object.categories.map((cat) => ({
       ...cat,
       sampleComments: cat.sampleIndices
         .map((idx) => {
           const comment = sample.find((s) => s.index === idx);
-          return comment ? { index: idx, text: comment.text, nps: comment.nps } : null;
+          return comment
+            ? { index: idx, text: comment.text, nps: comment.nps }
+            : null;
         })
         .filter(Boolean),
     }));

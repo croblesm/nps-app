@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chmod +x /Users/carlos/nps-app/.claude/hooks/enforce-spec-update.sh /Users/carlos/nps-app/.claude/hooks/remind-spec-update.sh)"
+    ]
+  }
+}

@@ -10,9 +10,14 @@ The system SHALL allow a user to create a new project by providing a tool name a
 
 #### Scenario: User creates a project with valid inputs
 
-WHEN the user submits a new project form with a tool name and description
-THEN the system SHALL create a project record in SQL Server 2025 with a unique ID, the provided tool name, the provided description, and a creation timestamp
+WHEN the user submits a new project form with a tool name, description, and optional analysis hints
+THEN the system SHALL create a project record in SQL Server 2025 with a unique ID, the provided tool name, description, analysis hints, and a creation timestamp
 AND the system SHALL navigate the user to the newly created project's workflow.
+
+#### Scenario: User provides analysis hints
+
+WHEN the user fills in the "Analysis Focus" field with guidance like "Focus on competitor comparisons with SSMS and Azure Data Studio"
+THEN the system SHALL store the analysis hints on the project record and pass them to the AI theme discovery agent as guidance.
 
 #### Scenario: User submits a project with missing required fields
 

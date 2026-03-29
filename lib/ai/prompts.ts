@@ -83,16 +83,21 @@ export type ThemeDiscoveryOutput = z.infer<typeof themeDiscoverySchema>;
 export function buildThemeDiscoveryPrompt(
   productName: string,
   productDescription: string | null,
-  comments: { index: number; text: string; nps: number | null }[]
+  comments: { index: number; text: string; nps: number | null }[],
+  analysisHints?: string | null
 ): string {
   const commentList = comments
     .map((c) => `[${c.index}] (NPS: ${c.nps ?? "N/A"}) ${c.text}`)
     .join("\n");
 
+  const hintsSection = analysisHints
+    ? `\n## Analysis Focus (from the product manager)\n${analysisHints}\nMake sure your proposed categories cover these areas if the data supports them.\n`
+    : "";
+
   return `You are analyzing NPS feedback for "${productName}"${
     productDescription ? ` — ${productDescription}` : ""
   }.
-
+${hintsSection}
 ## Sample Comments
 ${commentList}
 
@@ -108,6 +113,89 @@ Guidelines:
 - Do NOT create a "General Feedback" category — that will be added automatically as a fallback
 - Consider both positive and negative themes
 - If many comments compare the product to competitors, that could be its own category`;
+}
+
+// ── Agent 2: Suggest More Categories ─────────────────────────────────
+
+export const suggestMoreSchema = z.object({
+  categories: z.array(
+    z.object({
+      name: z.string().describe("Short, descriptive category name"),
+      description: z
+        .string()
+        .describe("What types of comments fall into this category"),
+      sampleIndices: z
+        .array(z.number())
+        .describe("Indices of sample comments that match this category"),
+    })
+  ),
+});
+
+export function buildSuggestMorePrompt(
+  productName: string,
+  existingCategories: string[],
+  comments: { index: number; text: string; nps: number | null }[],
+  analysisHints?: string | null
+): string {
+  const commentList = comments
+    .map((c) => `[${c.index}] (NPS: ${c.nps ?? "N/A"}) ${c.text}`)
+    .join("\n");
+
+  const hintsSection = analysisHints
+    ? `\nThe PM has asked to focus on: ${analysisHints}\n`
+    : "";
+
+  return `You are analyzing NPS feedback for "${productName}".
+${hintsSection}
+## Existing Categories
+${existingCategories.map((c) => `- ${c}`).join("\n")}
+
+## Sample Comments (may include comments not well-covered by existing categories)
+${commentList}
+
+## Your Task
+Propose 2-3 ADDITIONAL categories that are missing from the existing list. Focus on themes that appear in the comments but aren't covered by any existing category. Each category should:
+- Have a clear, concise name
+- Include a description
+- Reference 3-5 sample comment indices that match
+
+Do NOT repeat existing categories. Do NOT propose "General Feedback".`;
+}
+
+// ── Agent 2: Scan for Specific Theme ─────────────────────────────────
+
+export const themeScanSchema = z.object({
+  isValid: z.boolean().describe("Whether enough comments match this theme to justify a category"),
+  matchCount: z.number().describe("How many of the provided comments match this theme"),
+  sampleIndices: z.array(z.number()).describe("Indices of comments that match"),
+  refinedDescription: z.string().describe("A refined description of the category based on matching comments"),
+});
+
+export function buildThemeScanPrompt(
+  themeName: string,
+  themeDescription: string,
+  comments: { index: number; text: string; nps: number | null }[]
+): string {
+  const commentList = comments
+    .map((c) => `[${c.index}] (NPS: ${c.nps ?? "N/A"}) ${c.text}`)
+    .join("\n");
+
+  return `You are scanning NPS comments to see if "${themeName}" is a valid category.
+
+## Theme Definition
+Name: ${themeName}
+Description: ${themeDescription}
+
+## Comments to Scan
+${commentList}
+
+## Your Task
+1. Scan through the comments and find ones that match this theme
+2. Determine if there are enough matching comments (at least 3) to justify this as a category
+3. Return the matching comment indices
+4. Provide a refined description based on what you actually found in the data
+
+Be thorough — look for synonyms, related concepts, and indirect references.`;
 }
 
 // ── Agent 2b: Classification ─────────────────────────────────────────

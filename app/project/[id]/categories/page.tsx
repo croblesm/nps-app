@@ -10,13 +10,6 @@ interface SampleComment {
   nps: number | null;
 }
 
-interface ProposedCategory {
-  name: string;
-  description: string;
-  sampleComments: SampleComment[];
-  sampleIndices: number[];
-}
-
 interface EditableCategory {
   name: string;
   description: string;
@@ -36,8 +29,21 @@ export default function CategoriesPage() {
   const [error, setError] = useState("");
   const [discovered, setDiscovered] = useState(false);
   const [stats, setStats] = useState({ sampleSize: 0, totalComments: 0 });
-  const [newCatName, setNewCatName] = useState("");
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
+
+  // Enhanced add category
+  const [newCatName, setNewCatName] = useState("");
+  const [newCatDesc, setNewCatDesc] = useState("");
+  const [scanning, setScanning] = useState(false);
+  const [scanResult, setScanResult] = useState<{
+    isValid: boolean;
+    matchCount: number;
+    refinedDescription: string;
+    sampleComments: SampleComment[];
+  } | null>(null);
+
+  // Suggest more
+  const [suggesting, setSuggesting] = useState(false);
 
   async function handleDiscover() {
     setDiscovering(true);
@@ -47,7 +53,7 @@ export default function CategoriesPage() {
       const res = await fetch("/api/ai/categorize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ projectId }),
+        body: JSON.stringify({ projectId, action: "discover" }),
       });
 
       const data = await res.json();
@@ -56,41 +62,139 @@ export default function CategoriesPage() {
         return;
       }
 
-      const proposed: ProposedCategory[] = data.categories;
       setStats({
         sampleSize: data.sampleSize,
         totalComments: data.totalComments,
       });
 
-      // Convert to editable — deduplicate "General Feedback" if AI proposed one
-      const aiCategories = proposed.filter(
-        (c) => c.name.toLowerCase() !== "general feedback"
+      const aiCategories = (data.categories || []).filter(
+        (c: { name: string }) =>
+          c.name.toLowerCase() !== "general feedback"
       );
-      const editable: EditableCategory[] = [
-        ...aiCategories.map((c) => ({
+
+      setCategories([
+        ...aiCategories.map((c: { name: string; description: string; sampleComments: SampleComment[] }) => ({
           name: c.name,
           description: c.description,
-          sampleComments: c.sampleComments,
+          sampleComments: c.sampleComments || [],
           isFallback: false,
           removed: false,
         })),
         {
           name: "General Feedback",
-          description:
-            "Comments that do not clearly fit any other category",
+          description: "Comments that do not clearly fit any other category",
           sampleComments: [],
           isFallback: true,
           removed: false,
         },
-      ];
-
-      setCategories(editable);
+      ]);
       setDiscovered(true);
     } catch {
       setError("Failed to run AI discovery. Check your LLM settings.");
     } finally {
       setDiscovering(false);
     }
+  }
+
+  async function handleSuggestMore() {
+    setSuggesting(true);
+    setError("");
+
+    try {
+      const existingNames = categories
+        .filter((c) => !c.removed)
+        .map((c) => c.name);
+
+      const res = await fetch("/api/ai/categorize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          projectId,
+          action: "suggest-more",
+          existingCategories: existingNames,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Suggest more failed");
+        return;
+      }
+
+      const newCats: EditableCategory[] = (data.categories || [])
+        .filter(
+          (c: { name: string }) =>
+            c.name.toLowerCase() !== "general feedback"
+        )
+        .map((c: { name: string; description: string; sampleComments: SampleComment[] }) => ({
+          name: c.name,
+          description: c.description,
+          sampleComments: c.sampleComments || [],
+          isFallback: false,
+          removed: false,
+        }));
+
+      // Insert before General Feedback
+      setCategories((prev) => [
+        ...prev.filter((c) => !c.isFallback),
+        ...newCats,
+        ...prev.filter((c) => c.isFallback),
+      ]);
+    } catch {
+      setError("Failed to get suggestions. Check your LLM settings.");
+    } finally {
+      setSuggesting(false);
+    }
+  }
+
+  async function handleScanTheme() {
+    if (!newCatName.trim()) return;
+    setScanning(true);
+    setScanResult(null);
+
+    try {
+      const res = await fetch("/api/ai/categorize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          projectId,
+          action: "scan-for-theme",
+          themeName: newCatName.trim(),
+          themeDescription: newCatDesc.trim() || newCatName.trim(),
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setScanResult(data);
+      }
+    } catch {
+      setError("AI scan failed");
+    } finally {
+      setScanning(false);
+    }
+  }
+
+  function handleAddCustom() {
+    if (!newCatName.trim()) return;
+    const desc =
+      scanResult?.refinedDescription || newCatDesc.trim() || "Custom category";
+    const samples = scanResult?.sampleComments || [];
+
+    setCategories((prev) => [
+      ...prev.filter((c) => !c.isFallback),
+      {
+        name: newCatName.trim(),
+        description: desc,
+        sampleComments: samples,
+        isFallback: false,
+        removed: false,
+      },
+      ...prev.filter((c) => c.isFallback),
+    ]);
+    setNewCatName("");
+    setNewCatDesc("");
+    setScanResult(null);
   }
 
   function handleRename(idx: number, name: string) {
@@ -110,22 +214,6 @@ export default function CategoriesPage() {
     setCategories((prev) =>
       prev.map((c, i) => (i === idx ? { ...c, removed: false } : c))
     );
-  }
-
-  function handleAddCustom() {
-    if (!newCatName.trim()) return;
-    setCategories((prev) => [
-      ...prev.filter((c) => !c.isFallback),
-      {
-        name: newCatName.trim(),
-        description: "Custom category",
-        sampleComments: [],
-        isFallback: false,
-        removed: false,
-      },
-      ...prev.filter((c) => c.isFallback),
-    ]);
-    setNewCatName("");
   }
 
   async function handleConfirm() {
@@ -162,11 +250,15 @@ export default function CategoriesPage() {
         AI will analyze your comments and propose thematic categories
       </p>
 
-      {!discovered && (
+      {/* Discover / Re-discover */}
+      {!discovered ? (
         <>
           {discovering && (
             <div className="mb-4 p-3 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-              <Spinner size="sm" label="Discovering thematic categories from your comments with AI..." />
+              <Spinner
+                size="sm"
+                label="Discovering thematic categories from your comments with AI..."
+              />
             </div>
           )}
           <button
@@ -174,11 +266,36 @@ export default function CategoriesPage() {
             disabled={discovering}
             className="px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 font-medium"
           >
-            {discovering
-              ? <Spinner size="sm" label="Discovering themes with AI..." />
-              : "Discover Categories"}
+            {discovering ? (
+              <Spinner size="sm" label="Discovering..." />
+            ) : (
+              "Discover Categories"
+            )}
           </button>
         </>
+      ) : (
+        <div className="flex items-center gap-4 mb-4">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Analyzed {stats.sampleSize} of {stats.totalComments} comments.{" "}
+            {activeCount} categories active.
+          </p>
+          <button
+            onClick={() => {
+              if (
+                confirm(
+                  "Re-discover will replace all current categories. Continue?"
+                )
+              ) {
+                setDiscovered(false);
+                setCategories([]);
+                handleDiscover();
+              }
+            }}
+            className="text-xs text-blue-500 hover:text-blue-400"
+          >
+            Re-discover
+          </button>
+        </div>
       )}
 
       {error && (
@@ -187,13 +304,9 @@ export default function CategoriesPage() {
         </div>
       )}
 
+      {/* Category list */}
       {discovered && (
         <div className="space-y-4">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Analyzed {stats.sampleSize} of {stats.totalComments} comments.{" "}
-            {activeCount} categories active.
-          </p>
-
           {categories.map((cat, idx) => (
             <div
               key={idx}
@@ -225,7 +338,9 @@ export default function CategoriesPage() {
                           ? "cursor-pointer hover:text-blue-500 group"
                           : ""
                       }`}
-                      onClick={() => !cat.isFallback && setEditingIdx(idx)}
+                      onClick={() =>
+                        !cat.isFallback && setEditingIdx(idx)
+                      }
                     >
                       {cat.name}
                       {cat.isFallback ? (
@@ -247,7 +362,9 @@ export default function CategoriesPage() {
                 {!cat.isFallback && (
                   <button
                     onClick={() =>
-                      cat.removed ? handleRestore(idx) : handleRemove(idx)
+                      cat.removed
+                        ? handleRestore(idx)
+                        : handleRemove(idx)
                     }
                     className="ml-3 text-sm text-gray-400 hover:text-red-500"
                   >
@@ -256,7 +373,6 @@ export default function CategoriesPage() {
                 )}
               </div>
 
-              {/* Sample comments */}
               {cat.sampleComments.length > 0 && !cat.removed && (
                 <div className="mt-3 space-y-1">
                   <p className="text-xs text-gray-400 uppercase tracking-wide">
@@ -280,37 +396,112 @@ export default function CategoriesPage() {
             </div>
           ))}
 
-          {/* Add custom category */}
-          <div className="flex gap-2 mt-4">
-            <input
-              value={newCatName}
-              onChange={(e) => setNewCatName(e.target.value)}
-              placeholder="Add custom category..."
-              onKeyDown={(e) => e.key === "Enter" && handleAddCustom()}
-              className="flex-1 p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm"
-            />
-            <button
-              onClick={handleAddCustom}
-              disabled={!newCatName.trim()}
-              className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 text-sm"
-            >
-              Add
-            </button>
+          {/* Suggest More */}
+          <div className="flex items-center gap-2">
+            {suggesting && (
+              <Spinner size="sm" label="Asking AI for more themes..." />
+            )}
+            {!suggesting && (
+              <button
+                onClick={handleSuggestMore}
+                className="text-sm text-blue-500 hover:text-blue-400"
+              >
+                Suggest More Categories
+              </button>
+            )}
           </div>
 
+          {/* Add Custom Category — Enhanced */}
+          <div className="p-4 rounded-lg border border-dashed border-gray-300 dark:border-gray-700 space-y-3">
+            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+              Add Custom Category
+            </p>
+            <input
+              value={newCatName}
+              onChange={(e) => {
+                setNewCatName(e.target.value);
+                setScanResult(null);
+              }}
+              placeholder="Category name (e.g., Competitor Comparisons)"
+              className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm"
+            />
+            <input
+              value={newCatDesc}
+              onChange={(e) => setNewCatDesc(e.target.value)}
+              placeholder="Description (e.g., Comments comparing to SSMS or Azure Data Studio)"
+              className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={handleScanTheme}
+                disabled={scanning || !newCatName.trim()}
+                className="px-3 py-1.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 text-sm"
+              >
+                {scanning ? (
+                  <Spinner size="sm" label="Scanning..." />
+                ) : (
+                  "AI Scan"
+                )}
+              </button>
+              <button
+                onClick={handleAddCustom}
+                disabled={!newCatName.trim()}
+                className="px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 text-sm"
+              >
+                Add Category
+              </button>
+            </div>
+
+            {/* Scan results */}
+            {scanResult && (
+              <div
+                className={`p-3 rounded text-sm ${
+                  scanResult.isValid
+                    ? "bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300"
+                    : "bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300"
+                }`}
+              >
+                <p className="font-medium">
+                  {scanResult.isValid
+                    ? `Found ${scanResult.matchCount} matching comments`
+                    : `Only ${scanResult.matchCount} comments match — may not be a strong category`}
+                </p>
+                <p className="mt-1 text-xs opacity-80">
+                  {scanResult.refinedDescription}
+                </p>
+                {scanResult.sampleComments.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    {scanResult.sampleComments.slice(0, 3).map((sc, i) => (
+                      <div
+                        key={i}
+                        className="pl-2 border-l-2 border-current opacity-70 text-xs"
+                      >
+                        NPS {sc.nps ?? "?"} — {sc.text.slice(0, 120)}
+                        {sc.text.length > 120 ? "..." : ""}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Confirm */}
           {saving && (
-            <div className="mt-4 p-3 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-              <Spinner size="sm" label="Saving categories configuration..." />
+            <div className="p-3 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+              <Spinner size="sm" label="Saving categories..." />
             </div>
           )}
           <button
             onClick={handleConfirm}
             disabled={saving || activeCount < 2}
-            className="mt-4 px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 font-medium"
+            className="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 font-medium"
           >
-            {saving
-              ? <Spinner size="sm" label="Saving..." />
-              : `Confirm ${activeCount} Categories & Continue`}
+            {saving ? (
+              <Spinner size="sm" label="Saving..." />
+            ) : (
+              `Confirm ${activeCount} Categories & Continue`
+            )}
           </button>
         </div>
       )}

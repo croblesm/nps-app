@@ -183,7 +183,7 @@ You can change your LLM provider at any time from the Settings page. The active 
 ## Usage Workflow
 
 ### Step 1: Create a Project
-Click "New Project", enter the product name and description (e.g., "MSSQL VS Code Extension").
+Click "New Project", enter the product name and description (e.g., "MSSQL VS Code Extension"). Optionally add **Analysis Focus** hints to guide the AI — e.g., "Focus on competitor comparisons with SSMS and Azure Data Studio, performance issues, and missing features."
 
 ### Step 2: Upload CSV Data
 Drag and drop your NPS survey CSV file. The system shows a 5-row preview, then validates the file:
@@ -203,8 +203,16 @@ Toggle columns on/off and click "Confirm Structure".
 Click "Discover Categories" — the AI agent samples 75 comments (stratified across promoters/passives/detractors) and proposes 5-10 thematic categories with:
 - Category name and description
 - 3-5 sample comments showing why the category was proposed
+- Analysis hints from Step 1 are passed to the AI as guidance
 
-You can rename, remove, or add custom categories. "General Feedback" is always present as a fallback. Click "Confirm Categories".
+After discovery, you can:
+- **Rename** categories (click the name)
+- **Remove** categories you don't need
+- **"Suggest More"** — ask the AI for 2-3 additional themes it missed
+- **Add custom category** with name + description + **"AI Scan"** to validate the theme against your data (shows matching comments and whether the theme is strong enough)
+- **Re-discover** — re-run AI discovery if results aren't satisfactory
+
+"General Feedback" is always present as a mandatory fallback. Click "Confirm Categories" to proceed.
 
 ### Step 5: Classify Comments
 On the Dashboard page, click "Classify All Comments". The AI processes comments in batches of 25, assigning each a category, confidence score, and actionability flag. Empty comments are flagged deterministically as "No Comment".
