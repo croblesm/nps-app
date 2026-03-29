@@ -7,6 +7,7 @@ import { npsLabel } from "@/lib/nps/calculator";
 import { Spinner } from "@/components/ui/Spinner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { ScoreCards } from "@/components/nps/ScoreCards";
 import { CategoryBreakdown } from "@/components/nps/CategoryBreakdown";
@@ -172,9 +173,15 @@ export default function DashboardPage() {
 
   if (loading || !nps) {
     return (
-      <div className="flex items-center gap-2 text-muted-foreground p-8">
-        <Spinner size="sm" />
-        <span>Loading dashboard...</span>
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          {[1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="h-24 rounded-lg" />)}
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-16 rounded-lg" />)}
+        </div>
+        <Skeleton className="h-10 w-full rounded-lg" />
+        <Skeleton className="h-64 w-full rounded-lg" />
       </div>
     );
   }

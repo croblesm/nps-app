@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/Spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardAction } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileText, Download, RefreshCw, Sparkles } from "lucide-react";
@@ -71,9 +72,10 @@ export default function SummaryPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 text-muted-foreground p-8">
-        <Spinner size="sm" />
-        <span>Loading summary...</span>
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-4 w-64" />
+        <Skeleton className="h-96 w-full rounded-lg" />
       </div>
     );
   }

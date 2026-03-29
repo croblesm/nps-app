@@ -18,10 +18,10 @@
 - [x] 0.16 Redesign summary page: proper markdown container, shadcn Button for actions
 - [x] 0.17 Replace all browser confirm() with shadcn AlertDialog
 - [x] 0.18 Replace all inline success/error messages with shadcn Toast (Sonner)
-- [ ] 0.19 Add loading skeletons using shadcn Skeleton component for page load states
-- [ ] 0.20 Verify light mode and dark mode look polished on all pages
-- [ ] 0.21 Write tests for theme toggle, verify component rendering
-- [ ] 0.22 Update specs, README, CLAUDE.md with shadcn/ui documentation
+- [x] 0.19 Add loading skeletons using shadcn Skeleton component for page load states
+- [x] 0.20 Verify light mode and dark mode look polished on all pages
+- [x] 0.21 Write tests for theme toggle, verify component rendering
+- [x] 0.22 Update specs, README, CLAUDE.md with shadcn/ui documentation
 
 ## 1. Authentication Foundation
 
