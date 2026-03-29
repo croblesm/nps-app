@@ -30,13 +30,13 @@
 
 ### 0b. Sidebar Layout + Charts Redesign
 
-- [ ] 0.28 Install dependencies: `npx shadcn@latest add sidebar breadcrumb collapsible` + `npm install recharts`. Verify: components/ui/sidebar.tsx exists, recharts in package.json
-- [ ] 0.29 Create `components/app-sidebar.tsx` — two modes: home (Projects, Settings) and project (Dashboard, Data, Categories, Noise, Summary, GitHub). Uses usePathname + useParams to detect context. Verify: renders in isolation
-- [ ] 0.30 Create `components/top-bar.tsx` — minimal h-12 bar with SidebarTrigger, Breadcrumb, LLM status badge, theme toggle. Verify: renders in isolation
-- [ ] 0.31 Add sidebar user footer — avatar, name, email from useSession, DropdownMenu with Account Settings + Sign Out. Verify: sign-out works
-- [ ] 0.32 Update `app/layout.tsx` — replace Header with SidebarProvider + AppSidebar + SidebarInset + TopBar. Verify: home page renders with sidebar
-- [ ] 0.33 Simplify `app/project/[id]/layout.tsx` — remove project header + tab navigation (sidebar handles it). Keep AssistantContextProvider + content wrapper. Verify: all 6 project pages still load
-- [ ] 0.34 Delete `components/ui/Header.tsx`. Move LLM status logic to top-bar.tsx. Verify: build passes
+- [x] 0.28 Install dependencies: `npx shadcn@latest add sidebar breadcrumb collapsible` + `npm install recharts`. Verify: components/ui/sidebar.tsx exists, recharts in package.json
+- [x] 0.29 Create `components/app-sidebar.tsx` — two modes: home (Projects, Settings) and project (Dashboard, Data, Categories, Noise, Summary, GitHub). Uses usePathname + useParams to detect context. Verify: renders in isolation
+- [x] 0.30 Create `components/top-bar.tsx` — minimal h-12 bar with SidebarTrigger, Breadcrumb, LLM status badge, theme toggle. Verify: renders in isolation
+- [x] 0.31 Add sidebar user footer — avatar, name, email from useSession, DropdownMenu with Account Settings + Sign Out. Verify: sign-out works
+- [x] 0.32 Update `app/layout.tsx` — replace Header with SidebarProvider + AppSidebar + SidebarInset + TopBar. Verify: home page renders with sidebar
+- [x] 0.33 Simplify `app/project/[id]/layout.tsx` — remove project header + tab navigation (sidebar handles it). Keep AssistantContextProvider + content wrapper. Verify: all 6 project pages still load
+- [x] 0.34 Delete `components/ui/Header.tsx` (replaced by TopBar + sidebar). Move LLM status logic to top-bar.tsx. Verify: build passes
 - [ ] 0.35 Refactor AssistantPanel from floating panel to sidebar-integrated. Sheet trigger in sidebar footer. Verify: assistant opens from sidebar
 - [ ] 0.36 Upload page: detect existing data on mount, show success card + "Replace Data" button. Hide upload zone when data exists. Verify: shows correct state for existing project
 - [ ] 0.37 Categories page: add visible Pencil icon next to each category name (always visible). Verify: pencil shows without hover
