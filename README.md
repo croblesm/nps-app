@@ -319,7 +319,7 @@ npm test              # Run all tests once
 npm run test:watch    # Run tests in watch mode
 ```
 
-**Test suites (67 tests):**
+**Test suites (87 tests):**
 
 | Suite | File | What it covers |
 |-------|------|---------------|
@@ -329,6 +329,7 @@ npm run test:watch    # Run tests in watch mode
 | API Schemas | `__tests__/lib/schemas.test.ts` | Zod validation for all API inputs: project creation, LLM config, noise filters, categories, structure, UUID format |
 | Encryption | `__tests__/lib/encryption.test.ts` | AES-256-GCM round-trip, random IV uniqueness, unicode support, tamper detection |
 | API Error Handling | `__tests__/lib/api-error-handling.test.ts` | Invalid JSON, empty body, missing fields, wrong types, valid input pass-through, UUID validation, null body |
+| AI Prompts | `__tests__/lib/prompts.test.ts` | Theme discovery (with/without hints), suggest-more (existing categories, hints), scan-for-theme (name, description, match threshold) |
 
 ## Scripts
 
