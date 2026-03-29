@@ -96,6 +96,15 @@ THEN the system SHALL persist the configuration with the custom server URL and t
 
 ---
 
+### Requirement: Header updates immediately after saving configuration
+When the user saves an LLM configuration, the active provider indicator in the header SHALL update immediately without requiring a page refresh.
+
+#### Scenario: Save triggers header update
+- **WHEN** the user saves a new LLM configuration on the settings page
+- **THEN** the header active provider indicator updates immediately to show the new provider and model name
+
+---
+
 ### Requirement: Ollama model auto-detection
 
 When the user selects Ollama as the provider, the system SHALL auto-detect installed models from the Ollama server and display them as a dropdown selector instead of a free-text input.
