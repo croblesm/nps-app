@@ -56,37 +56,42 @@ app/                          # Next.js App Router pages
       github/                 #   GitHub integration (connect repo, create issues)
         issues/               #   Issue creation from categories/comments
     settings/
+      embeddings/               #   Embedding provider info (GET, read-only)
+      ollama-models/            #   Ollama model discovery
+      test/                     #   LLM connection test
     upload/
   admin/                      # Admin settings page (user management)
   login/                      # Login page (NextAuth)
   register/                   # Registration page
-  project/[id]/               # Project pages with top-nav + tabs layout
+  project/[id]/               # Project pages (sidebar navigation)
     {upload,structure,categories,dashboard,noise,summary}/
     chat/                     #   RAG chat analysis page
-    github/                   #   GitHub integration page
+    github/                   #   GitHub Issues page (config + issues tabs)
   settings/                   # LLM provider configuration
   new-project/                # Project creation
 components/
-  app-sidebar.tsx             # Collapsible left sidebar (project nav + user footer)
-  top-bar.tsx                 # Minimal h-12 top bar (sidebar trigger, breadcrumb, LLM status, theme)
+  layout-wrapper.tsx          # Auth-gated layout: hides sidebar/topbar on /login, /register
+  app-sidebar.tsx             # Collapsible left sidebar (project nav + back-to-projects + user footer)
+  top-bar.tsx                 # Minimal h-12 top bar (sidebar trigger, breadcrumb, LLM status, theme, user avatar)
   providers.tsx               # SessionProvider + ThemeProvider wrapper
   nps/                        # NPS-specific components
-    NpsDonutChart.tsx          #   Recharts donut chart (dashboard)
-    NpsVisualCards.tsx         #   Recharts pie chart + legend (summary)
-    CategoryBarChart.tsx       #   Recharts horizontal bar chart (dashboard)
+    NpsVisualCards.tsx         #   Recharts pie chart + quotes (summary page)
+    ScoreCards.tsx             #   NPS score cards with emoji indicators
+    CategoryBreakdown.tsx     #   Category grid with "Create Issue" actions
+    ChatPanel.tsx             #   RAG chat panel (dashboard FAB)
   ui/                         # Shared UI components (shadcn/ui, includes sidebar.tsx)
 lib/
   ai/                         # LLM providers, prompts, encryption
     get-embedding-config.ts   #   Smart embedding provider resolution (auto-finds OpenAI/Azure/Ollama)
     assistant-prompts.ts      #   Page-aware system prompt builder for AI assistant
-  auth/                       # Auth utilities
-    get-user.ts               #   Server-side user resolution from session
   csv/                        # CSV validator, sampler
   db/                         # TypeORM entities, data source, connection
     entities/                 #   Includes GitHubRepo, GitHubIssue, ChatMessage entities
   nps/                        # NPS calculation logic
-auth.ts                       # NextAuth.js config (Node runtime, DB adapter)
-auth.config.ts                # NextAuth.js config (Edge-compatible, no DB)
+lib/auth/
+  index.ts                    # NextAuth.js config (Node runtime, providers, DB)
+  config.ts                   # NextAuth.js config (Edge-compatible, JWT/session callbacks)
+  get-user.ts                 # Server-side user resolution from session
 openspec/                     # Spec-driven development artifacts
 ```
 
@@ -104,7 +109,8 @@ openspec/                     # Spec-driven development artifacts
 - TypeORM entities in `lib/db/entities/` — use string-based relation targets, import dynamically in API routes to avoid circular deps
 - All AI calls use Vercel AI SDK with Zod-validated structured output
 - API routes use `getDb()` for lazy-initialized database connection
-- Auth uses Edge-compatible config split: `auth.config.ts` (Edge middleware) and `auth.ts` (Node runtime with DB access). `SessionProvider` wraps the app in `components/providers.tsx`
+- Auth uses Edge-compatible config split: `lib/auth/config.ts` (Edge middleware) and `lib/auth/index.ts` (Node runtime with providers + DB). `SessionProvider` wraps the app in `components/providers.tsx`. JWT callback handles `trigger === "update"` for client-side session updates (e.g., name change)
+- `components/layout-wrapper.tsx` conditionally renders the sidebar/topbar — auth pages (`/login`, `/register`) get a clean layout without navigation chrome. Do NOT use `useSession()` for this check — `AUTH_REQUIRED=false` means no session exists, which would hide the layout entirely
 - GitHub integration entities (`GitHubRepo`, `GitHubIssue`) link to projects; Octokit handles GitHub API calls
 - `ChatMessage` entity stores RAG chat history; comment embeddings stored as SQL Server VECTOR type for cosine similarity search
 - The `/api/ai/embed` route uses SSE (Server-Sent Events) streaming via `ReadableStream` + `text/event-stream` content type to push real-time progress to the client; follow this pattern for any long-running pipeline routes

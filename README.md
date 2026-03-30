@@ -14,16 +14,16 @@ An AI-powered NPS (Net Promoter Score) analysis platform for product managers. U
 - **Category management** — Rename, remove, or add custom categories; "General Feedback" as mandatory fallback
 - **AI bulk classification** — Classifies all comments into confirmed categories with confidence scores
 - **Non-actionable detection** — AI flags nonsensical, single-word, redacted, or purely emotional feedback
-- **Interactive dashboard** — Clickable score cards with gradients, multi-category filter chips, category breakdown grid, full-text search, sortable paginated table
-- **Sidebar navigation** — Collapsible left sidebar with project nav, user footer with sign-out, breadcrumb top bar
-- **Noise filters** — Keyword-based filters that can exclude comments from NPS score calculation
+- **Interactive dashboard** — Clickable score cards with emoji indicators, multi-category filter chips, category breakdown grid, full-text search, sortable paginated table. Noise filter banner shows active filter names
+- **Sidebar navigation** — Collapsible left sidebar with project nav, "Back to Projects" link, user footer with sign-out, breadcrumb top bar with user avatar
+- **Noise filters** — Keyword-based filters that can exclude comments from NPS score calculation. Expandable cards with match counts and edit support
 - **AI summary report** — On-demand markdown report with executive summary, theme analysis, key quotes, and recommendations
 - **RAG chat analysis** — Ask natural language questions about your NPS data via a floating chat button (bottom-right FAB on the dashboard); vector embeddings + cosine similarity search retrieve relevant comments, LLM generates cited answers
 - **Smart embedding provider** — Auto-detects an embedding-capable provider (OpenAI, Azure OpenAI, Ollama) even when the default LLM is Anthropic; Ollama auto-pulls the embedding model (`nomic-embed-text`) if it is not installed
 - **SSE embedding pipeline** — The `/api/ai/embed` route streams progress updates via Server-Sent Events so the UI can show real-time batch progress
 - **GitHub integration** — Connect a repo, export NPS categories as GitHub issues with impact summaries, representative quotes, and recommendations; auto-creates labels; tracks all created issues
 - **Data export** — Download filtered CSV or project metadata JSON (categories, noise filters, structure)
-- **Multi-provider LLM** — Bring your own API key: Anthropic (priority), OpenAI, Azure OpenAI, or Ollama (local)
+- **Multi-provider LLM** — Bring your own API key: Anthropic (priority), OpenAI, Azure OpenAI, or Ollama (local). Settings page shows both LLM config and embedding provider info with cost note
 - **Dark mode** — Enabled by default, full dark theme throughout
 
 ## Tech Stack
@@ -296,6 +296,9 @@ nps-app/
         github/                     #   GitHub repo connection + issue creation
           issues/                   #   Create issues from categories/comments
       settings/                     # LLM provider configuration
+        embeddings/                 #   Embedding provider info (GET, read-only)
+        ollama-models/              #   Ollama model discovery
+        test/                       #   LLM connection test
       upload/                       # CSV upload + validation
     admin/                          # Admin settings page
     login/                          # Login page
@@ -312,16 +315,21 @@ nps-app/
     settings/                       # LLM settings page
     new-project/                    # Project creation form
   components/
+    layout-wrapper.tsx               # Auth-gated layout (hides sidebar on /login, /register)
+    app-sidebar.tsx                  # Collapsible sidebar (project nav + back-to-projects + user)
+    top-bar.tsx                      # Top bar (sidebar trigger, breadcrumb, LLM status, theme, avatar)
     providers.tsx                    # SessionProvider + ThemeProvider
-    ui/                             # Shared UI components (shadcn/ui)
+    nps/                             # NPS-specific components (ScoreCards, CategoryBreakdown, etc.)
+    ui/                              # Shared UI components (shadcn/ui)
   lib/
-    ai/                             # LLM providers, prompts, encryption
-    auth/                           # Auth utilities (get-user.ts)
-    csv/                            # CSV validator, sampler
-    db/                             # TypeORM entities, data source, connection
-    nps/                            # NPS calculation logic
-  auth.ts                           # NextAuth.js config (Node runtime)
-  auth.config.ts                    # NextAuth.js config (Edge-compatible)
+    ai/                              # LLM providers, prompts, encryption
+    auth/                            # Auth utilities
+      index.ts                       #   NextAuth.js config (Node runtime, providers, DB)
+      config.ts                      #   NextAuth.js config (Edge-compatible, JWT callbacks)
+      get-user.ts                    #   Server-side user resolution from session
+    csv/                             # CSV validator, sampler
+    db/                              # TypeORM entities, data source, connection
+    nps/                             # NPS calculation logic
   openspec/                         # Spec-driven development artifacts
   docker-compose.yml                # SQL Server 2025 container
 ```
@@ -468,7 +476,7 @@ npx skills add bobmatnyc/claude-mpm-skills@api-design-patterns -g -y
 ### Implemented
 
 #### UI Redesign
-shadcn/ui components throughout, Lucide icons, top-nav + tabs layout (Spark app style), loading skeletons, light/dark theme toggle.
+shadcn/ui components throughout, Lucide icons, collapsible sidebar layout with breadcrumb top bar, loading skeletons, light/dark theme toggle. Auth-gated layout hides sidebar on login/register pages. "Back to Projects" link in sidebar when inside a project. Noise filter names shown in dashboard banner. Embedding configuration card in Settings. "Chat with your data" FAB label. "GitHub Issues" sidebar label.
 
 #### Authentication (NextAuth.js v5)
 Full authentication system with three providers:
@@ -481,8 +489,10 @@ Key features:
 - Admin settings page (`/admin`) for user management
 - Session-based project scoping — each user sees only their own projects
 - `AUTH_REQUIRED=false` environment variable disables auth entirely for local development
-- Edge-compatible config split: `auth.config.ts` (Edge middleware) and `auth.ts` (Node runtime with DB adapter)
+- Edge-compatible config split: `lib/auth/config.ts` (Edge middleware) and `lib/auth/index.ts` (Node runtime with DB adapter)
+- JWT callback handles `trigger === "update"` for client-side session updates (e.g., name change)
 - `SessionProvider` wraps the app via `components/providers.tsx`
+- `LayoutWrapper` (`components/layout-wrapper.tsx`) hides sidebar/topbar on auth pages
 
 #### GitHub Integration (Octokit)
 Connect a GitHub repository to any project and export NPS insights as GitHub issues:
