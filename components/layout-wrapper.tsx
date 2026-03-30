@@ -1,8 +1,8 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+
 import { AppSidebar } from "@/components/app-sidebar";
 import { TopBar } from "@/components/top-bar";
 
@@ -10,13 +10,12 @@ const AUTH_PAGES = ["/login", "/register"];
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { status } = useSession();
 
   const isAuthPage = AUTH_PAGES.some((p) => pathname.startsWith(p));
-  const isAuthenticated = status === "authenticated";
 
-  // Auth pages or unauthenticated/loading → render without sidebar
-  if (isAuthPage || !isAuthenticated) {
+  // Auth pages render without sidebar/topbar (clean login experience)
+  // All other pages get the full layout — middleware handles route protection
+  if (isAuthPage) {
     return <>{children}</>;
   }
 
