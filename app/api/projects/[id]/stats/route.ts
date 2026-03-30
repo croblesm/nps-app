@@ -90,5 +90,6 @@ export async function GET(
     categoryBreakdown,
     noiseExcludedCount,
     activeNoiseFilterCount: noiseFilters.length,
+    activeNoiseFilterNames: noiseFilters.map((f) => f.name),
   });
 }

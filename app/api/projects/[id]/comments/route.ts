@@ -34,7 +34,12 @@ export async function GET(
   }
 
   if (category) {
-    query = query.andWhere("cat.name = :category", { category });
+    const categories = category.split(",").map((c) => c.trim()).filter(Boolean);
+    if (categories.length === 1) {
+      query = query.andWhere("cat.name = :category", { category: categories[0] });
+    } else if (categories.length > 1) {
+      query = query.andWhere("cat.name IN (:...categories)", { categories });
+    }
   }
 
   if (feedbackType === "promoter") {

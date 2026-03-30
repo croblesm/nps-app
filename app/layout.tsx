@@ -2,9 +2,7 @@ import type { Metadata } from "next";
 import { Providers } from "@/components/providers";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
-import { TopBar } from "@/components/top-bar";
+import { LayoutWrapper } from "@/components/layout-wrapper";
 import "./globals.css";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
@@ -32,25 +30,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <SidebarProvider>
-              <AppSidebar />
-              <SidebarInset>
-                <TopBar />
-                <div className="flex-1 p-4 md:p-6">{children}</div>
-                <footer className="border-t border-border py-4 text-center text-xs text-muted-foreground">
-                  &copy; {new Date().getFullYear()}{" "}
-                  <a
-                    href="https://croblesm.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-primary transition-colors"
-                  >
-                    croblesm
-                  </a>
-                  . All rights reserved.
-                </footer>
-              </SidebarInset>
-            </SidebarProvider>
+            <LayoutWrapper>{children}</LayoutWrapper>
             <Toaster />
           </ThemeProvider>
         </Providers>

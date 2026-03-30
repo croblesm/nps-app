@@ -58,6 +58,7 @@ interface NpsStats {
   categoryBreakdown: CategoryBreakdownItem[];
   noiseExcludedCount: number;
   activeNoiseFilterCount: number;
+  activeNoiseFilterNames?: string[];
 }
 
 export default function DashboardPage() {
@@ -471,11 +472,11 @@ export default function DashboardPage() {
       />
 
       {nps.activeNoiseFilterCount > 0 && (
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted border border-border text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 flex-wrap px-3 py-2 rounded-lg bg-muted border border-border text-sm text-muted-foreground">
           <Filter className="size-4 shrink-0" />
-          <Badge variant="outline">
-            {nps.activeNoiseFilterCount} noise filter{nps.activeNoiseFilterCount > 1 ? "s" : ""}
-          </Badge>
+          {nps.activeNoiseFilterNames?.map((name) => (
+            <Badge key={name} variant="outline">{name}</Badge>
+          ))}
           <span>
             {nps.noiseExcludedCount} comment{nps.noiseExcludedCount !== 1 ? "s" : ""} excluded from NPS score
           </span>
@@ -609,7 +610,7 @@ export default function DashboardPage() {
           <>
             <MessageSquare className="size-5" />
             <span className="text-sm font-medium">
-              {chatEnabled ? "Chat" : "Enable Chat"}
+              {chatEnabled ? "Chat with your data" : "Enable Chat"}
             </span>
           </>
         )}

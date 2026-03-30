@@ -15,6 +15,7 @@ import {
   ChevronsUpDown,
   LogOut,
   UserCircle,
+  ArrowLeft,
 } from "lucide-react";
 import {
   Sidebar,
@@ -56,7 +57,7 @@ const PROJECT_NAV_ITEMS = [
   { href: "noise", label: "Noise Filters", icon: Filter },
   { href: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "summary", label: "Summary", icon: FileText },
-  { href: "github", label: "GitHub", icon: GitHubIcon },
+  { href: "github", label: "GitHub Issues", icon: GitHubIcon },
 ];
 
 const HOME_NAV_ITEMS = [
@@ -137,6 +138,21 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
+        {isProjectMode && (
+          <SidebarGroup>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip="Back to Projects"
+                  render={<Link href="/" />}
+                >
+                  <ArrowLeft />
+                  <span>Projects</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroup>
+        )}
         <SidebarGroup>
           <SidebarGroupLabel>
             {isProjectMode ? "Navigation" : "Menu"}

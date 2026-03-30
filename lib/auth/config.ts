@@ -11,9 +11,12 @@ export const authConfig: NextAuthConfig = {
     signIn: "/login",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
+      }
+      if (trigger === "update" && session) {
+        if (session.name) token.name = session.name;
       }
       return token;
     },
@@ -27,6 +30,7 @@ export const authConfig: NextAuthConfig = {
       const isLoggedIn = !!auth?.user;
       const isAuthPage =
         nextUrl.pathname.startsWith("/login") ||
+        nextUrl.pathname.startsWith("/register") ||
         nextUrl.pathname.startsWith("/api/auth");
 
       if (isAuthPage) return true;

@@ -159,6 +159,26 @@
 - [x] 4.14 Write unit tests for buildAssistantSystemPrompt — test each page context type (upload, structure, categories, dashboard, noise, summary). Verify: npm test passes
 - [x] 4.15 Update specs/ai-assistant/spec.md with implementation details. Update README and CLAUDE.md with assistant documentation. Verify: specs match code
 
+## 6. Final Bug Fixes
+
+### 6a. Auth + Layout (Group A)
+- [x] 6.1 Fix JWT callback to handle trigger === "update" — merge session.name into token.name in lib/auth/config.ts
+- [x] 6.2 Add /register to middleware matcher and authorized callback so unauthenticated users can access the register page
+- [x] 6.3 Create components/layout-wrapper.tsx — client component that conditionally renders sidebar/topbar only for authenticated non-auth pages
+- [x] 6.4 Refactor app/layout.tsx to use LayoutWrapper instead of unconditional sidebar rendering
+- [x] 6.5 Verify auth flow: register → login → name change → sign-out → redirect to clean login page
+
+### 6b. Dashboard/UX (Group B)
+- [x] 6.6 Fix multi-category filter: split category param on commas, use IN clause in app/api/projects/[id]/comments/route.ts
+- [x] 6.7 Add "Projects" back link with ArrowLeft icon to sidebar when in project mode (components/app-sidebar.tsx)
+- [x] 6.8 Add activeNoiseFilterNames to stats API response, display filter names as badges in dashboard banner
+- [x] 6.9 Change Chat FAB label from "Chat" to "Chat with your data" in dashboard page
+
+### 6c. Settings/Config (Group C)
+- [x] 6.10 Rename "GitHub" to "GitHub Issues" in sidebar label and top-bar breadcrumb
+- [x] 6.11 Create app/api/settings/embeddings/route.ts endpoint that returns embedding provider info
+- [x] 6.12 Add read-only "Embedding Configuration" card to Settings page
+
 ## 5. Integration and Polish
 
 - [ ] 5.1 End-to-end test: login → create project → full workflow → chat analysis → export to GitHub

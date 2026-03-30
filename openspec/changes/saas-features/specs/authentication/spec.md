@@ -237,3 +237,59 @@ AND the user SHALL be redirected to the sign-in page.
 
 WHEN an authenticated user makes a request within the 30-day window
 THEN the system SHALL extend the session expiry by another 30 days from the current time.
+
+---
+
+### Requirement: JWT callback handles session updates
+
+The JWT callback SHALL handle the `trigger === "update"` case so that client-side session updates (e.g., display name changes via `updateSession()`) are persisted into the JWT token and reflected immediately across the app.
+
+#### Scenario: User updates display name via admin page
+
+WHEN the user changes their display name in admin settings and the admin page calls `updateSession({ name: "New Name" })`
+THEN the JWT callback SHALL detect `trigger === "update"` and merge `session.name` into `token.name`
+AND the session callback SHALL propagate `token.name` into `session.user.name`
+AND the updated name SHALL be visible in the header/sidebar without requiring a page refresh or re-login.
+
+---
+
+### Requirement: Auth-gated layout
+
+The application layout SHALL conditionally render the sidebar and top bar based on authentication state. Unauthenticated users and auth pages (`/login`, `/register`) SHALL see a clean layout without navigation chrome.
+
+#### Scenario: Login page renders without sidebar
+
+WHEN an unauthenticated user navigates to `/login`
+THEN the page SHALL render without the sidebar or top bar
+AND the full viewport SHALL be available for the login form.
+
+#### Scenario: Register page renders without sidebar
+
+WHEN an unauthenticated user navigates to `/register`
+THEN the page SHALL render without the sidebar or top bar.
+
+#### Scenario: Authenticated user sees full layout
+
+WHEN an authenticated user navigates to any application page
+THEN the sidebar and top bar SHALL render normally.
+
+#### Scenario: Session loading state
+
+WHEN the session is loading (status === "loading")
+THEN the layout SHALL render children without sidebar to prevent a flash of navigation followed by a redirect.
+
+---
+
+### Requirement: Register route accessible without authentication
+
+The middleware and auth config SHALL allow unauthenticated access to the `/register` page and the `/api/auth/register` API endpoint.
+
+#### Scenario: Unauthenticated user accesses register page
+
+WHEN an unauthenticated user navigates to `/register`
+THEN the page SHALL render without redirection to `/login`.
+
+#### Scenario: Register API accessible
+
+WHEN an unauthenticated request is made to `/api/auth/register`
+THEN the request SHALL proceed without authentication checks.

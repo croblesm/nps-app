@@ -286,3 +286,75 @@ All component and page files SHALL use CSS variable-based color classes exclusiv
 #### Scenario: Status and alert banners use semantic tokens
 - **WHEN** informational banners render (loading, warning, error, partial status)
 - **THEN** they SHALL use `bg-muted border-border text-muted-foreground` for informational, `bg-destructive/10 text-destructive` for errors, and `bg-primary text-primary-foreground` for active progress
+
+---
+
+### Requirement: Multi-category filter support
+
+The comments API SHALL support filtering by multiple categories simultaneously.
+
+#### Scenario: Dashboard sends multiple category filters
+- **WHEN** the dashboard sends a `category` query parameter with comma-separated values (e.g., `category=Performance,Reliability`)
+- **THEN** the API SHALL split the parameter on commas and use an `IN` clause to match any of the specified categories
+- **AND** the dashboard grid SHALL display comments matching any selected category
+
+---
+
+### Requirement: Back to Projects navigation in sidebar
+
+The sidebar SHALL provide a way to navigate back to the projects list when inside a project.
+
+#### Scenario: Projects link in project sidebar
+- **WHEN** the user is viewing any project page
+- **THEN** the sidebar SHALL display a "Projects" link with a back arrow icon above the project navigation items
+- **AND** clicking it SHALL navigate to the projects list page (`/`)
+
+---
+
+### Requirement: Noise filter names in dashboard banner
+
+The dashboard noise filter banner SHALL display the names of active noise filters, not just a count.
+
+#### Scenario: Noise filter names displayed
+- **WHEN** the dashboard renders with active noise filters
+- **THEN** the noise filter banner SHALL show each filter's name as a badge (e.g., "ADS Comparisons", "SSMS Noise")
+- **AND** the excluded comment count SHALL still be displayed
+
+---
+
+### Requirement: Chat FAB descriptive label
+
+The chat floating action button SHALL use a descriptive label that communicates the feature's purpose.
+
+#### Scenario: Chat FAB label
+- **WHEN** the dashboard renders the chat floating action button
+- **THEN** the button label SHALL read "Chat with your data" (not just "Chat")
+
+---
+
+### Requirement: GitHub page renamed to GitHub Issues
+
+The GitHub sidebar navigation item and breadcrumb SHALL be labeled "GitHub Issues" to better describe the page's primary function.
+
+#### Scenario: Sidebar label
+- **WHEN** the sidebar renders the GitHub navigation item
+- **THEN** it SHALL display "GitHub Issues" as the label
+
+#### Scenario: Breadcrumb label
+- **WHEN** the top bar breadcrumb renders for the GitHub page
+- **THEN** it SHALL display "GitHub Issues"
+
+---
+
+### Requirement: Embedding configuration visibility in Settings
+
+The Settings page SHALL display information about the embedding provider configuration so users understand which provider handles embeddings and that embeddings have a cost.
+
+#### Scenario: Embedding info card
+- **WHEN** the Settings page renders
+- **THEN** a read-only "Embedding Configuration" card SHALL display showing the auto-resolved embedding provider name, model, and whether it is configured
+- **AND** a note SHALL indicate that embeddings are used for the "Chat with your data" feature and may incur API costs
+
+#### Scenario: No embedding provider configured
+- **WHEN** no embedding-capable provider is configured
+- **THEN** the embedding card SHALL indicate that no embedding provider is available and suggest configuring an OpenAI, Azure OpenAI, or Ollama provider

@@ -44,7 +44,7 @@ const PAGE_LABELS: Record<string, string> = {
   categories: "Categories",
   noise: "Noise Filters",
   summary: "Summary",
-  github: "GitHub",
+  github: "GitHub Issues",
   settings: "Settings",
   admin: "Account",
   "new-project": "New Project",

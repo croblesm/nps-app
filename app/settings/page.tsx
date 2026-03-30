@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Settings, Check, X, Shield, ArrowLeft, Plug, Save, KeyRound } from "lucide-react";
+import { Settings, Check, X, Shield, ArrowLeft, Plug, Save, KeyRound, Cpu, Info } from "lucide-react";
 import { toast } from "sonner";
 import {
   PROVIDERS,
@@ -46,9 +46,28 @@ export default function SettingsPage() {
   const [ollamaModels, setOllamaModels] = useState<string[]>([]);
   const [loadingOllamaModels, setLoadingOllamaModels] = useState(false);
 
+  // Embedding config info
+  const [embeddingInfo, setEmbeddingInfo] = useState<{
+    configured: boolean;
+    provider: string | null;
+    model: string | null;
+  } | null>(null);
+
   useEffect(() => {
     fetchConfigs();
+    fetchEmbeddingInfo();
   }, []);
+
+  async function fetchEmbeddingInfo() {
+    try {
+      const res = await fetch("/api/settings/embeddings");
+      if (res.ok) {
+        setEmbeddingInfo(await res.json());
+      }
+    } catch {
+      // silently fail
+    }
+  }
 
   async function fetchConfigs() {
     try {
@@ -108,6 +127,7 @@ export default function SettingsPage() {
         toast.success("Configuration saved");
         setApiKey("");
         await fetchConfigs();
+        await fetchEmbeddingInfo();
         window.dispatchEvent(new Event("llm-config-changed"));
       } else {
         try {
@@ -220,6 +240,47 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
         )}
+
+        {/* Embedding Configuration */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Cpu className="size-4" />
+              Embedding Configuration
+            </CardTitle>
+            <CardDescription>
+              Used for &quot;Chat with your data&quot; — auto-resolved from your configured providers
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {embeddingInfo?.configured ? (
+              <div className="flex items-center justify-between rounded-lg border p-3">
+                <div className="flex items-center gap-3">
+                  <Badge variant="default">
+                    <Check className="size-3" />
+                    Ready
+                  </Badge>
+                  <span className="font-medium text-foreground">
+                    {embeddingInfo.provider}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {embeddingInfo.model}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-lg border border-border bg-muted/50 p-3 text-sm text-muted-foreground">
+                No embedding-capable provider configured. Add an OpenAI, Azure OpenAI, or Ollama provider to enable chat.
+              </div>
+            )}
+            <div className="flex items-start gap-2 mt-3 text-xs text-muted-foreground">
+              <Info className="size-3.5 mt-0.5 shrink-0" />
+              <span>
+                Embedding APIs may incur costs depending on your provider. Ollama embeddings are free and run locally.
+              </span>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Configuration Form */}
         <Card>
