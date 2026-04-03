@@ -15,13 +15,18 @@ export async function getCurrentUserId(): Promise<string | null> {
 
   if (!authRequired) {
     // Dev mode: return first user from DB for data consistency
-    const { getDb } = await import("@/lib/db");
-    const { User } = await import("@/lib/db/entities/User");
-    const db = await getDb();
-    const firstUser = await db.getRepository(User).findOne({
-      order: { createdAt: "ASC" },
-    });
-    return firstUser?.id ?? null;
+    try {
+      const { getDb } = await import("@/lib/db");
+      const { User } = await import("@/lib/db/entities/User");
+      const db = await getDb();
+      const firstUser = await db.getRepository(User).findOne({
+        order: { createdAt: "ASC" },
+      });
+      return firstUser?.id ?? null;
+    } catch {
+      // User table may not exist yet — return null silently
+      return null;
+    }
   }
 
   return null;

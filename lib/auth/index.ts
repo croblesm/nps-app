@@ -1,5 +1,7 @@
 import NextAuth from "next-auth";
 import type { Provider } from "next-auth/providers";
+import GitHub from "next-auth/providers/github";
+import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import { authConfig } from "./config";
@@ -9,13 +11,10 @@ import { getDb } from "@/lib/db";
 const oauthProviders: Provider[] = [];
 
 if (process.env.AUTH_GITHUB_ID && process.env.AUTH_GITHUB_SECRET) {
-  // Dynamic import not needed — NextAuth auto-reads AUTH_GITHUB_ID/SECRET
-  const { default: GitHub } = require("next-auth/providers/github");
   oauthProviders.push(GitHub);
 }
 
 if (process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET) {
-  const { default: Google } = require("next-auth/providers/google");
   oauthProviders.push(Google);
 }
 
