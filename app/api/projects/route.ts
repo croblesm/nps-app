@@ -24,6 +24,7 @@ export async function GET() {
     .addSelect("SUM(CASE WHEN c.npsScore >= 9 THEN 1 ELSE 0 END)", "promoters")
     .addSelect("SUM(CASE WHEN c.npsScore <= 6 THEN 1 ELSE 0 END)", "detractors")
     .addSelect("COUNT(CASE WHEN c.npsScore IS NOT NULL THEN 1 END)", "scored")
+    .where("c.isNoise = :isNoise", { isNoise: false })
     .groupBy("c.projectId")
     .getRawMany();
 
