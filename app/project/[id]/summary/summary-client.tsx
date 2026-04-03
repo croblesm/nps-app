@@ -76,21 +76,24 @@ export function SummaryClient({
     });
   }
 
-  // Re-fetch stats when noise toggles change (only when user has toggled)
+  // Fetch stats from API (handles noise correctly) — on mount + on toggle
   const fetchFilteredStats = useCallback(async () => {
-    if (initialNoiseFilters.length === 0) return;
-    if (!noiseUserModified) return; // Use server-provided stats until user toggles
     const statsParams = new URLSearchParams();
-    const activeIds = Array.from(noiseFilterToggles.entries())
-      .filter(([, active]) => active)
-      .map(([id]) => id);
-    if (activeIds.length === 0) {
-      statsParams.set("excludeNoise", "false");
-    } else {
-      statsParams.set("activeFilterIds", activeIds.join(","));
+    if (noiseUserModified && noiseFilterToggles.size > 0) {
+      const activeIds = Array.from(noiseFilterToggles.entries())
+        .filter(([, active]) => active)
+        .map(([id]) => id);
+      if (activeIds.length === 0) {
+        statsParams.set("excludeNoise", "false");
+      } else {
+        statsParams.set("activeFilterIds", activeIds.join(","));
+      }
     }
+    const statsUrl = statsParams.toString()
+      ? `/api/projects/${projectId}/stats?${statsParams}`
+      : `/api/projects/${projectId}/stats`;
     try {
-      const res = await fetch(`/api/projects/${projectId}/stats?${statsParams}`);
+      const res = await fetch(statsUrl);
       if (res.ok) {
         const data = await res.json();
         setNpsStats({
