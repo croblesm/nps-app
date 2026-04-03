@@ -55,6 +55,7 @@ export function TopBar() {
   const pathname = usePathname();
   const params = useParams();
   const { theme, setTheme } = useTheme();
+  const [devName, setDevName] = useState<string | null>(null);
   const { data: session } = useSession();
   const [mounted, setMounted] = useState(false);
 
@@ -102,6 +103,18 @@ export function TopBar() {
       .then((data) => setProject({ id: data.id, name: data.name }))
       .catch(() => {});
   }, [projectId]);
+
+  // In dev mode (no session), fetch profile name from API
+  useEffect(() => {
+    if (!session?.user?.name) {
+      fetch("/api/auth/profile")
+        .then((res) => res.ok ? res.json() : null)
+        .then((data) => { if (data?.name) setDevName(data.name); })
+        .catch(() => {});
+    }
+  }, [session]);
+
+  const userName = session?.user?.name || devName || "User";
 
   const breadcrumbs = useMemo(() => {
     const segments = pathname.split("/").filter(Boolean);
@@ -197,14 +210,14 @@ export function TopBar() {
         <DropdownMenu>
             <DropdownMenuTrigger className="flex items-center gap-2 rounded-full hover:bg-muted px-2 py-1">
               <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">
-                {session?.user?.name?.[0]?.toUpperCase() || "U"}
+                {userName[0]?.toUpperCase() || "U"}
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuGroup>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium">{session?.user?.name || "User"}</p>
+                    <p className="text-sm font-medium">{userName}</p>
                     <p className="text-xs text-muted-foreground">{session?.user?.email || ""}</p>
                   </div>
                 </DropdownMenuLabel>

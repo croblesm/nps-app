@@ -16,6 +16,23 @@ export async function GET() {
   const authRequired = process.env.AUTH_REQUIRED !== "false";
 
   if (!session?.user?.id && !authRequired) {
+    // Dev mode: return first user from DB if available
+    try {
+      const db = await getDb();
+      const { User } = await import("@/lib/db/entities/User");
+      const firstUser = await db.getRepository(User).findOne({ order: { createdAt: "ASC" } });
+      if (firstUser) {
+        return NextResponse.json({
+          name: firstUser.name,
+          email: firstUser.email,
+          image: firstUser.image,
+          provider: firstUser.provider,
+          hasPassword: !!firstUser.password,
+        });
+      }
+    } catch {
+      // Fall through to stub
+    }
     return NextResponse.json({
       name: "Dev User",
       email: "dev@localhost",
@@ -53,6 +70,20 @@ export async function PATCH(request: Request) {
     const parsed = await parseBody(request, updateProfileSchema);
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error }, { status: 400 });
+    }
+    // Dev mode: update first user in DB if one exists
+    try {
+      const db = await getDb();
+      const { User } = await import("@/lib/db/entities/User");
+      const repo = db.getRepository(User);
+      const firstUser = await repo.findOne({ order: { createdAt: "ASC" } });
+      if (firstUser && parsed.data.name) {
+        firstUser.name = parsed.data.name;
+        await repo.save(firstUser);
+        return NextResponse.json({ name: firstUser.name, email: firstUser.email });
+      }
+    } catch {
+      // Fall through to stub response
     }
     return NextResponse.json({ name: parsed.data.name || "Dev User", email: "dev@localhost" });
   }

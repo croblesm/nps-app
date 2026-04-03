@@ -79,6 +79,19 @@ export function AppSidebar() {
   const pathname = usePathname();
   const params = useParams();
   const { data: session } = useSession();
+  const [devName, setDevName] = useState<string | null>(null);
+
+  // In dev mode (no session), fetch profile name from API
+  useEffect(() => {
+    if (!session?.user?.name) {
+      fetch("/api/auth/profile")
+        .then((res) => res.ok ? res.json() : null)
+        .then((data) => { if (data?.name) setDevName(data.name); })
+        .catch(() => {});
+    }
+  }, [session]);
+
+  const userName = session?.user?.name || devName || "User";
 
   const projectId = params.id as string | undefined;
   const isProjectMode = pathname.includes("/project/") && projectId;
@@ -220,12 +233,12 @@ export function AppSidebar() {
                     />
                   )}
                   <AvatarFallback className="rounded-lg text-xs">
-                    {getInitials(session?.user?.name)}
+                    {getInitials(userName)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">
-                    {session?.user?.name ?? "User"}
+                    {userName}
                   </span>
                   <span className="truncate text-xs text-muted-foreground">
                     {session?.user?.email ?? ""}
