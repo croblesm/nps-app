@@ -109,6 +109,7 @@ openspec/                     # Spec-driven development artifacts
 
 ### Key Conventions
 - Server components by default, `"use client"` only for interactivity
+- **Project pages use server/client split pattern**: `page.tsx` is an async server component that fetches initial data via `getDb()` + `assertProjectAccess()`, then passes props to a co-located `*-client.tsx` client component. This eliminates the flash of empty/default state. Each page directory also has a `loading.tsx` skeleton. Converted pages: upload, structure, noise, summary, github.
 - TypeORM entities in `lib/db/entities/` — use string-based relation targets, import dynamically in API routes to avoid circular deps
 - All AI calls use Vercel AI SDK with Zod-validated structured output
 - API routes use `getDb()` for lazy-initialized database connection

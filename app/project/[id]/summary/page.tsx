@@ -1,213 +1,93 @@
-"use client";
+import { getDb } from "@/lib/db";
+import { assertProjectAccess } from "@/lib/auth/assert-project-access";
+import { SummaryClient } from "./summary-client";
 
-import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
-import ReactMarkdown from "react-markdown";
-import { toast } from "sonner";
-import { Spinner } from "@/components/ui/Spinner";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardAction } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { FileText, Download, RefreshCw, Sparkles } from "lucide-react";
-import { NpsVisualCards } from "@/components/nps/NpsVisualCards";
-import { useAssistantContext } from "@/lib/assistant-context";
+export default async function SummaryPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const project = await assertProjectAccess(id);
+  if (!project) {
+    const { notFound } = await import("next/navigation");
+    notFound();
+  }
 
-interface SummaryData {
-  id: string;
-  markdown: string;
-  generatedAt: string;
-}
+  const db = await getDb();
 
-interface NpsStats {
-  total: number;
-  promoters: number;
-  passives: number;
-  detractors: number;
-  npsScore: number;
-  promoterPct: number;
-  passivePct: number;
-  detractorPct: number;
-}
+  // Fetch summary
+  const { Summary } = await import("@/lib/db/entities/Summary");
+  const summaryEntity = await db.getRepository(Summary).findOne({
+    where: { projectId: id },
+    order: { generatedAt: "DESC" },
+  });
+  const initialSummary = summaryEntity
+    ? { id: summaryEntity.id, markdown: summaryEntity.markdownContent || "", generatedAt: summaryEntity.generatedAt.toISOString() }
+    : null;
 
-export default function SummaryPage() {
-  const params = useParams();
-  const projectId = params.id as string;
+  // Fetch NPS stats
+  const { Comment } = await import("@/lib/db/entities/Comment");
+  const statsRaw = await db
+    .getRepository(Comment)
+    .createQueryBuilder("c")
+    .select("COUNT(*)", "total")
+    .addSelect("SUM(CASE WHEN c.npsScore >= 9 THEN 1 ELSE 0 END)", "promoters")
+    .addSelect("SUM(CASE WHEN c.npsScore >= 7 AND c.npsScore <= 8 THEN 1 ELSE 0 END)", "passives")
+    .addSelect("SUM(CASE WHEN c.npsScore <= 6 THEN 1 ELSE 0 END)", "detractors")
+    .addSelect("COUNT(CASE WHEN c.npsScore IS NOT NULL THEN 1 END)", "scored")
+    .where("c.projectId = :id", { id })
+    .getRawOne();
 
-  const [summary, setSummary] = useState<SummaryData | null>(null);
-  const [npsStats, setNpsStats] = useState<NpsStats | null>(null);
-  const [generating, setGenerating] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [promoterQuotes, setPromoterQuotes] = useState<{ text: string; nps: number }[]>([]);
-  const [detractorQuotes, setDetractorQuotes] = useState<{ text: string; nps: number }[]>([]);
-  const { setPageContext } = useAssistantContext();
+  const total = Number(statsRaw?.total || 0);
+  const promoters = Number(statsRaw?.promoters || 0);
+  const passives = Number(statsRaw?.passives || 0);
+  const detractors = Number(statsRaw?.detractors || 0);
+  const scored = Number(statsRaw?.scored || 0);
+  const npsScore = scored > 0 ? Math.round(((promoters - detractors) / scored) * 100) : 0;
 
-  useEffect(() => {
-    setPageContext({
-      summaryGenerated: !!summary,
-    });
-  }, [summary, setPageContext]);
-
-  // Load existing summary from DB on mount
-  useEffect(() => {
-    fetch(`/api/projects/${projectId}/summary`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data) setSummary(data);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [projectId]);
-
-  // Load NPS stats on mount
-  useEffect(() => {
-    fetch(`/api/projects/${projectId}/stats`)
-      .then((res) => {
-        if (res.ok) return res.json();
-        return null;
-      })
-      .then((data) => {
-        if (data && data.total > 0) setNpsStats(data);
-      })
-      .catch(() => {});
-  }, [projectId]);
-
-  // Fetch promoter and detractor quotes
-  useEffect(() => {
-    fetch(`/api/projects/${projectId}/comments?feedbackType=promoter&limit=10&sortBy=npsScore&sortDir=DESC`)
-      .then(res => res.json())
-      .then(data => setPromoterQuotes((data.comments?.filter((c: { commentText: string | null }) => c.commentText).map((c: { commentText: string; npsScore: number }) => ({ text: c.commentText, nps: c.npsScore })) || []).slice(0, 3)))
-      .catch(() => {});
-    fetch(`/api/projects/${projectId}/comments?feedbackType=detractor&limit=10&sortBy=npsScore&sortDir=ASC`)
-      .then(res => res.json())
-      .then(data => setDetractorQuotes((data.comments?.filter((c: { commentText: string | null }) => c.commentText).map((c: { commentText: string; npsScore: number }) => ({ text: c.commentText, nps: c.npsScore })) || []).slice(0, 3)))
-      .catch(() => {});
-  }, [projectId]);
-
-  async function handleGenerate() {
-    setGenerating(true);
-
-    try {
-      const res = await fetch("/api/ai/summarize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ projectId }),
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        setSummary(data);
-        toast.success("Summary generated successfully");
-      } else {
-        toast.error(data.error || "Summary generation failed");
+  const initialStats = total > 0
+    ? {
+        total,
+        promoters,
+        passives,
+        detractors,
+        npsScore,
+        promoterPct: scored > 0 ? Math.round((promoters / scored) * 100) : 0,
+        passivePct: scored > 0 ? Math.round((passives / scored) * 100) : 0,
+        detractorPct: scored > 0 ? Math.round((detractors / scored) * 100) : 0,
       }
-    } catch {
-      toast.error("Failed to generate summary. Check your LLM settings.");
-    } finally {
-      setGenerating(false);
-    }
-  }
+    : null;
 
-  function handleDownload() {
-    if (!summary) return;
-    const blob = new Blob([summary.markdown], { type: "text/markdown" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `nps-summary-${new Date().toISOString().split("T")[0]}.md`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+  // Fetch quotes
+  const promoComments = await db.getRepository(Comment).find({
+    where: { projectId: id },
+    order: { npsScore: "DESC" },
+    take: 10,
+  });
+  const detractComments = await db.getRepository(Comment).find({
+    where: { projectId: id },
+    order: { npsScore: "ASC" },
+    take: 10,
+  });
 
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-4 w-64" />
-        <Skeleton className="h-96 w-full rounded-lg" />
-      </div>
-    );
-  }
+  const initialPromoterQuotes = promoComments
+    .filter((c) => c.commentText && c.npsScore !== null && c.npsScore >= 9)
+    .slice(0, 3)
+    .map((c) => ({ text: c.commentText!, nps: c.npsScore! }));
+
+  const initialDetractorQuotes = detractComments
+    .filter((c) => c.commentText && c.npsScore !== null && c.npsScore <= 6)
+    .slice(0, 3)
+    .map((c) => ({ text: c.commentText!, nps: c.npsScore! }));
 
   return (
-    <div className="max-w-4xl space-y-4">
-      {npsStats && (
-        <NpsVisualCards
-          npsScore={npsStats.npsScore}
-          promoters={npsStats.promoters}
-          passives={npsStats.passives}
-          detractors={npsStats.detractors}
-          promoterPct={npsStats.promoterPct}
-          passivePct={npsStats.passivePct}
-          detractorPct={npsStats.detractorPct}
-          promoterQuotes={promoterQuotes}
-          detractorQuotes={detractorQuotes}
-        />
-      )}
-
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <FileText className="size-5 text-primary" />
-            <CardTitle className="text-2xl">AI Summary</CardTitle>
-          </div>
-          <CardDescription>
-            Generate an AI-powered insight report
-          </CardDescription>
-          <CardAction>
-            <div className="flex items-center gap-2">
-              {summary && (
-                <>
-                  <Button variant="outline" size="sm" onClick={handleDownload}>
-                    <Download className="size-4" />
-                    Download .md
-                  </Button>
-                  <span className="text-xs text-muted-foreground">Charts are shown in-app only</span>
-                </>
-              )}
-              <Button
-                size="sm"
-                onClick={handleGenerate}
-                disabled={generating}
-              >
-                {generating ? (
-                  <Spinner size="sm" label="Generating..." />
-                ) : summary ? (
-                  <>
-                    <RefreshCw className="size-4" />
-                    Regenerate
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="size-4" />
-                    Generate Summary
-                  </>
-                )}
-              </Button>
-            </div>
-          </CardAction>
-        </CardHeader>
-
-        <CardContent>
-          {generating && (
-            <div className="p-3 rounded-lg bg-muted border border-border mb-4">
-              <Spinner size="sm" label="Generating AI-powered insight report..." />
-            </div>
-          )}
-
-          {summary && !generating && (
-            <div className="markdown-content max-w-none p-6 rounded-lg bg-card ring-1 ring-foreground/10 text-muted-foreground">
-              <ReactMarkdown>{summary.markdown}</ReactMarkdown>
-            </div>
-          )}
-
-          {!summary && !generating && (
-            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-              <Sparkles className="size-10 mb-3 opacity-40" />
-              <p className="text-sm">No summary generated yet. Click Generate Summary to get started.</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+    <SummaryClient
+      initialSummary={initialSummary}
+      initialStats={initialStats}
+      initialPromoterQuotes={initialPromoterQuotes}
+      initialDetractorQuotes={initialDetractorQuotes}
+      projectId={id}
+    />
   );
 }
