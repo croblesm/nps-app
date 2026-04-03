@@ -532,6 +532,23 @@ Contextual AI helper available on every project page:
 - **Structure checkbox fix** — Column toggle fires exactly once (event propagation fix)
 - **Categories stats** — Existing categories show actual comment counts instead of "Analyzed 0 of 0"
 
+#### Server Component Loading
+- **Instant page rendering** — 5 project pages (Data, Structure, Noise, Summary, GitHub) converted to async server components with server/client split pattern. Initial data loads on the server — no flash of empty/default state.
+- **Loading skeletons** — Each converted page has a `loading.tsx` for skeleton UI during server data fetch
+- **Client-side router cache** — `staleTimes.dynamic=30` caches dynamic pages for 30 seconds, making back-navigation instant
+
+#### Auth System Hardening (Round 2)
+- **Conditional OAuth providers** — GitHub and Google providers only registered when env vars exist (`AUTH_GITHUB_ID`, `AUTH_GOOGLE_ID`). Login page hides buttons for unconfigured providers via `/api/auth/providers` endpoint.
+- **Sign-in error handling** — Uses `signIn("credentials", { redirect: false })` with inline error messages instead of silent failures
+- **Profile API dev mode** — Returns dev stub responses when `AUTH_REQUIRED=false` (no more "Unauthorized" in local dev)
+- **Dev user fallback** — `getCurrentUserId()` queries first DB user when `AUTH_REQUIRED=false` for data consistency
+- **/register redirect** — `/register` route redirects to `/login?signup=true`
+- **Production safety** — Console warning when `AUTH_REQUIRED=false` in production
+- **Registration race condition** — Catches DB unique constraint errors on concurrent signups
+- **Data page preview** — Collapsible table showing first 5 rows of existing uploaded data
+- **Categories confirm UX** — "Confirm" button hidden when categories are already saved; reappears on edit
+- **Top bar embedding model** — Shows both LLM and embedding model (e.g., "ollama / mistral:latest | nomic-embed-text")
+
 ### Planned (Not Yet Implemented)
 - **Cloud deployment** — Azure App Service or Vercel, migrate to Azure SQL
 - **Multi-tenancy** — User/org-scoped data isolation
