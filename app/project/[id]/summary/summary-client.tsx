@@ -64,17 +64,22 @@ export function SummaryClient({
   );
   const [noiseExcludedCount, setNoiseExcludedCount] = useState(0);
 
+  const [noiseUserModified, setNoiseUserModified] = useState(false);
+
   function handleNoiseToggle(filterId: string) {
     setNoiseFilterToggles((prev) => {
       const next = new Map(prev);
       next.set(filterId, !next.get(filterId));
+      const allActive = Array.from(next.values()).every((v) => v);
+      setNoiseUserModified(!allActive);
       return next;
     });
   }
 
-  // Re-fetch stats when noise toggles change
+  // Re-fetch stats when noise toggles change (only when user has toggled)
   const fetchFilteredStats = useCallback(async () => {
     if (initialNoiseFilters.length === 0) return;
+    if (!noiseUserModified) return; // Use server-provided stats until user toggles
     const statsParams = new URLSearchParams();
     const activeIds = Array.from(noiseFilterToggles.entries())
       .filter(([, active]) => active)
@@ -103,7 +108,7 @@ export function SummaryClient({
     } catch {
       // Silently fail
     }
-  }, [projectId, noiseFilterToggles, initialNoiseFilters.length]);
+  }, [projectId, noiseFilterToggles, noiseUserModified, initialNoiseFilters.length]);
 
   useEffect(() => {
     fetchFilteredStats();

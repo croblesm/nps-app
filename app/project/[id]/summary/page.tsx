@@ -37,6 +37,7 @@ export default async function SummaryPage({
     .addSelect("SUM(CASE WHEN c.npsScore <= 6 THEN 1 ELSE 0 END)", "detractors")
     .addSelect("COUNT(CASE WHEN c.npsScore IS NOT NULL THEN 1 END)", "scored")
     .where("c.projectId = :id", { id })
+    .andWhere("c.isNoise = :isNoise", { isNoise: false })
     .getRawOne();
 
   const total = Number(statsRaw?.total || 0);
@@ -59,14 +60,14 @@ export default async function SummaryPage({
       }
     : null;
 
-  // Fetch quotes
+  // Fetch quotes (exclude noise)
   const promoComments = await db.getRepository(Comment).find({
-    where: { projectId: id },
+    where: { projectId: id, isNoise: false },
     order: { npsScore: "DESC" },
     take: 10,
   });
   const detractComments = await db.getRepository(Comment).find({
-    where: { projectId: id },
+    where: { projectId: id, isNoise: false },
     order: { npsScore: "ASC" },
     take: 10,
   });
