@@ -16,12 +16,29 @@ export default async function UploadPage({
 
   const db = await getDb();
   const { Comment } = await import("@/lib/db/entities/Comment");
-  const rowCount = await db.getRepository(Comment).count({ where: { projectId: id } });
+  const repo = db.getRepository(Comment);
+  const rowCount = await repo.count({ where: { projectId: id } });
+
+  // Fetch sample rows for preview
+  let sampleRows: { rowIndex: number; npsScore: number | null; commentText: string | null }[] = [];
+  if (rowCount > 0) {
+    const samples = await repo.find({
+      where: { projectId: id },
+      order: { rowIndex: "ASC" },
+      take: 5,
+    });
+    sampleRows = samples.map((c) => ({
+      rowIndex: c.rowIndex,
+      npsScore: c.npsScore,
+      commentText: c.commentText,
+    }));
+  }
 
   return (
     <UploadClient
       initialDataExists={rowCount > 0}
       initialRowCount={rowCount}
+      sampleRows={sampleRows}
     />
   );
 }

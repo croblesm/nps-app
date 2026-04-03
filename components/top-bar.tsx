@@ -30,6 +30,7 @@ import {
 interface ActiveProvider {
   provider: string;
   modelName: string;
+  embeddingModel?: string;
 }
 
 interface ProjectInfo {
@@ -65,22 +66,23 @@ export function TopBar() {
   useEffect(() => setMounted(true), []);
 
   const fetchActive = useCallback(() => {
-    fetch("/api/settings")
-      .then((res) => res.json())
-      .then((configs) => {
-        const defaultConfig = configs.find(
-          (c: { isDefault: boolean }) => c.isDefault
-        );
-        setActive(
-          defaultConfig
-            ? {
-                provider: defaultConfig.provider,
-                modelName: defaultConfig.modelName,
-              }
-            : null
-        );
-      })
-      .catch(() => {});
+    Promise.all([
+      fetch("/api/settings").then((res) => res.json()).catch(() => []),
+      fetch("/api/settings/embeddings").then((res) => res.ok ? res.json() : null).catch(() => null),
+    ]).then(([configs, embeddingData]) => {
+      const defaultConfig = configs.find(
+        (c: { isDefault: boolean }) => c.isDefault
+      );
+      setActive(
+        defaultConfig
+          ? {
+              provider: defaultConfig.provider,
+              modelName: defaultConfig.modelName,
+              embeddingModel: embeddingData?.configured ? embeddingData.model : undefined,
+            }
+          : null
+      );
+    });
   }, []);
 
   useEffect(() => {
@@ -165,7 +167,7 @@ export function TopBar() {
         {active ? (
           <span className="text-xs text-muted-foreground">
             <span className="inline-block w-2 h-2 rounded-full bg-[var(--nps-promoter)] mr-1" />
-            {active.provider} / {active.modelName}
+            {active.provider} / {active.modelName}{active.embeddingModel ? ` | ${active.embeddingModel}` : ""}
           </span>
         ) : (
           <span className="text-xs text-muted-foreground">No LLM configured</span>

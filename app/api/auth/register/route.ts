@@ -36,7 +36,24 @@ export async function POST(request: Request) {
     email: email.toLowerCase(),
     password: hashedPassword,
   });
-  await repo.save(user);
+
+  try {
+    await repo.save(user);
+  } catch (err: unknown) {
+    // Handle concurrent registration race condition (MSSQL unique constraint error 2627)
+    if (
+      err instanceof Error &&
+      (err.message.includes("UNIQUE") ||
+        err.message.includes("duplicate") ||
+        (err as unknown as Record<string, unknown>).number === 2627)
+    ) {
+      return NextResponse.json(
+        { error: "An account with this email already exists" },
+        { status: 409 }
+      );
+    }
+    throw err;
+  }
 
   return NextResponse.json(
     { id: user.id, name: user.name, email: user.email },

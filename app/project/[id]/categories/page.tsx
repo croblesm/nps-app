@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Pencil, Plus, Sparkles, Wand2 } from "lucide-react";
 import { Spinner } from "@/components/ui/Spinner";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -58,6 +59,7 @@ export default function CategoriesPage() {
   // Suggest more
   const [suggesting, setSuggesting] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [categoriesSaved, setCategoriesSaved] = useState(false);
   const [addCategoryOpen, setAddCategoryOpen] = useState(false);
   const { setPageContext } = useAssistantContext();
 
@@ -85,6 +87,7 @@ export default function CategoriesPage() {
             }))
           );
           setDiscovered(true);
+          setCategoriesSaved(true);
           // Populate stats from project data so existing categories don't show 0/0
           if (statsData?.total) {
             setStats({ sampleSize: statsData.total, totalComments: statsData.total });
@@ -139,6 +142,7 @@ export default function CategoriesPage() {
         },
       ]);
       setDiscovered(true);
+      setCategoriesSaved(false);
     } catch {
       setError("Failed to run AI discovery. Check your LLM settings.");
     } finally {
@@ -190,6 +194,7 @@ export default function CategoriesPage() {
         ...newCats,
         ...prev.filter((c) => c.isFallback),
       ]);
+      setCategoriesSaved(false);
     } catch {
       setError("Failed to get suggestions. Check your LLM settings.");
     } finally {
@@ -245,12 +250,14 @@ export default function CategoriesPage() {
     setNewCatName("");
     setNewCatDesc("");
     setScanResult(null);
+    setCategoriesSaved(false);
   }
 
   function handleRename(idx: number, name: string) {
     setCategories((prev) =>
       prev.map((c, i) => (i === idx ? { ...c, name } : c))
     );
+    setCategoriesSaved(false);
   }
 
   function handleRemove(idx: number) {
@@ -258,12 +265,14 @@ export default function CategoriesPage() {
     setCategories((prev) =>
       prev.map((c, i) => (i === idx ? { ...c, removed: true } : c))
     );
+    setCategoriesSaved(false);
   }
 
   function handleRestore(idx: number) {
     setCategories((prev) =>
       prev.map((c, i) => (i === idx ? { ...c, removed: false } : c))
     );
+    setCategoriesSaved(false);
   }
 
   async function handleConfirm() {
@@ -284,6 +293,8 @@ export default function CategoriesPage() {
       });
 
       if (res.ok) {
+        setCategoriesSaved(true);
+        toast.success("Categories saved");
         router.push(`/project/${projectId}/dashboard`);
       }
     } finally {
@@ -585,19 +596,21 @@ export default function CategoriesPage() {
               <Spinner size="sm" label="Saving categories..." />
             </div>
           )}
-          <div className="sticky bottom-0 bg-background py-4 border-t border-border -mx-4 px-4 md:-mx-6 md:px-6">
-            <Button
-              onClick={handleConfirm}
-              disabled={saving || activeCount < 2}
-              size="lg"
-            >
-              {saving ? (
-                <Spinner size="sm" label="Saving..." />
-              ) : (
-                `Confirm ${activeCount} Categories & Continue`
-              )}
-            </Button>
-          </div>
+          {!categoriesSaved && (
+            <div className="sticky bottom-0 bg-background py-4 border-t border-border -mx-4 px-4 md:-mx-6 md:px-6">
+              <Button
+                onClick={handleConfirm}
+                disabled={saving || activeCount < 2}
+                size="lg"
+              >
+                {saving ? (
+                  <Spinner size="sm" label="Saving..." />
+                ) : (
+                  `Confirm ${activeCount} Categories & Continue`
+                )}
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>

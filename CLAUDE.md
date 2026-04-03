@@ -115,6 +115,9 @@ openspec/                     # Spec-driven development artifacts
 - API routes use `getDb()` for lazy-initialized database connection
 - **All project-scoped API routes** (`/api/projects/[id]/*` and `/api/ai/*`) MUST call `assertProjectAccess(projectId)` from `lib/auth/assert-project-access.ts` before processing. This verifies the current user owns the project. When `AUTH_REQUIRED=false`, the check is bypassed.
 - Auth uses Edge-compatible config split: `lib/auth/config.ts` (Edge middleware) and `lib/auth/index.ts` (Node runtime with providers + DB). `SessionProvider` wraps the app in `components/providers.tsx`. JWT callback handles `trigger === "update"` for client-side session updates (e.g., name change)
+- **OAuth providers are conditionally registered** — GitHub/Google only added when `AUTH_GITHUB_ID`/`AUTH_GOOGLE_ID` env vars exist. Login page fetches `/api/auth/providers` to show/hide OAuth buttons. Never assume OAuth is available.
+- **Credential signIn uses `redirect: false`** — Check `result?.error` for failures, `router.push("/")` on success. Never use auto-redirect with signIn("credentials").
+- **Profile API respects AUTH_REQUIRED=false** — Returns a dev stub profile when no session exists in dev mode. `getCurrentUserId()` queries first user from DB as dev fallback.
 - `components/layout-wrapper.tsx` conditionally renders the sidebar/topbar — auth pages (`/login`, `/register`) get a clean layout without navigation chrome. Do NOT use `useSession()` for this check — `AUTH_REQUIRED=false` means no session exists, which would hide the layout entirely
 - GitHub integration entities (`GitHubRepo`, `GitHubIssue`) link to projects; Octokit handles GitHub API calls
 - `ChatMessage` entity stores RAG chat history; comment embeddings stored as SQL Server VECTOR type for cosine similarity search

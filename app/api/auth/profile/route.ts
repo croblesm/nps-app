@@ -6,13 +6,25 @@ import { auth } from "@/lib/auth";
 import { parseBody } from "@/lib/api/schemas";
 
 const updateProfileSchema = z.object({
-  name: z.string().min(1).max(255).optional(),
+  name: z.string().trim().min(1, "Name cannot be empty").max(255).optional(),
   currentPassword: z.string().optional(),
   newPassword: z.string().min(8).max(128).optional(),
 });
 
 export async function GET() {
   const session = await auth();
+  const authRequired = process.env.AUTH_REQUIRED !== "false";
+
+  if (!session?.user?.id && !authRequired) {
+    return NextResponse.json({
+      name: "Dev User",
+      email: "dev@localhost",
+      image: null,
+      provider: null,
+      hasPassword: false,
+    });
+  }
+
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -35,6 +47,16 @@ export async function GET() {
 
 export async function PATCH(request: Request) {
   const session = await auth();
+  const authRequired = process.env.AUTH_REQUIRED !== "false";
+
+  if (!session?.user?.id && !authRequired) {
+    const parsed = await parseBody(request, updateProfileSchema);
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error }, { status: 400 });
+    }
+    return NextResponse.json({ name: parsed.data.name || "Dev User", email: "dev@localhost" });
+  }
+
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

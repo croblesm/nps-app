@@ -53,12 +53,19 @@ function columnTypeBadgeVariant(type: string) {
   }
 }
 
+interface SampleRow {
+  rowIndex: number;
+  npsScore: number | null;
+  commentText: string | null;
+}
+
 interface UploadClientProps {
   initialDataExists: boolean;
   initialRowCount: number;
+  sampleRows?: SampleRow[];
 }
 
-export function UploadClient({ initialDataExists, initialRowCount }: UploadClientProps) {
+export function UploadClient({ initialDataExists, initialRowCount, sampleRows }: UploadClientProps) {
   const params = useParams();
   const router = useRouter();
   const projectId = params.id as string;
@@ -177,20 +184,52 @@ export function UploadClient({ initialDataExists, initialRowCount }: UploadClien
       {/* Data exists status */}
       {dataExists && !showUploadZone && !result && (
         <Card className="mb-6">
-          <CardContent className="flex items-center gap-3 pt-4">
-            <CheckCircle className="size-5 text-primary shrink-0" />
-            <div className="flex-1">
-              <p className="font-semibold text-foreground">Data uploaded</p>
-              <p className="text-sm text-muted-foreground">
-                {existingRowCount.toLocaleString()} rows loaded in this project
-              </p>
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-3">
+              <CheckCircle className="size-5 text-primary shrink-0" />
+              <div className="flex-1">
+                <p className="font-semibold text-foreground">Data uploaded</p>
+                <p className="text-sm text-muted-foreground">
+                  {existingRowCount.toLocaleString()} rows loaded in this project
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => setShowUploadZone(true)}
+              >
+                Replace Data
+              </Button>
             </div>
-            <Button
-              variant="outline"
-              onClick={() => setShowUploadZone(true)}
-            >
-              Replace Data
-            </Button>
+
+            {sampleRows && sampleRows.length > 0 && (
+              <details className="mt-4">
+                <summary className="text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+                  Preview first {sampleRows.length} rows
+                </summary>
+                <div className="mt-2 overflow-x-auto rounded-lg border border-border">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted/50">
+                      <tr>
+                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">Row</th>
+                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">NPS</th>
+                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">Comment</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sampleRows.map((row) => (
+                        <tr key={row.rowIndex} className="border-t border-border">
+                          <td className="px-3 py-2 text-foreground">{row.rowIndex}</td>
+                          <td className="px-3 py-2 text-foreground">{row.npsScore ?? "—"}</td>
+                          <td className="px-3 py-2 text-foreground truncate max-w-[400px]">
+                            {row.commentText || "—"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </details>
+            )}
           </CardContent>
         </Card>
       )}

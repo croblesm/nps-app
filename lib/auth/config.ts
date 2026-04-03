@@ -1,5 +1,15 @@
 import type { NextAuthConfig } from "next-auth";
 
+if (
+  process.env.AUTH_REQUIRED === "false" &&
+  process.env.NODE_ENV === "production"
+) {
+  console.warn(
+    "\x1b[33m[SECURITY WARNING]\x1b[0m AUTH_REQUIRED=false in production. " +
+      "All routes are publicly accessible without authentication."
+  );
+}
+
 /**
  * Edge-compatible auth config (no Node.js-only imports like TypeORM/bcryptjs).
  * Used by middleware.ts for route protection.
