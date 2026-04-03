@@ -2,6 +2,11 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  experimental: {
+    staleTimes: {
+      dynamic: 30, // Cache dynamic pages client-side for 30s (default is 0 in Next.js 15)
+    },
+  },
   serverExternalPackages: ["tedious", "typeorm", "reflect-metadata", "mssql"],
   headers: async () => [
     {
