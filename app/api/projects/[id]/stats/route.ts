@@ -21,6 +21,31 @@ export async function GET(
   });
   const hasNoiseExclusion = noiseFilters.length > 0;
 
+  // Auto-repair: if filters exist but no comments are flagged as noise, re-apply
+  if (hasNoiseExclusion) {
+    const noiseCount = await db.getRepository(Comment)
+      .createQueryBuilder("c")
+      .where("c.projectId = :id", { id })
+      .andWhere("c.isNoise = :isNoise", { isNoise: true })
+      .getCount();
+    if (noiseCount === 0) {
+      for (const filter of noiseFilters) {
+        const keywords: string[] = JSON.parse(filter.filterKeywords || "[]");
+        if (keywords.length === 0) continue;
+        const conditions = keywords.map((_, ki) => `commentText LIKE :kw${ki}`);
+        const kwParams: Record<string, string> = {};
+        keywords.forEach((kw, ki) => { kwParams[`kw${ki}`] = `%${kw}%`; });
+        await db.getRepository(Comment)
+          .createQueryBuilder()
+          .update()
+          .set({ isNoise: true })
+          .where("projectId = :id", { id })
+          .andWhere(`(${conditions.join(" OR ")})`, kwParams)
+          .execute();
+      }
+    }
+  }
+
   // NPS stats — exclude noise when filters are active
   const npsQuery = db
     .getRepository(Comment)

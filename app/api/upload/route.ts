@@ -124,6 +124,26 @@ export async function POST(request: NextRequest) {
 
       await commentRepo.save(batch);
     }
+
+    // Re-apply active noise filters to newly uploaded comments
+    const { NoiseFilter } = await import("@/lib/db/entities/NoiseFilter");
+    const activeFilters = await db.getRepository(NoiseFilter).find({
+      where: { projectId, isActive: true },
+    });
+    for (const filter of activeFilters) {
+      const keywords: string[] = JSON.parse(filter.filterKeywords || "[]");
+      if (keywords.length === 0) continue;
+      const conditions = keywords.map((_, ki) => `commentText LIKE :kw${ki}`);
+      const kwParams: Record<string, string> = {};
+      keywords.forEach((kw, ki) => { kwParams[`kw${ki}`] = `%${kw}%`; });
+      await commentRepo
+        .createQueryBuilder()
+        .update()
+        .set({ isNoise: true })
+        .where("projectId = :projectId", { projectId })
+        .andWhere(`(${conditions.join(" OR ")})`, kwParams)
+        .execute();
+    }
   }
 
   return NextResponse.json({
