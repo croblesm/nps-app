@@ -100,9 +100,11 @@ export default function DashboardPage() {
     setNoiseFilterToggles((prev) => {
       const next = new Map(prev);
       next.set(filterId, !next.get(filterId));
+      // Check if all are back to active (default state)
+      const allActive = Array.from(next.values()).every((v) => v);
+      setNoiseUserModified(!allActive);
       return next;
     });
-    setNoiseUserModified(true);
   }
 
   const fetchComments = useCallback(async () => {
