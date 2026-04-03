@@ -7,12 +7,17 @@ import { getActiveModel } from "@/lib/ai/get-model";
 import { parseBody, createGithubIssueSchema } from "@/lib/api/schemas";
 import { decrypt } from "@/lib/ai/encryption";
 import { buildIssueBody, buildIssueTitle } from "@/lib/github/issue-template";
+import { assertProjectAccess } from "@/lib/auth/assert-project-access";
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const project = await assertProjectAccess(id);
+  if (!project) {
+    return NextResponse.json({ error: "Project not found" }, { status: 404 });
+  }
   const db = await getDb();
   const { GitHubIssue } = await import("@/lib/db/entities/GitHubIssue");
 
@@ -29,6 +34,10 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const project = await assertProjectAccess(id);
+  if (!project) {
+    return NextResponse.json({ error: "Project not found" }, { status: 404 });
+  }
   const parsed = await parseBody(request, createGithubIssueSchema);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error }, { status: 400 });
@@ -156,6 +165,10 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const project = await assertProjectAccess(id);
+  if (!project) {
+    return NextResponse.json({ error: "Project not found" }, { status: 404 });
+  }
   const db = await getDb();
 
   const { GitHubConfig } = await import("@/lib/db/entities/GitHubConfig");

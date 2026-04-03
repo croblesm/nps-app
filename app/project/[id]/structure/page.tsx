@@ -223,7 +223,10 @@ export default function StructurePage() {
               <input
                 type="checkbox"
                 checked={col.include}
-                onChange={() => toggleColumn(col.name)}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  toggleColumn(col.name);
+                }}
                 className="mt-1 rounded cursor-pointer accent-primary"
               />
               <div className="flex-1">

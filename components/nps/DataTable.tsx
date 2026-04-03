@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { NPS_THRESHOLDS } from "@/lib/nps/calculator";
 import { Button } from "@/components/ui/button";
 
@@ -51,6 +51,15 @@ export function DataTable<T extends DataTableComment>({
   onExportSelected,
 }: DataTableProps<T>) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const prevCommentsRef = useRef(comments);
+
+  // Reset selection when data changes (page, filter, sort)
+  useEffect(() => {
+    if (prevCommentsRef.current !== comments) {
+      setSelected(new Set());
+      prevCommentsRef.current = comments;
+    }
+  }, [comments]);
 
   const toggleSelect = (id: string) => {
     setSelected((prev) => {

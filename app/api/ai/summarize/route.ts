@@ -5,6 +5,7 @@ import { getActiveModel } from "@/lib/ai/get-model";
 import { parseBody, projectIdBodySchema } from "@/lib/api/schemas";
 import { buildSummaryPrompt } from "@/lib/ai/prompts";
 import { calculateNps } from "@/lib/nps/calculator";
+import { assertProjectAccess } from "@/lib/auth/assert-project-access";
 
 export async function POST(request: Request) {
   const parsed = await parseBody(request, projectIdBodySchema);
@@ -13,14 +14,12 @@ export async function POST(request: Request) {
   }
   const { projectId } = parsed.data;
 
-  const db = await getDb();
-
-  // Get project
-  const { Project } = await import("@/lib/db/entities/Project");
-  const project = await db.getRepository(Project).findOneBy({ id: projectId });
+  const project = await assertProjectAccess(projectId);
   if (!project) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
+
+  const db = await getDb();
 
   // Get all comments
   const { Comment } = await import("@/lib/db/entities/Comment");

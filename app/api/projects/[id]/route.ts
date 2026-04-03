@@ -1,25 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { parseBody, updateProjectSchema } from "@/lib/api/schemas";
-import { getCurrentUserId } from "@/lib/auth/get-user";
-
-async function findProjectForUser(id: string) {
-  const userId = await getCurrentUserId();
-  const authRequired = process.env.AUTH_REQUIRED !== "false";
-
-  const db = await getDb();
-  const { Project } = await import("@/lib/db/entities/Project");
-
-  const where = authRequired && userId ? { id, userId } : { id };
-  return db.getRepository(Project).findOneBy(where);
-}
+import { assertProjectAccess } from "@/lib/auth/assert-project-access";
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const project = await findProjectForUser(id);
+  const project = await assertProjectAccess(id);
 
   if (!project) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
@@ -38,7 +27,7 @@ export async function PATCH(
     return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
 
-  const project = await findProjectForUser(id);
+  const project = await assertProjectAccess(id);
   if (!project) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
@@ -59,7 +48,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const project = await findProjectForUser(id);
+  const project = await assertProjectAccess(id);
 
   if (!project) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 });

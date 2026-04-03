@@ -3,6 +3,7 @@ import { getDb } from "@/lib/db";
 import { embedBatch } from "@/lib/ai/embeddings";
 import { getEmbeddingConfig } from "@/lib/ai/get-embedding-config";
 import { parseBody, projectIdBodySchema } from "@/lib/api/schemas";
+import { assertProjectAccess } from "@/lib/auth/assert-project-access";
 
 const BATCH_SIZE = 10;
 
@@ -13,14 +14,12 @@ export async function POST(request: Request) {
   }
   const { projectId } = parsed.data;
 
-  const db = await getDb();
-
-  // Get project
-  const { Project } = await import("@/lib/db/entities/Project");
-  const project = await db.getRepository(Project).findOneBy({ id: projectId });
+  const project = await assertProjectAccess(projectId);
   if (!project) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
+
+  const db = await getDb();
 
   // Find an embedding-capable provider
   const embeddingConfig = await getEmbeddingConfig();
@@ -104,6 +103,7 @@ export async function POST(request: Request) {
 
         // Step 2: Load comments
         send("progress", { step: "Loading comments..." });
+        const { Project } = await import("@/lib/db/entities/Project");
         const { Comment } = await import("@/lib/db/entities/Comment");
         const commentRepo = db.getRepository(Comment);
         const comments = await commentRepo.find({

@@ -4,6 +4,7 @@ import { getDb } from "@/lib/db";
 import { getActiveModel } from "@/lib/ai/get-model";
 import { parseBody, projectIdBodySchema } from "@/lib/api/schemas";
 import { classificationSchema, buildClassificationPrompt } from "@/lib/ai/prompts";
+import { assertProjectAccess } from "@/lib/auth/assert-project-access";
 
 const BATCH_SIZE = 25;
 
@@ -13,6 +14,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
   const { projectId } = parsed.data;
+
+  const project = await assertProjectAccess(projectId);
+  if (!project) {
+    return NextResponse.json({ error: "Project not found" }, { status: 404 });
+  }
 
   const db = await getDb();
 

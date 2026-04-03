@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
+import { assertProjectAccess } from "@/lib/auth/assert-project-access";
 
 // Export filtered CSV
 export async function GET(
@@ -7,6 +8,10 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const project = await assertProjectAccess(id);
+  if (!project) {
+    return NextResponse.json({ error: "Project not found" }, { status: 404 });
+  }
   const { searchParams } = new URL(request.url);
   const format = searchParams.get("format") || "csv";
 
@@ -14,12 +19,9 @@ export async function GET(
 
   if (format === "metadata") {
     // Export project metadata (no raw data)
-    const { Project } = await import("@/lib/db/entities/Project");
     const { Category } = await import("@/lib/db/entities/Category");
     const { NoiseFilter } = await import("@/lib/db/entities/NoiseFilter");
     const { ReportStructure } = await import("@/lib/db/entities/ReportStructure");
-
-    const project = await db.getRepository(Project).findOneBy({ id });
     const categories = await db.getRepository(Category).find({ where: { projectId: id } });
     const noiseFilters = await db.getRepository(NoiseFilter).find({ where: { projectId: id } });
     const structure = await db.getRepository(ReportStructure).findOneBy({ projectId: id });
@@ -89,9 +91,6 @@ export async function GET(
   ]);
 
   const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
-
-  const { Project } = await import("@/lib/db/entities/Project");
-  const project = await db.getRepository(Project).findOneBy({ id });
 
   return new NextResponse(csv, {
     headers: {

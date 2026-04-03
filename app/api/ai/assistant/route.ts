@@ -4,6 +4,7 @@ import { generateText } from "ai";
 import { getActiveModel } from "@/lib/ai/get-model";
 import { buildAssistantSystemPrompt } from "@/lib/ai/assistant-prompts";
 import { parseBody } from "@/lib/api/schemas";
+import { assertProjectAccess } from "@/lib/auth/assert-project-access";
 
 const assistantSchema = z.object({
   projectId: z.string().uuid("Invalid project ID"),
@@ -18,7 +19,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
 
-  const { page, message, pageContext } = parsed.data;
+  const { projectId, page, message, pageContext } = parsed.data;
+
+  const project = await assertProjectAccess(projectId);
+  if (!project) {
+    return NextResponse.json({ error: "Project not found" }, { status: 404 });
+  }
 
   // Check if LLM is configured
   let model;

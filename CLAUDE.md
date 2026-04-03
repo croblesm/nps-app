@@ -55,6 +55,8 @@ app/                          # Next.js App Router pages
       embeddings/             #   Generate/store comment embeddings
       github/                 #   GitHub integration (connect repo, create issues)
         issues/               #   Issue creation from categories/comments
+      noise/
+        count/                #   Keyword match count (no limit cap, for noise preview)
     settings/
       embeddings/               #   Embedding provider info (GET, read-only)
       ollama-models/            #   Ollama model discovery
@@ -92,6 +94,7 @@ lib/auth/
   index.ts                    # NextAuth.js config (Node runtime, providers, DB)
   config.ts                   # NextAuth.js config (Edge-compatible, JWT/session callbacks)
   get-user.ts                 # Server-side user resolution from session
+  assert-project-access.ts    # Shared ownership guard for project-scoped API routes
 openspec/                     # Spec-driven development artifacts
 ```
 
@@ -109,6 +112,7 @@ openspec/                     # Spec-driven development artifacts
 - TypeORM entities in `lib/db/entities/` — use string-based relation targets, import dynamically in API routes to avoid circular deps
 - All AI calls use Vercel AI SDK with Zod-validated structured output
 - API routes use `getDb()` for lazy-initialized database connection
+- **All project-scoped API routes** (`/api/projects/[id]/*` and `/api/ai/*`) MUST call `assertProjectAccess(projectId)` from `lib/auth/assert-project-access.ts` before processing. This verifies the current user owns the project. When `AUTH_REQUIRED=false`, the check is bypassed.
 - Auth uses Edge-compatible config split: `lib/auth/config.ts` (Edge middleware) and `lib/auth/index.ts` (Node runtime with providers + DB). `SessionProvider` wraps the app in `components/providers.tsx`. JWT callback handles `trigger === "update"` for client-side session updates (e.g., name change)
 - `components/layout-wrapper.tsx` conditionally renders the sidebar/topbar — auth pages (`/login`, `/register`) get a clean layout without navigation chrome. Do NOT use `useSession()` for this check — `AUTH_REQUIRED=false` means no session exists, which would hide the layout entirely
 - GitHub integration entities (`GitHubRepo`, `GitHubIssue`) link to projects; Octokit handles GitHub API calls
@@ -117,6 +121,7 @@ openspec/                     # Spec-driven development artifacts
 - `getEmbeddingConfig()` in `lib/ai/get-embedding-config.ts` auto-resolves an embedding-capable provider even when the default LLM (e.g., Anthropic) does not support embeddings
 - `AUTH_REQUIRED=false` disables auth for local development (all projects accessible)
 - **No hardcoded Tailwind colors** in `.tsx` files — use CSS variables only (`text-foreground`, `bg-card`, `bg-muted`, `border-border`, `bg-primary`, `text-destructive`, etc.). NPS domain colors use custom properties (`--nps-promoter`, `--nps-passive`, `--nps-detractor`, `--nps-excellent`) defined in `globals.css`
+- **Error states on all data-fetching pages** — use `{ loading, error, data }` triple pattern. On fetch failure, show error message with Retry button. Never leave users in perpetual skeleton state.
 
 ## OpenSpec Workflow (MANDATORY)
 

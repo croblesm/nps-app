@@ -69,6 +69,7 @@ export default function DashboardPage() {
   const [nps, setNps] = useState<NpsStats | null>(null);
   const [categoryBreakdown, setCategoryBreakdown] = useState<CategoryBreakdownItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [needsClassification, setNeedsClassification] = useState(false);
   const [classifying, setClassifying] = useState(false);
   const [chatEnabled, setChatEnabled] = useState(false);
@@ -101,26 +102,40 @@ export default function DashboardPage() {
     if (categoryFilters.length) params.set("category", categoryFilters.join(","));
     if (actionableFilter) params.set("actionable", actionableFilter);
 
-    const res = await fetch(`/api/projects/${projectId}/comments?${params}`);
-    if (res.ok) {
-      const result: CommentsResponse = await res.json();
-      setData(result);
-      if (
-        result.comments.length > 0 &&
-        !result.comments.some((c) => c.categoryName)
-      ) {
-        setNeedsClassification(true);
+    try {
+      const res = await fetch(`/api/projects/${projectId}/comments?${params}`);
+      if (res.ok) {
+        const result: CommentsResponse = await res.json();
+        setData(result);
+        setError(null);
+        if (
+          result.comments.length > 0 &&
+          !result.comments.some((c) => c.categoryName)
+        ) {
+          setNeedsClassification(true);
+        }
+      } else {
+        setError("Failed to load comments");
       }
+    } catch {
+      setError("Failed to load dashboard data");
     }
     setLoading(false);
   }, [projectId, page, limit, search, feedbackType, categoryFilters, actionableFilter, sortBy, sortDir]);
 
   const fetchStats = useCallback(async () => {
-    const res = await fetch(`/api/projects/${projectId}/stats`);
-    if (res.ok) {
-      const stats: NpsStats = await res.json();
-      setNps(stats);
-      setCategoryBreakdown(stats.categoryBreakdown);
+    try {
+      const res = await fetch(`/api/projects/${projectId}/stats`);
+      if (res.ok) {
+        const stats: NpsStats = await res.json();
+        setNps(stats);
+        setCategoryBreakdown(stats.categoryBreakdown);
+        setError(null);
+      } else {
+        setError("Failed to load dashboard data");
+      }
+    } catch {
+      setError("Failed to load dashboard data");
     }
   }, [projectId]);
 
@@ -410,6 +425,17 @@ export default function DashboardPage() {
   function handleLimitChange(val: number) {
     setLimit(val);
     setPage(1);
+  }
+
+  if (!loading && error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <p className="text-destructive font-medium mb-2">{error}</p>
+        <Button variant="outline" onClick={() => { setError(null); setLoading(true); fetchComments(); fetchStats(); }}>
+          Retry
+        </Button>
+      </div>
+    );
   }
 
   if (loading || !nps) {

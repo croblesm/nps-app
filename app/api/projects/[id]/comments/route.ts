@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
+import { assertProjectAccess } from "@/lib/auth/assert-project-access";
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const project = await assertProjectAccess(id);
+  if (!project) {
+    return NextResponse.json({ error: "Project not found" }, { status: 404 });
+  }
   const { searchParams } = new URL(request.url);
 
   const page = parseInt(searchParams.get("page") || "1");

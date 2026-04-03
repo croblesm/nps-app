@@ -69,9 +69,11 @@ export default function CategoriesPage() {
 
   // Load existing categories from DB on mount
   useEffect(() => {
-    fetch(`/api/projects/${projectId}/categories`)
-      .then((res) => res.json())
-      .then((data) => {
+    Promise.all([
+      fetch(`/api/projects/${projectId}/categories`).then((res) => res.json()),
+      fetch(`/api/projects/${projectId}/stats`).then((res) => res.ok ? res.json() : null),
+    ])
+      .then(([data, statsData]) => {
         if (Array.isArray(data) && data.length > 0) {
           setCategories(
             data.map((cat: { name: string; description: string | null; sampleComments: string | null; isFallback: boolean }) => ({
@@ -83,6 +85,10 @@ export default function CategoriesPage() {
             }))
           );
           setDiscovered(true);
+          // Populate stats from project data so existing categories don't show 0/0
+          if (statsData?.total) {
+            setStats({ sampleSize: statsData.total, totalComments: statsData.total });
+          }
         }
       })
       .catch(() => {})

@@ -3,6 +3,7 @@ import { generateObject } from "ai";
 import { getDb } from "@/lib/db";
 import { getActiveModel } from "@/lib/ai/get-model";
 import { parseBody, projectIdBodySchema } from "@/lib/api/schemas";
+import { assertProjectAccess } from "@/lib/auth/assert-project-access";
 import {
   dataValidatorSchema,
   buildDataValidatorPrompt,
@@ -14,6 +15,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
   const { projectId } = parsed.data;
+
+  const project = await assertProjectAccess(projectId);
+  if (!project) {
+    return NextResponse.json({ error: "Project not found" }, { status: 404 });
+  }
 
   const db = await getDb();
   const { DataSource } = await import("@/lib/db/entities/DataSource");

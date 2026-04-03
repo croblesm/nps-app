@@ -523,6 +523,15 @@ Contextual AI helper available on every project page:
 - **Proactive recommendations** — Suggests noise filters for common patterns (N/A, test), highlights high-impact categories, warns about negative NPS scores
 - **Uses configured LLM** — Same provider as classification/summary; shows error with Settings link if unconfigured
 
+#### Security & UX Hardening (Codex Review)
+- **Project ownership guard** — All project-scoped API routes (`/api/projects/[id]/*`) and AI routes verify the current user owns the project via `assertProjectAccess()`. Prevents cross-project data access in multi-user deployments.
+- **Accurate noise filter counts** — Dedicated `/api/projects/[id]/noise/count` endpoint returns exact keyword match counts without the comments API's 100-row pagination limit
+- **Chat multi-category filter** — Chat retrieval correctly handles comma-separated category filters (matching the comments API behavior)
+- **Error states** — Dashboard, projects page, and quote cards show explicit error messages with retry buttons instead of perpetual loading skeletons
+- **DataTable selection reset** — Table selection clears when navigating pages, applying filters, or changing sort order
+- **Structure checkbox fix** — Column toggle fires exactly once (event propagation fix)
+- **Categories stats** — Existing categories show actual comment counts instead of "Analyzed 0 of 0"
+
 ### Planned (Not Yet Implemented)
 - **Cloud deployment** — Azure App Service or Vercel, migrate to Azure SQL
 - **Multi-tenancy** — User/org-scoped data isolation

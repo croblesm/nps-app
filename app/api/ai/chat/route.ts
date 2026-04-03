@@ -9,6 +9,7 @@ import {
   getEmbeddingConfigForProvider,
 } from "@/lib/ai/get-embedding-config";
 import { parseBody } from "@/lib/api/schemas";
+import { assertProjectAccess } from "@/lib/auth/assert-project-access";
 
 const DEFAULT_K = 20;
 
@@ -32,14 +33,13 @@ export async function POST(request: Request) {
   const { projectId, message, filters, topK } = parsed.data;
   const K = topK || DEFAULT_K;
 
-  const db = await getDb();
-
-  // Verify project exists and chat is enabled
-  const { Project } = await import("@/lib/db/entities/Project");
-  const project = await db.getRepository(Project).findOneBy({ id: projectId });
+  // Verify ownership and that project exists
+  const project = await assertProjectAccess(projectId);
   if (!project) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
+
+  const db = await getDb();
   if (!project.chatEnabled) {
     return NextResponse.json(
       { error: "Chat analysis is not enabled. Run the embedding pipeline first." },
@@ -92,9 +92,10 @@ export async function POST(request: Request) {
     else if (filters.feedbackType === "detractor") filtered = filtered.filter((c) => c.npsScore !== null && c.npsScore < NPS_THRESHOLDS.PASSIVE_MIN);
   }
   if (filters?.category) {
+    const categories = filters.category.split(",").map((c) => c.trim()).filter(Boolean);
     filtered = filtered.filter((c) => {
       const catName = c.category && typeof c.category === "object" && "name" in c.category ? (c.category as { name: string }).name : null;
-      return catName === filters.category;
+      return catName !== null && categories.includes(catName);
     });
   }
   if (filters?.search) {

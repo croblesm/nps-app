@@ -35,27 +35,41 @@ interface ProjectSummary {
 export default function HomePage() {
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [loading, setLoading] = useState(true);
-  const [quotes, setQuotes] = useState<Record<string, { promoter: string; detractor: string }>>({});
+  const [error, setError] = useState<string | null>(null);
+  const [quotes, setQuotes] = useState<Record<string, { promoter: string | null; detractor: string | null }>>({});
 
-  useEffect(() => {
+  function fetchProjects() {
+    setLoading(true);
+    setError(null);
     fetch("/api/projects")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load projects");
+        return res.json();
+      })
       .then((data: ProjectSummary[]) => {
         setProjects(data);
         // Fetch top quotes for each project with data
         data.filter(p => p.commentCount > 0).forEach(p => {
           Promise.all([
-            fetch(`/api/projects/${p.id}/comments?feedbackType=promoter&limit=5&sortBy=npsScore&sortDir=DESC`).then(r => r.json()),
-            fetch(`/api/projects/${p.id}/comments?feedbackType=detractor&limit=5&sortBy=npsScore&sortDir=ASC`).then(r => r.json()),
+            fetch(`/api/projects/${p.id}/comments?feedbackType=promoter&limit=5&sortBy=npsScore&sortDir=DESC`).then(r => r.ok ? r.json() : null),
+            fetch(`/api/projects/${p.id}/comments?feedbackType=detractor&limit=5&sortBy=npsScore&sortDir=ASC`).then(r => r.ok ? r.json() : null),
           ]).then(([promo, detract]) => {
-            const promoText = promo.comments?.find((c: { commentText: string | null }) => c.commentText && c.commentText.length > 10)?.commentText || "";
-            const detractText = detract.comments?.find((c: { commentText: string | null }) => c.commentText && c.commentText.length > 10)?.commentText || "";
+            const promoText = promo?.comments?.find((c: { commentText: string | null }) => c.commentText && c.commentText.length > 10)?.commentText || null;
+            const detractText = detract?.comments?.find((c: { commentText: string | null }) => c.commentText && c.commentText.length > 10)?.commentText || null;
             setQuotes(prev => ({ ...prev, [p.id]: { promoter: promoText, detractor: detractText } }));
-          }).catch(() => {});
+          }).catch(() => {
+            setQuotes(prev => ({ ...prev, [p.id]: { promoter: null, detractor: null } }));
+          });
         });
       })
-      .catch(() => {})
+      .catch(() => {
+        setError("Failed to load projects");
+      })
       .finally(() => setLoading(false));
+  }
+
+  useEffect(() => {
+    fetchProjects();
   }, []);
 
   async function handleDelete(id: string, name: string) {
@@ -96,6 +110,15 @@ export default function HomePage() {
             </Card>
           ))}
         </div>
+      ) : error ? (
+        <Card className="text-center py-12">
+          <CardContent>
+            <p className="text-destructive font-medium mb-2">{error}</p>
+            <Button variant="outline" onClick={fetchProjects}>
+              Retry
+            </Button>
+          </CardContent>
+        </Card>
       ) : projects.length === 0 ? (
         <Card className="text-center py-12">
           <CardContent>
@@ -222,19 +245,23 @@ export default function HomePage() {
                       {/* Promoter highlight */}
                       <div className="text-xs min-w-0">
                         <div className="text-[#22c55e] font-medium mb-1">Top promoter</div>
-                        {quotes[project.id]?.promoter ? (
+                        {quotes[project.id] === undefined ? (
+                          <p className="text-muted-foreground italic">Loading...</p>
+                        ) : quotes[project.id]?.promoter ? (
                           <p className="text-muted-foreground line-clamp-2 italic">&quot;{quotes[project.id].promoter}&quot;</p>
                         ) : (
-                          <p className="text-muted-foreground italic">Loading...</p>
+                          <p className="text-muted-foreground italic">No quotes available</p>
                         )}
                       </div>
                       {/* Detractor highlight */}
                       <div className="text-xs min-w-0">
                         <div className="text-[#ef4444] font-medium mb-1">Top concern</div>
-                        {quotes[project.id]?.detractor ? (
+                        {quotes[project.id] === undefined ? (
+                          <p className="text-muted-foreground italic">Loading...</p>
+                        ) : quotes[project.id]?.detractor ? (
                           <p className="text-muted-foreground line-clamp-2 italic">&quot;{quotes[project.id].detractor}&quot;</p>
                         ) : (
-                          <p className="text-muted-foreground italic">Loading...</p>
+                          <p className="text-muted-foreground italic">No quotes available</p>
                         )}
                       </div>
                     </div>

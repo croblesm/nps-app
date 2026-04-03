@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { parseBody, saveCategoriesSchema, updateCategorySchema } from "@/lib/api/schemas";
+import { assertProjectAccess } from "@/lib/auth/assert-project-access";
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const project = await assertProjectAccess(id);
+  if (!project) {
+    return NextResponse.json({ error: "Project not found" }, { status: 404 });
+  }
   const db = await getDb();
   const { Category } = await import("@/lib/db/entities/Category");
 
@@ -23,6 +28,10 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const project = await assertProjectAccess(id);
+  if (!project) {
+    return NextResponse.json({ error: "Project not found" }, { status: 404 });
+  }
   const parsed = await parseBody(request, saveCategoriesSchema);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error }, { status: 400 });
@@ -62,6 +71,10 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const project = await assertProjectAccess(id);
+  if (!project) {
+    return NextResponse.json({ error: "Project not found" }, { status: 404 });
+  }
   const parsed = await parseBody(request, updateCategorySchema);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error }, { status: 400 });

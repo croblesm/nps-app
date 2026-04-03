@@ -12,6 +12,7 @@ import {
   buildThemeScanPrompt,
 } from "@/lib/ai/prompts";
 import { stratifiedSample } from "@/lib/csv/sampler";
+import { assertProjectAccess } from "@/lib/auth/assert-project-access";
 
 export async function POST(request: Request) {
   const parsed = await parseBody(request, categorizeActionSchema);
@@ -21,15 +22,12 @@ export async function POST(request: Request) {
   const { projectId, action, existingCategories, themeName, themeDescription } =
     parsed.data;
 
-  const db = await getDb();
-
-  const { Project } = await import("@/lib/db/entities/Project");
-  const project = await db
-    .getRepository(Project)
-    .findOneBy({ id: projectId });
+  const project = await assertProjectAccess(projectId);
   if (!project) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
+
+  const db = await getDb();
 
   const { Comment } = await import("@/lib/db/entities/Comment");
   const allComments = await db.getRepository(Comment).find({

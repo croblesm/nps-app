@@ -94,25 +94,24 @@ export default function NoisePage() {
 
   async function computeMatchCounts(filterList: NoiseFilterData[]) {
     if (filterList.length === 0) return;
-    try {
-      const res = await fetch(`/api/projects/${projectId}/comments?limit=10000`);
-      if (!res.ok) return;
-      const data = await res.json();
-      const counts: Record<string, number> = {};
-      for (const f of filterList) {
-        const kws: string[] = JSON.parse(f.filterKeywords || "[]");
-        const lower = kws.map((k) => k.toLowerCase());
-        const matches = data.comments.filter(
-          (c: { commentText: string | null }) =>
-            c.commentText &&
-            lower.some((kw) => c.commentText!.toLowerCase().includes(kw))
-        );
-        counts[f.id] = matches.length;
-      }
-      setMatchCounts(counts);
-    } catch {
-      // silently fail
-    }
+    const counts: Record<string, number> = {};
+    await Promise.all(
+      filterList.map(async (f) => {
+        try {
+          const kws: string[] = JSON.parse(f.filterKeywords || "[]");
+          const res = await fetch(
+            `/api/projects/${projectId}/noise/count?keywords=${encodeURIComponent(kws.join(","))}`
+          );
+          if (res.ok) {
+            const data = await res.json();
+            counts[f.id] = data.count;
+          }
+        } catch {
+          // silently fail
+        }
+      })
+    );
+    setMatchCounts(counts);
   }
 
   function openEditDialog(f: NoiseFilterData) {
@@ -161,18 +160,16 @@ export default function NoisePage() {
     const kws = keywords.split(",").map((k) => k.trim()).filter(Boolean);
     if (kws.length === 0) return;
 
-    const res = await fetch(
-      `/api/projects/${projectId}/comments?limit=10000`
-    );
-    if (res.ok) {
-      const data = await res.json();
-      const lower = kws.map((k) => k.toLowerCase());
-      const matches = data.comments.filter(
-        (c: { commentText: string | null }) =>
-          c.commentText &&
-          lower.some((kw) => c.commentText!.toLowerCase().includes(kw))
+    try {
+      const res = await fetch(
+        `/api/projects/${projectId}/noise/count?keywords=${encodeURIComponent(kws.join(","))}`
       );
-      setMatchPreview(matches.length);
+      if (res.ok) {
+        const data = await res.json();
+        setMatchPreview(data.count);
+      }
+    } catch {
+      // silently fail
     }
   }
 
