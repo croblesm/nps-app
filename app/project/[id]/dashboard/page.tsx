@@ -94,6 +94,7 @@ export default function DashboardPage() {
 
   // Noise filter toggle state (session-only)
   const [noiseFilterToggles, setNoiseFilterToggles] = useState<Map<string, boolean>>(new Map());
+  const [noiseUserModified, setNoiseUserModified] = useState(false);
 
   function handleNoiseToggle(filterId: string) {
     setNoiseFilterToggles((prev) => {
@@ -101,6 +102,7 @@ export default function DashboardPage() {
       next.set(filterId, !next.get(filterId));
       return next;
     });
+    setNoiseUserModified(true);
   }
 
   const fetchComments = useCallback(async () => {
@@ -139,8 +141,8 @@ export default function DashboardPage() {
   const fetchStats = useCallback(async () => {
     try {
       const statsParams = new URLSearchParams();
-      // If user has toggled any filters, pass the active set
-      if (noiseFilterToggles.size > 0) {
+      // Only send filter overrides when user has actually toggled a chip
+      if (noiseUserModified && noiseFilterToggles.size > 0) {
         const activeIds = Array.from(noiseFilterToggles.entries())
           .filter(([, active]) => active)
           .map(([id]) => id);
@@ -169,7 +171,7 @@ export default function DashboardPage() {
     } catch {
       setError("Failed to load dashboard data");
     }
-  }, [projectId, noiseFilterToggles]);
+  }, [projectId, noiseFilterToggles, noiseUserModified]);
 
   const fetchProject = useCallback(async () => {
     const res = await fetch(`/api/projects/${projectId}`);

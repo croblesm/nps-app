@@ -118,20 +118,24 @@ export async function GET(
   // Noise exclusion count
   let noiseExcludedCount = 0;
   if (noiseExclusionEnabled) {
-    if (useCustomFilters && noiseCondition) {
+    if (useCustomFilters) {
       // Count comments matching the effective filters' keywords
-      const countQuery = db.getRepository(Comment)
-        .createQueryBuilder("c")
-        .where("c.projectId = :id", { id })
-        .andWhere(`NOT (${noiseCondition})`.replace("NOT (NOT (", "(").replace("))", ")"));
-      // Simpler: count comments that DO match the keywords
-      const matchConditions = Object.keys(noiseParams).map((k) => `c.commentText LIKE :${k}`);
-      const matchQuery = db.getRepository(Comment)
-        .createQueryBuilder("c")
-        .where("c.projectId = :id", { id })
-        .andWhere(`(${matchConditions.join(" OR ")})`, noiseParams);
-      noiseExcludedCount = await matchQuery.getCount();
-    } else if (!useCustomFilters) {
+      const allKeywords: string[] = [];
+      for (const filter of effectiveFilters) {
+        const kws: string[] = JSON.parse(filter.filterKeywords || "[]");
+        allKeywords.push(...kws);
+      }
+      if (allKeywords.length > 0) {
+        const matchConds = allKeywords.map((_, ki) => `c.commentText LIKE :mkw${ki}`);
+        const matchParams: Record<string, string> = {};
+        allKeywords.forEach((kw, ki) => { matchParams[`mkw${ki}`] = `%${kw}%`; });
+        noiseExcludedCount = await db.getRepository(Comment)
+          .createQueryBuilder("c")
+          .where("c.projectId = :id", { id })
+          .andWhere(`(${matchConds.join(" OR ")})`, matchParams)
+          .getCount();
+      }
+    } else {
       noiseExcludedCount = await db.getRepository(Comment)
         .createQueryBuilder("c")
         .where("c.projectId = :id", { id })
