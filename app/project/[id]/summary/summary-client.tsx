@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
@@ -9,6 +9,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardAction }
 import { Button } from "@/components/ui/button";
 import { FileText, Download, RefreshCw, Sparkles } from "lucide-react";
 import { NpsVisualCards } from "@/components/nps/NpsVisualCards";
+import { NoiseFilterChips } from "@/components/nps/NoiseFilterChips";
 import { useAssistantContext } from "@/lib/assistant-context";
 
 interface SummaryData {
@@ -28,11 +29,17 @@ interface NpsStats {
   detractorPct: number;
 }
 
+interface NoiseFilterInfo {
+  id: string;
+  name: string;
+}
+
 interface SummaryClientProps {
   initialSummary: SummaryData | null;
   initialStats: NpsStats | null;
   initialPromoterQuotes: { text: string; nps: number }[];
   initialDetractorQuotes: { text: string; nps: number }[];
+  initialNoiseFilters: NoiseFilterInfo[];
   projectId: string;
 }
 
@@ -41,14 +48,66 @@ export function SummaryClient({
   initialStats,
   initialPromoterQuotes,
   initialDetractorQuotes,
+  initialNoiseFilters,
   projectId,
 }: SummaryClientProps) {
   const [summary, setSummary] = useState<SummaryData | null>(initialSummary);
-  const [npsStats] = useState<NpsStats | null>(initialStats);
+  const [npsStats, setNpsStats] = useState<NpsStats | null>(initialStats);
   const [generating, setGenerating] = useState(false);
   const [promoterQuotes] = useState(initialPromoterQuotes);
   const [detractorQuotes] = useState(initialDetractorQuotes);
   const { setPageContext } = useAssistantContext();
+
+  // Noise filter toggles (session-only)
+  const [noiseFilterToggles, setNoiseFilterToggles] = useState<Map<string, boolean>>(
+    () => new Map(initialNoiseFilters.map((f) => [f.id, true]))
+  );
+  const [noiseExcludedCount, setNoiseExcludedCount] = useState(0);
+
+  function handleNoiseToggle(filterId: string) {
+    setNoiseFilterToggles((prev) => {
+      const next = new Map(prev);
+      next.set(filterId, !next.get(filterId));
+      return next;
+    });
+  }
+
+  // Re-fetch stats when noise toggles change
+  const fetchFilteredStats = useCallback(async () => {
+    if (initialNoiseFilters.length === 0) return;
+    const statsParams = new URLSearchParams();
+    const activeIds = Array.from(noiseFilterToggles.entries())
+      .filter(([, active]) => active)
+      .map(([id]) => id);
+    if (activeIds.length === 0) {
+      statsParams.set("excludeNoise", "false");
+    } else {
+      statsParams.set("activeFilterIds", activeIds.join(","));
+    }
+    try {
+      const res = await fetch(`/api/projects/${projectId}/stats?${statsParams}`);
+      if (res.ok) {
+        const data = await res.json();
+        setNpsStats({
+          total: data.total,
+          promoters: data.promoters,
+          passives: data.passives,
+          detractors: data.detractors,
+          npsScore: data.npsScore,
+          promoterPct: data.promoterPct,
+          passivePct: data.passivePct,
+          detractorPct: data.detractorPct,
+        });
+        setNoiseExcludedCount(data.noiseExcludedCount);
+      }
+    } catch {
+      // Silently fail
+    }
+  }, [projectId, noiseFilterToggles, initialNoiseFilters.length]);
+
+  useEffect(() => {
+    fetchFilteredStats();
+  }, [fetchFilteredStats]);
 
   useEffect(() => {
     setPageContext({
@@ -59,11 +118,21 @@ export function SummaryClient({
   async function handleGenerate() {
     setGenerating(true);
 
+    // Build request with noise filter state
+    const activeIds = Array.from(noiseFilterToggles.entries())
+      .filter(([, active]) => active)
+      .map(([id]) => id);
+    const excludeNoise = activeIds.length > 0;
+
     try {
       const res = await fetch("/api/ai/summarize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ projectId }),
+        body: JSON.stringify({
+          projectId,
+          excludeNoise,
+          activeFilterIds: excludeNoise ? activeIds : undefined,
+        }),
       });
 
       const data = await res.json();
@@ -93,6 +162,18 @@ export function SummaryClient({
 
   return (
     <div className="max-w-4xl space-y-4">
+      {initialNoiseFilters.length > 0 && (
+        <NoiseFilterChips
+          filters={initialNoiseFilters.map((f) => ({
+            id: f.id,
+            name: f.name,
+            active: noiseFilterToggles.get(f.id) ?? true,
+          }))}
+          onToggle={handleNoiseToggle}
+          excludedCount={noiseExcludedCount}
+        />
+      )}
+
       {npsStats && (
         <NpsVisualCards
           npsScore={npsStats.npsScore}

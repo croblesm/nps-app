@@ -3,7 +3,7 @@ import { getDb } from "@/lib/db";
 import { assertProjectAccess } from "@/lib/auth/assert-project-access";
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
@@ -11,25 +11,44 @@ export async function GET(
   if (!project) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
+
+  const { searchParams } = new URL(request.url);
+  const excludeNoiseParam = searchParams.get("excludeNoise");
+  const activeFilterIdsParam = searchParams.get("activeFilterIds");
+
   const db = await getDb();
   const { Comment } = await import("@/lib/db/entities/Comment");
   const { NoiseFilter } = await import("@/lib/db/entities/NoiseFilter");
 
-  // Check if any noise filters with excludeFromNps are active
-  const noiseFilters = await db.getRepository(NoiseFilter).find({
+  // Load all active noise filters for this project
+  const allNoiseFilters = await db.getRepository(NoiseFilter).find({
     where: { projectId: id, isActive: true, excludeFromNps: true },
   });
-  const hasNoiseExclusion = noiseFilters.length > 0;
+
+  // Determine which filters to apply based on query params
+  let effectiveFilters = allNoiseFilters;
+  let noiseExclusionEnabled = allNoiseFilters.length > 0;
+
+  if (excludeNoiseParam === "false") {
+    // Client explicitly disabled all noise exclusion
+    noiseExclusionEnabled = false;
+    effectiveFilters = [];
+  } else if (activeFilterIdsParam) {
+    // Client specified a custom set of filter IDs
+    const activeIds = new Set(activeFilterIdsParam.split(",").filter(Boolean));
+    effectiveFilters = allNoiseFilters.filter((f) => activeIds.has(f.id));
+    noiseExclusionEnabled = effectiveFilters.length > 0;
+  }
 
   // Auto-repair: if filters exist but no comments are flagged as noise, re-apply
-  if (hasNoiseExclusion) {
+  if (allNoiseFilters.length > 0) {
     const noiseCount = await db.getRepository(Comment)
       .createQueryBuilder("c")
       .where("c.projectId = :id", { id })
       .andWhere("c.isNoise = :isNoise", { isNoise: true })
       .getCount();
     if (noiseCount === 0) {
-      for (const filter of noiseFilters) {
+      for (const filter of allNoiseFilters) {
         const keywords: string[] = JSON.parse(filter.filterKeywords || "[]");
         if (keywords.length === 0) continue;
         const conditions = keywords.map((_, ki) => `commentText LIKE :kw${ki}`);
@@ -46,7 +65,29 @@ export async function GET(
     }
   }
 
-  // NPS stats — exclude noise when filters are active
+  // Build noise exclusion WHERE clause
+  // When using custom filter set, we need dynamic keyword matching instead of isNoise column
+  const useCustomFilters = activeFilterIdsParam !== null && noiseExclusionEnabled;
+
+  // Build a subquery or condition for noise exclusion
+  let noiseCondition = "";
+  let noiseParams: Record<string, string> = {};
+
+  if (noiseExclusionEnabled && useCustomFilters) {
+    // Dynamic: exclude comments matching any of the effective filters' keywords
+    const allKeywords: string[] = [];
+    for (const filter of effectiveFilters) {
+      const kws: string[] = JSON.parse(filter.filterKeywords || "[]");
+      allKeywords.push(...kws);
+    }
+    if (allKeywords.length > 0) {
+      const conditions = allKeywords.map((_, ki) => `c.commentText LIKE :nkw${ki}`);
+      allKeywords.forEach((kw, ki) => { noiseParams[`nkw${ki}`] = `%${kw}%`; });
+      noiseCondition = `NOT (${conditions.join(" OR ")})`;
+    }
+  }
+
+  // NPS stats
   const npsQuery = db
     .getRepository(Comment)
     .createQueryBuilder("c")
@@ -57,8 +98,12 @@ export async function GET(
     .addSelect("COUNT(CASE WHEN c.npsScore IS NOT NULL THEN 1 END)", "scored")
     .where("c.projectId = :id", { id });
 
-  if (hasNoiseExclusion) {
-    npsQuery.andWhere("c.isNoise = :isNoise", { isNoise: false });
+  if (noiseExclusionEnabled) {
+    if (useCustomFilters && noiseCondition) {
+      npsQuery.andWhere(noiseCondition, noiseParams);
+    } else if (!useCustomFilters) {
+      npsQuery.andWhere("c.isNoise = :isNoise", { isNoise: false });
+    }
   }
 
   const npsStats = await npsQuery.getRawOne();
@@ -72,17 +117,30 @@ export async function GET(
 
   // Noise exclusion count
   let noiseExcludedCount = 0;
-  if (hasNoiseExclusion) {
-    const noiseCount = await db
-      .getRepository(Comment)
-      .createQueryBuilder("c")
-      .where("c.projectId = :id", { id })
-      .andWhere("c.isNoise = :isNoise", { isNoise: true })
-      .getCount();
-    noiseExcludedCount = noiseCount;
+  if (noiseExclusionEnabled) {
+    if (useCustomFilters && noiseCondition) {
+      // Count comments matching the effective filters' keywords
+      const countQuery = db.getRepository(Comment)
+        .createQueryBuilder("c")
+        .where("c.projectId = :id", { id })
+        .andWhere(`NOT (${noiseCondition})`.replace("NOT (NOT (", "(").replace("))", ")"));
+      // Simpler: count comments that DO match the keywords
+      const matchConditions = Object.keys(noiseParams).map((k) => `c.commentText LIKE :${k}`);
+      const matchQuery = db.getRepository(Comment)
+        .createQueryBuilder("c")
+        .where("c.projectId = :id", { id })
+        .andWhere(`(${matchConditions.join(" OR ")})`, noiseParams);
+      noiseExcludedCount = await matchQuery.getCount();
+    } else if (!useCustomFilters) {
+      noiseExcludedCount = await db.getRepository(Comment)
+        .createQueryBuilder("c")
+        .where("c.projectId = :id", { id })
+        .andWhere("c.isNoise = :isNoise", { isNoise: true })
+        .getCount();
+    }
   }
 
-  // Category breakdown — also respect noise exclusion
+  // Category breakdown
   const { Category } = await import("@/lib/db/entities/Category");
   const catQuery = db
     .getRepository(Comment)
@@ -92,8 +150,12 @@ export async function GET(
     .addSelect("COUNT(*)", "count")
     .where("c.projectId = :id", { id });
 
-  if (hasNoiseExclusion) {
-    catQuery.andWhere("c.isNoise = :isNoise", { isNoise: false });
+  if (noiseExclusionEnabled) {
+    if (useCustomFilters && noiseCondition) {
+      catQuery.andWhere(noiseCondition, noiseParams);
+    } else if (!useCustomFilters) {
+      catQuery.andWhere("c.isNoise = :isNoise", { isNoise: false });
+    }
   }
 
   const categoryStats = await catQuery
@@ -119,7 +181,8 @@ export async function GET(
     detractorPct: scored > 0 ? Math.round((detractors / scored) * 100) : 0,
     categoryBreakdown,
     noiseExcludedCount,
-    activeNoiseFilterCount: noiseFilters.length,
-    activeNoiseFilterNames: noiseFilters.map((f) => f.name),
+    activeNoiseFilterCount: allNoiseFilters.length,
+    activeNoiseFilterNames: allNoiseFilters.map((f) => f.name),
+    noiseFilters: allNoiseFilters.map((f) => ({ id: f.id, name: f.name })),
   });
 }

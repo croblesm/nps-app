@@ -81,12 +81,20 @@ export default async function SummaryPage({
     .slice(0, 3)
     .map((c) => ({ text: c.commentText!, nps: c.npsScore! }));
 
+  // Fetch noise filters
+  const { NoiseFilter } = await import("@/lib/db/entities/NoiseFilter");
+  const noiseFilters = await db.getRepository(NoiseFilter).find({
+    where: { projectId: id, isActive: true, excludeFromNps: true },
+  });
+  const initialNoiseFilters = noiseFilters.map((f) => ({ id: f.id, name: f.name }));
+
   return (
     <SummaryClient
       initialSummary={initialSummary}
       initialStats={initialStats}
       initialPromoterQuotes={initialPromoterQuotes}
       initialDetractorQuotes={initialDetractorQuotes}
+      initialNoiseFilters={initialNoiseFilters}
       projectId={id}
     />
   );

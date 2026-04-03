@@ -1,18 +1,25 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { generateText } from "ai";
 import { getDb } from "@/lib/db";
 import { getActiveModel } from "@/lib/ai/get-model";
-import { parseBody, projectIdBodySchema } from "@/lib/api/schemas";
+import { parseBody } from "@/lib/api/schemas";
 import { buildSummaryPrompt } from "@/lib/ai/prompts";
 import { calculateNps } from "@/lib/nps/calculator";
 import { assertProjectAccess } from "@/lib/auth/assert-project-access";
 
+const summarizeSchema = z.object({
+  projectId: z.string().uuid("Invalid project ID"),
+  excludeNoise: z.boolean().optional(),
+  activeFilterIds: z.array(z.string()).optional(),
+});
+
 export async function POST(request: Request) {
-  const parsed = await parseBody(request, projectIdBodySchema);
+  const parsed = await parseBody(request, summarizeSchema);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
-  const { projectId } = parsed.data;
+  const { projectId, excludeNoise, activeFilterIds } = parsed.data;
 
   const project = await assertProjectAccess(projectId);
   if (!project) {
@@ -23,10 +30,28 @@ export async function POST(request: Request) {
 
   // Get all comments
   const { Comment } = await import("@/lib/db/entities/Comment");
-  const comments = await db.getRepository(Comment).find({
+  let comments = await db.getRepository(Comment).find({
     where: { projectId },
     relations: ["category"],
   });
+
+  // Apply noise filtering if requested
+  if (excludeNoise && activeFilterIds && activeFilterIds.length > 0) {
+    const { NoiseFilter } = await import("@/lib/db/entities/NoiseFilter");
+    const filters = await db.getRepository(NoiseFilter).findByIds(activeFilterIds);
+    const allKeywords: string[] = [];
+    for (const f of filters) {
+      const kws: string[] = JSON.parse(f.filterKeywords || "[]");
+      allKeywords.push(...kws.map((k) => k.toLowerCase()));
+    }
+    if (allKeywords.length > 0) {
+      comments = comments.filter((c) => {
+        if (!c.commentText) return true;
+        const lower = c.commentText.toLowerCase();
+        return !allKeywords.some((kw) => lower.includes(kw));
+      });
+    }
+  }
 
   // NPS stats
   const nps = calculateNps(comments.map((c) => c.npsScore));

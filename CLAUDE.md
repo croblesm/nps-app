@@ -124,6 +124,7 @@ openspec/                     # Spec-driven development artifacts
 - The `/api/ai/embed` route uses SSE (Server-Sent Events) streaming via `ReadableStream` + `text/event-stream` content type to push real-time progress to the client; follow this pattern for any long-running pipeline routes
 - `getEmbeddingConfig()` in `lib/ai/get-embedding-config.ts` auto-resolves an embedding-capable provider even when the default LLM (e.g., Anthropic) does not support embeddings
 - `AUTH_REQUIRED=false` disables auth for local development (all projects accessible)
+- **Noise filter toggles** — Dashboard and Summary pages use `NoiseFilterChips` component for session-only per-filter toggling. Stats API accepts `?activeFilterIds=` for custom filter sets or `?excludeNoise=false` to disable all exclusion. Summarize API accepts `excludeNoise` + `activeFilterIds` in body.
 - **No hardcoded Tailwind colors** in `.tsx` files — use CSS variables only (`text-foreground`, `bg-card`, `bg-muted`, `border-border`, `bg-primary`, `text-destructive`, etc.). NPS domain colors use custom properties (`--nps-promoter`, `--nps-passive`, `--nps-detractor`, `--nps-excellent`) defined in `globals.css`
 - **Error states on all data-fetching pages** — use `{ loading, error, data }` triple pattern. On fetch failure, show error message with Retry button. Never leave users in perpetual skeleton state.
 

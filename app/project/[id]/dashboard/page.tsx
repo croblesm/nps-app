@@ -15,7 +15,8 @@ import { SearchBar } from "@/components/nps/SearchBar";
 import { FilterPanel } from "@/components/nps/FilterPanel";
 import { DataTable } from "@/components/nps/DataTable";
 import { ChatPanel } from "@/components/nps/ChatPanel";
-import { Filter, Sparkles, LayoutDashboard, MessageSquare, X, Loader2 } from "lucide-react";
+import { Sparkles, LayoutDashboard, MessageSquare, X, Loader2 } from "lucide-react";
+import { NoiseFilterChips } from "@/components/nps/NoiseFilterChips";
 import { useAssistantContext } from "@/lib/assistant-context";
 
 interface CommentRow {
@@ -59,6 +60,7 @@ interface NpsStats {
   noiseExcludedCount: number;
   activeNoiseFilterCount: number;
   activeNoiseFilterNames?: string[];
+  noiseFilters?: { id: string; name: string }[];
 }
 
 export default function DashboardPage() {
@@ -89,6 +91,17 @@ export default function DashboardPage() {
   const [actionableFilter, setActionableFilter] = useState("");
   const [sortBy, setSortBy] = useState("rowIndex");
   const [sortDir, setSortDir] = useState<"ASC" | "DESC">("ASC");
+
+  // Noise filter toggle state (session-only)
+  const [noiseFilterToggles, setNoiseFilterToggles] = useState<Map<string, boolean>>(new Map());
+
+  function handleNoiseToggle(filterId: string) {
+    setNoiseFilterToggles((prev) => {
+      const next = new Map(prev);
+      next.set(filterId, !next.get(filterId));
+      return next;
+    });
+  }
 
   const fetchComments = useCallback(async () => {
     const params = new URLSearchParams({
@@ -125,19 +138,38 @@ export default function DashboardPage() {
 
   const fetchStats = useCallback(async () => {
     try {
-      const res = await fetch(`/api/projects/${projectId}/stats`);
+      const statsParams = new URLSearchParams();
+      // If user has toggled any filters, pass the active set
+      if (noiseFilterToggles.size > 0) {
+        const activeIds = Array.from(noiseFilterToggles.entries())
+          .filter(([, active]) => active)
+          .map(([id]) => id);
+        if (activeIds.length === 0) {
+          statsParams.set("excludeNoise", "false");
+        } else {
+          statsParams.set("activeFilterIds", activeIds.join(","));
+        }
+      }
+      const statsUrl = statsParams.toString()
+        ? `/api/projects/${projectId}/stats?${statsParams}`
+        : `/api/projects/${projectId}/stats`;
+      const res = await fetch(statsUrl);
       if (res.ok) {
         const stats: NpsStats = await res.json();
         setNps(stats);
         setCategoryBreakdown(stats.categoryBreakdown);
         setError(null);
+        // Initialize noise filter toggles from first load
+        if (noiseFilterToggles.size === 0 && stats.noiseFilters?.length) {
+          setNoiseFilterToggles(new Map(stats.noiseFilters.map((f) => [f.id, true])));
+        }
       } else {
         setError("Failed to load dashboard data");
       }
     } catch {
       setError("Failed to load dashboard data");
     }
-  }, [projectId]);
+  }, [projectId, noiseFilterToggles]);
 
   const fetchProject = useCallback(async () => {
     const res = await fetch(`/api/projects/${projectId}`);
@@ -497,16 +529,16 @@ export default function DashboardPage() {
         onFeedbackTypeChange={handleFeedbackType}
       />
 
-      {nps.activeNoiseFilterCount > 0 && (
-        <div className="flex items-center gap-2 flex-wrap px-3 py-2 rounded-lg bg-muted border border-border text-sm text-muted-foreground">
-          <Filter className="size-4 shrink-0" />
-          {nps.activeNoiseFilterNames?.map((name) => (
-            <Badge key={name} variant="outline">{name}</Badge>
-          ))}
-          <span>
-            {nps.noiseExcludedCount} comment{nps.noiseExcludedCount !== 1 ? "s" : ""} excluded from NPS score
-          </span>
-        </div>
+      {nps.noiseFilters && nps.noiseFilters.length > 0 && (
+        <NoiseFilterChips
+          filters={nps.noiseFilters.map((f) => ({
+            id: f.id,
+            name: f.name,
+            active: noiseFilterToggles.get(f.id) ?? true,
+          }))}
+          onToggle={handleNoiseToggle}
+          excludedCount={nps.noiseExcludedCount}
+        />
       )}
 
       <Card>
