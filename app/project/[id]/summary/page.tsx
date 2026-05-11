@@ -1,5 +1,6 @@
 import { getDb } from "@/lib/db";
 import { assertProjectAccess } from "@/lib/auth/assert-project-access";
+import { getCachedSummary, getCachedProjectStats, getCachedNoiseFilters } from "@/lib/db/cached-queries";
 import { SummaryClient } from "./summary-client";
 
 export default async function SummaryPage({
@@ -14,63 +15,30 @@ export default async function SummaryPage({
     notFound();
   }
 
-  const db = await getDb();
+  // Use cached queries for performance
+  const [initialSummary, stats, noiseFilters] = await Promise.all([
+    getCachedSummary(id),
+    getCachedProjectStats(id),
+    getCachedNoiseFilters(id),
+  ]);
 
-  // Fetch summary
-  const { Summary } = await import("@/lib/db/entities/Summary");
-  const summaryEntity = await db.getRepository(Summary).findOne({
-    where: { projectId: id },
-    order: { generatedAt: "DESC" },
-  });
-  const initialSummary = summaryEntity
-    ? { id: summaryEntity.id, markdown: summaryEntity.markdownContent || "", generatedAt: summaryEntity.generatedAt.toISOString() }
-    : null;
-
-  // Fetch NPS stats
-  const { Comment } = await import("@/lib/db/entities/Comment");
-  const statsRaw = await db
-    .getRepository(Comment)
-    .createQueryBuilder("c")
-    .select("COUNT(*)", "total")
-    .addSelect("SUM(CASE WHEN c.npsScore >= 9 THEN 1 ELSE 0 END)", "promoters")
-    .addSelect("SUM(CASE WHEN c.npsScore >= 7 AND c.npsScore <= 8 THEN 1 ELSE 0 END)", "passives")
-    .addSelect("SUM(CASE WHEN c.npsScore <= 6 THEN 1 ELSE 0 END)", "detractors")
-    .addSelect("COUNT(CASE WHEN c.npsScore IS NOT NULL THEN 1 END)", "scored")
-    .where("c.projectId = :id", { id })
-    .andWhere("c.isNoise = :isNoise", { isNoise: false })
-    .getRawOne();
-
-  const total = Number(statsRaw?.total || 0);
-  const promoters = Number(statsRaw?.promoters || 0);
-  const passives = Number(statsRaw?.passives || 0);
-  const detractors = Number(statsRaw?.detractors || 0);
-  const scored = Number(statsRaw?.scored || 0);
-  const npsScore = scored > 0 ? Math.round(((promoters - detractors) / scored) * 100) : 0;
-
-  const initialStats = total > 0
-    ? {
-        total,
-        promoters,
-        passives,
-        detractors,
-        npsScore,
-        promoterPct: scored > 0 ? Math.round((promoters / scored) * 100) : 0,
-        passivePct: scored > 0 ? Math.round((passives / scored) * 100) : 0,
-        detractorPct: scored > 0 ? Math.round((detractors / scored) * 100) : 0,
-      }
-    : null;
+  const initialStats = stats.total > 0 ? stats : null;
 
   // Fetch quotes (exclude noise)
-  const promoComments = await db.getRepository(Comment).find({
-    where: { projectId: id, isNoise: false },
-    order: { npsScore: "DESC" },
-    take: 10,
-  });
-  const detractComments = await db.getRepository(Comment).find({
-    where: { projectId: id, isNoise: false },
-    order: { npsScore: "ASC" },
-    take: 10,
-  });
+  const db = await getDb();
+  const { Comment } = await import("@/lib/db/entities/Comment");
+  const [promoComments, detractComments] = await Promise.all([
+    db.getRepository(Comment).find({
+      where: { projectId: id, isNoise: false },
+      order: { npsScore: "DESC" },
+      take: 10,
+    }),
+    db.getRepository(Comment).find({
+      where: { projectId: id, isNoise: false },
+      order: { npsScore: "ASC" },
+      take: 10,
+    }),
+  ]);
 
   const initialPromoterQuotes = promoComments
     .filter((c) => c.commentText && c.npsScore !== null && c.npsScore >= 9)
@@ -82,11 +50,6 @@ export default async function SummaryPage({
     .slice(0, 3)
     .map((c) => ({ text: c.commentText!, nps: c.npsScore! }));
 
-  // Fetch noise filters
-  const { NoiseFilter } = await import("@/lib/db/entities/NoiseFilter");
-  const noiseFilters = await db.getRepository(NoiseFilter).find({
-    where: { projectId: id, isActive: true, excludeFromNps: true },
-  });
   const initialNoiseFilters = noiseFilters.map((f) => ({ id: f.id, name: f.name }));
 
   return (

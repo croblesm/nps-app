@@ -188,5 +188,7 @@ export async function GET(
     activeNoiseFilterCount: allNoiseFilters.length,
     activeNoiseFilterNames: allNoiseFilters.map((f) => f.name),
     noiseFilters: allNoiseFilters.map((f) => ({ id: f.id, name: f.name })),
+  }, {
+    headers: { "Cache-Control": "private, max-age=10" },
   });
 }

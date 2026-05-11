@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { parseBody, saveCategoriesSchema, updateCategorySchema } from "@/lib/api/schemas";
 import { assertProjectAccess } from "@/lib/auth/assert-project-access";
+import { revalidateTag } from "next/cache";
 
 export async function GET(
   _request: NextRequest,
@@ -20,7 +21,9 @@ export async function GET(
     order: { sortOrder: "ASC" },
   });
 
-  return NextResponse.json(categories);
+  return NextResponse.json(categories, {
+    headers: { "Cache-Control": "private, max-age=30" },
+  });
 }
 
 export async function POST(
@@ -63,8 +66,12 @@ export async function POST(
     )
   );
 
+  revalidateTag(`project-stats-${id}`);
+
   return NextResponse.json(saved);
 }
+
+
 
 export async function PATCH(
   request: NextRequest,

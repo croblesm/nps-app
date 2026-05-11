@@ -34,6 +34,8 @@ export async function GET(
     hasToken: !!config.encryptedPat,
     createdAt: config.createdAt,
     updatedAt: config.updatedAt,
+  }, {
+    headers: { "Cache-Control": "private, max-age=30" },
   });
 }
 

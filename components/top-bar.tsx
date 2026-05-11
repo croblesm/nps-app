@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
+import { useProject } from "@/lib/hooks/use-project";
 import { useTheme } from "next-themes";
 import { useSession, signOut } from "next-auth/react";
 import { Sun, Moon, Settings, LogOut, UserCircle } from "lucide-react";
@@ -93,16 +94,10 @@ export function TopBar() {
     return () => window.removeEventListener("llm-config-changed", handler);
   }, [fetchActive]);
 
+  const projectData = useProject(projectId);
   useEffect(() => {
-    if (!projectId) {
-      setProject(null);
-      return;
-    }
-    fetch(`/api/projects/${projectId}`)
-      .then((res) => res.json())
-      .then((data) => setProject({ id: data.id, name: data.name }))
-      .catch(() => {});
-  }, [projectId]);
+    setProject(projectData ? { id: projectData.id, name: projectData.name } : null);
+  }, [projectData]);
 
   // In dev mode (no session), fetch profile name from API
   useEffect(() => {

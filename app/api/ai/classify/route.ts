@@ -5,6 +5,7 @@ import { getActiveModel } from "@/lib/ai/get-model";
 import { parseBody, projectIdBodySchema } from "@/lib/api/schemas";
 import { classificationSchema, buildClassificationPrompt } from "@/lib/ai/prompts";
 import { assertProjectAccess } from "@/lib/auth/assert-project-access";
+import { revalidateTag } from "next/cache";
 
 const BATCH_SIZE = 25;
 
@@ -110,6 +111,8 @@ export async function POST(request: Request) {
       errors.push(`Batch ${Math.floor(i / BATCH_SIZE) + 1}: ${msg}`);
     }
   }
+
+  revalidateTag(`project-stats-${projectId}`);
 
   return NextResponse.json({
     totalComments: allComments.length,

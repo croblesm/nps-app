@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { getDb } from "@/lib/db";
 import { analyzeColumns, validateStructure, MAX_FILE_SIZE } from "@/lib/csv/validator";
 import Papa from "papaparse";
@@ -145,6 +146,8 @@ export async function POST(request: NextRequest) {
         .execute();
     }
   }
+
+  revalidateTag(`project-stats-${projectId}`);
 
   return NextResponse.json({
     dataSourceId: dataSource.id,

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { getDb } from "@/lib/db";
 import { parseBody, createNoiseFilterSchema } from "@/lib/api/schemas";
 import { assertProjectAccess } from "@/lib/auth/assert-project-access";
@@ -17,7 +18,9 @@ export async function GET(
   const filters = await db.getRepository(NoiseFilter).find({
     where: { projectId: id },
   });
-  return NextResponse.json(filters);
+  return NextResponse.json(filters, {
+    headers: { "Cache-Control": "private, max-age=30" },
+  });
 }
 
 export async function POST(
@@ -53,6 +56,9 @@ export async function POST(
   // Apply noise flag to matching comments
   await applyNoiseFilter(db, id, filterKeywords);
 
+  revalidateTag(`noise-filters-${id}`);
+  revalidateTag(`project-stats-${id}`);
+
   return NextResponse.json(filter, { status: 201 });
 }
 
@@ -78,6 +84,9 @@ export async function DELETE(
 
   // Recalculate noise flags
   await recalculateNoise(db, id);
+
+  revalidateTag(`noise-filters-${id}`);
+  revalidateTag(`project-stats-${id}`);
 
   return NextResponse.json({ success: true });
 }
@@ -116,6 +125,9 @@ export async function PATCH(
 
   // Recalculate noise flags for this project
   await recalculateNoise(db, id);
+
+  revalidateTag(`noise-filters-${id}`);
+  revalidateTag(`project-stats-${id}`);
 
   return NextResponse.json(filter);
 }

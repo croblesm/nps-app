@@ -98,5 +98,7 @@ export async function GET(
     page,
     limit,
     totalPages: Math.ceil(total / limit),
+  }, {
+    headers: { "Cache-Control": "private, max-age=5" },
   });
 }

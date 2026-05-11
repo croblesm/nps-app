@@ -15,7 +15,9 @@ export async function GET() {
     hasApiKey: !!c.apiKeyEncrypted,
   }));
 
-  return NextResponse.json(masked);
+  return NextResponse.json(masked, {
+    headers: { "Cache-Control": "private, max-age=60" },
+  });
 }
 
 export async function POST(request: Request) {

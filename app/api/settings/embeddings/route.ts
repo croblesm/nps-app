@@ -17,6 +17,8 @@ export async function GET() {
       configured: true,
       provider: config.provider,
       model: config.embeddingModel,
+    }, {
+      headers: { "Cache-Control": "private, max-age=60" },
     });
   } catch {
     return NextResponse.json({

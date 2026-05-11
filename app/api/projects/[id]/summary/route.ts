@@ -27,5 +27,7 @@ export async function GET(
     id: summary.id,
     markdown: summary.markdownContent,
     generatedAt: summary.generatedAt,
+  }, {
+    headers: { "Cache-Control": "private, max-age=30" },
   });
 }

@@ -7,6 +7,7 @@ import { parseBody } from "@/lib/api/schemas";
 import { buildSummaryPrompt } from "@/lib/ai/prompts";
 import { calculateNps } from "@/lib/nps/calculator";
 import { assertProjectAccess } from "@/lib/auth/assert-project-access";
+import { revalidateTag } from "next/cache";
 
 const summarizeSchema = z.object({
   projectId: z.string().uuid("Invalid project ID"),
@@ -126,6 +127,8 @@ export async function POST(request: Request) {
       modelUsed: "active-provider",
     });
     await db.getRepository(Summary).save(summary);
+
+    revalidateTag(`summary-${projectId}`);
 
     return NextResponse.json({
       id: summary.id,

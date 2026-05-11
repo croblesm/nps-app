@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { getDb } from "@/lib/db";
 import { getCurrentUserId } from "@/lib/auth/get-user";
 
@@ -5,8 +6,9 @@ import { getCurrentUserId } from "@/lib/auth/get-user";
  * Verify the current user owns the given project.
  * Returns the project if access is granted, or null if not.
  * When AUTH_REQUIRED=false, ownership check is skipped.
+ * Wrapped with React cache() to deduplicate within a single render tree.
  */
-export async function assertProjectAccess(projectId: string) {
+export const assertProjectAccess = cache(async function assertProjectAccess(projectId: string) {
   const authRequired = process.env.AUTH_REQUIRED !== "false";
   const userId = await getCurrentUserId();
 
@@ -15,4 +17,4 @@ export async function assertProjectAccess(projectId: string) {
 
   const where = authRequired && userId ? { id: projectId, userId } : { id: projectId };
   return db.getRepository(Project).findOneBy(where);
-}
+});

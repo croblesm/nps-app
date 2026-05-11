@@ -127,6 +127,7 @@ openspec/                     # Spec-driven development artifacts
 - **Noise filter toggles** — Dashboard and Summary pages use `NoiseFilterChips` component for session-only per-filter toggling. Stats API accepts `?activeFilterIds=` for custom filter sets or `?excludeNoise=false` to disable all exclusion. Summarize API accepts `excludeNoise` + `activeFilterIds` in body.
 - **No hardcoded Tailwind colors** in `.tsx` files — use CSS variables only (`text-foreground`, `bg-card`, `bg-muted`, `border-border`, `bg-primary`, `text-destructive`, etc.). NPS domain colors use custom properties (`--nps-promoter`, `--nps-passive`, `--nps-detractor`, `--nps-excellent`) defined in `globals.css`
 - **Error states on all data-fetching pages** — use `{ loading, error, data }` triple pattern. On fetch failure, show error message with Retry button. Never leave users in perpetual skeleton state.
+- **Caching strategy** — Three levels: (1) `Cache-Control: private, max-age=N` on all GET API routes (5-300s TTLs), (2) React `cache()` on `assertProjectAccess` for request deduplication, (3) `unstable_cache` in `lib/db/cached-queries.ts` for server component DB queries with `revalidateTag` on mutations. Shared `useProject` hook (`lib/hooks/use-project.ts`) deduplicates sidebar+topbar project fetch with 60s module-level cache.
 
 ## OpenSpec Workflow (MANDATORY)
 

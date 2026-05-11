@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
+import { useProject } from "@/lib/hooks/use-project";
 import {
   LayoutDashboard,
   FileSpreadsheet,
@@ -96,18 +97,7 @@ export function AppSidebar() {
   const projectId = params.id as string | undefined;
   const isProjectMode = pathname.includes("/project/") && projectId;
 
-  const [project, setProject] = useState<ProjectInfo | null>(null);
-
-  useEffect(() => {
-    if (!projectId) {
-      setProject(null);
-      return;
-    }
-    fetch(`/api/projects/${projectId}`)
-      .then((res) => res.json())
-      .then(setProject)
-      .catch(() => {});
-  }, [projectId]);
+  const project = useProject(projectId);
 
   const currentSegment = pathname.split("/").pop();
 

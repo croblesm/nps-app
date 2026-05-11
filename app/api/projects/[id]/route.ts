@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { parseBody, updateProjectSchema } from "@/lib/api/schemas";
 import { assertProjectAccess } from "@/lib/auth/assert-project-access";
+import { revalidateTag } from "next/cache";
 
 export async function GET(
   _request: NextRequest,
@@ -14,7 +15,9 @@ export async function GET(
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
 
-  return NextResponse.json(project);
+  return NextResponse.json(project, {
+    headers: { "Cache-Control": "private, max-age=60" },
+  });
 }
 
 export async function PATCH(
@@ -40,6 +43,7 @@ export async function PATCH(
   if (parsed.data.description !== undefined) project.description = parsed.data.description;
 
   await repo.save(project);
+  revalidateTag(`project-${id}`);
   return NextResponse.json(project);
 }
 
